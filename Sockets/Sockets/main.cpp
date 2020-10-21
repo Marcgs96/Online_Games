@@ -6,6 +6,9 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 
+#define MAX_BUFFER_SIZE 1024
+#define PORT 8000
+
 void printWSErrorAndExit(const char* msg)
 {
 	wchar_t* s = NULL;
@@ -19,57 +22,53 @@ void printWSErrorAndExit(const char* msg)
 		0, NULL);
 	fprintf(stderr, "%s: %S\n", msg, s);
 	LocalFree(s);
-	//system("pause");
-	//exit(-1);
+	system("pause");
+	exit(-1);
 }
 
 int main() {
-
+	//Initialize Socket API
 	WSADATA wsa_data;
 
 	int result = WSAStartup(MAKEWORD(2, 2), &wsa_data);
 
 	if (result != NO_ERROR) {
+		printWSErrorAndExit("Error while initializing Sockets API from Client");
 		//handle error
 		return false;
 	}
 
 	printf("Hello, this is the UDP client!!\n");
 
-	int af = AF_INET; //IP V4
-	int type = SOCK_DGRAM; //UDP
-	int protocol = 0;
-	int port = 8000;
-	int res = 0;
 	const char* message = "ping";
-	char message_recieved;
+	char message_received[MAX_BUFFER_SIZE];
 
-	SOCKET s = socket(af, type, protocol);
+	//UDP Socket Creation AF_INET for IPv4 and SOCK_DGRAM for UDP
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	sockaddr_in bindAddr;
-	bindAddr.sin_family = AF_INET;
-	bindAddr.sin_port = htons(port);
-
+	//Server address creation
 	sockaddr_in remoteAddr;
 	remoteAddr.sin_family = AF_INET;
-	remoteAddr.sin_port = htons(port);
+	remoteAddr.sin_port = htons(PORT);
 	const char* remoteAddrStr = "127.0.0.1";
 	inet_pton(AF_INET, remoteAddrStr, &remoteAddr.sin_addr);
 
-	while (true) {
-		res = sendto(s, message, sizeof(char*), 0, (sockaddr*)&remoteAddr, sizeof(remoteAddr));
-		if (res == SOCKET_ERROR) {
-			printWSErrorAndExit("No va el enviar mensajes desde cliente!");
+	for (int i = 0; i < 5; ++i)
+	{
+		int len = sizeof(remoteAddr);
+
+		result = sendto(s, message, sizeof(message), 0, (sockaddr*)&remoteAddr, len);
+		if (result == SOCKET_ERROR) {
+			printWSErrorAndExit("Client error sending message");
 		}
 
-		int len = sizeof(bindAddr);
-		res = recvfrom(s, &message_recieved, sizeof(char*), 0, (sockaddr*)&bindAddr, &len);
-		if (res == SOCKET_ERROR) {
-			printWSErrorAndExit("No va el recibir mensajes desde cliente!");
+		result = recvfrom(s, message_received, sizeof(message), 0, (sockaddr*)&remoteAddr, &len);
+		if (result == SOCKET_ERROR) {
+			printWSErrorAndExit("Client error receiving message");
 		}
 		else {
-			printf(&message_recieved);
-			Sleep(500);
+			message_received[result] = '\0'; //add end of string
+			printf("%s\n", message_received);
 		}
 	}
 
@@ -77,7 +76,14 @@ int main() {
 	//int shutdown(SOCKET s, int direction);
 
 	//Destroy socket
-
+	closesocket(s);
+	//CleanUp Scokets API
+	result = WSACleanup();
+	if (result != NO_ERROR) {
+		printWSErrorAndExit("Error while closing Sockets API from Client");
+		//handle error
+		return false;
+	}
 
 	system("pause");
 	return 0;

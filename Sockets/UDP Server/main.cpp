@@ -6,6 +6,9 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 
+#define MAX_BUFFER_SIZE 1024
+#define PORT 8000
+
 void printWSErrorAndExit(const char* msg)
 {
 	wchar_t* s = NULL;
@@ -26,54 +29,64 @@ void printWSErrorAndExit(const char* msg)
 int main() {
 	WSADATA wsa_data;
 
-	int result = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+	int res = WSAStartup(MAKEWORD(2, 2), &wsa_data);
 
-	if (result != NO_ERROR) {
+	if (res != NO_ERROR) {
+		printWSErrorAndExit("Error while initializing Sockets API from Server");
 		//handle error
 		return false;
 	}
 	printf("Hello, this is the UDP server!!\n");
 
-	int af = AF_INET; //IP V4
-	int type = SOCK_DGRAM; //UDP
-	int protocol = 0;
-	int port = 8000;
-	int res = 0;
-	SOCKET s = socket(af, type, protocol);
-	char message_recieved;
 	const char* message = "pong";
+	char message_received[MAX_BUFFER_SIZE];
 
+	//Socket creation
+	SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
+
+	//Remote Address creation
 	sockaddr_in bindAddr;
 	bindAddr.sin_family = AF_INET; // IPv4
-	bindAddr.sin_port = htons(port); // Port
+	bindAddr.sin_port = htons(PORT); // Port
 	bindAddr.sin_addr.S_un.S_addr = INADDR_ANY; // Any local IP address
 
+	//Bind remote address
 	res = bind(s, (const struct sockaddr*)&bindAddr, sizeof(bindAddr));
 
 	if (res == SOCKET_ERROR) {
 		printWSErrorAndExit("No se ha bindeado el socket!");
 	}
 
-	while (true) {
+	for (int i = 0; i < 5; ++i)
+	{
 		int len = sizeof(bindAddr);
-		res = recvfrom(s, &message_recieved, sizeof(char*), 0, (sockaddr*)&bindAddr, &len);
+
+		res = recvfrom(s, message_received, sizeof(message), 0, (sockaddr*)&bindAddr, &len);
 		if (res == SOCKET_ERROR) {
-			printWSErrorAndExit("No va el recibir mensajes!");
+			printWSErrorAndExit("Server error receiving message");
 		}
 		else {
-			printf(&message_recieved);
+			message_received[res] = '\0'; //add end of string
+			printf("%s\n", message_received);
 		}
-		Sleep(500);
-		res = sendto(s, message, sizeof(char*), 0, (sockaddr*)&bindAddr, sizeof(bindAddr));
+
+		res = sendto(s, message, sizeof(message), 0, (sockaddr*)&bindAddr, sizeof(bindAddr));
 		if (res == SOCKET_ERROR) {
-			printWSErrorAndExit("No va el recibir mensajes!");
+			printWSErrorAndExit("Server error sending message");
 		}
 	}
 	//Shutdown socket
 	//int shutdown(SOCKET s, int direction);
 
 	//Destroy socket
-	//int closesocket(SOCKET s);
+	closesocket(s);
+	//CleanUp Scokets API
+	res = WSACleanup();
+	if (res != NO_ERROR) {
+		printWSErrorAndExit("Error while closing Sockets API from Server");
+		//handle error
+		return false;
+	}
 
 	system("pause");
 	return 0;

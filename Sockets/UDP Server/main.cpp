@@ -2,6 +2,7 @@
 #include <stdio.h>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+
 #include <Windows.h>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
@@ -22,8 +23,8 @@ void printWSErrorAndExit(const char* msg)
 		0, NULL);
 	fprintf(stderr, "%s: %S\n", msg, s);
 	LocalFree(s);
-	//system("pause");
-	//exit(-1);
+	system("pause");
+	exit(-1);
 }
 
 int main() {

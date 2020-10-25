@@ -39,7 +39,7 @@ int main() {
 	}
 	printf("Hello, this is the TCP server!!\n");
 
-	const char* message = "pong";
+	const char* message = "comemelapolla";
 	char message_received[MAX_BUFFER_SIZE];
 
 	//Socket creation
@@ -64,7 +64,7 @@ int main() {
 
 	while(true)
 	{
-		res = recv(s2, message_received, sizeof(message), 0);
+		res = recv(s2, message_received, strlen(message), 0);
 		if (res == SOCKET_ERROR) {
 			printWSErrorAndExit("Server error receiving message");
 		}
@@ -78,7 +78,7 @@ int main() {
 			Sleep(500);
 		}
 
-		res = send(s2, message, sizeof(message), 0);
+		res = send(s2, message, strlen(message), 0);
 		if (res == SOCKET_ERROR) {
 			printWSErrorAndExit("Server error sending message");
 		}

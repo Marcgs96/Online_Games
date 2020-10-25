@@ -41,7 +41,7 @@ int main() {
 
 	printf("Hello, this is the TCP client!!\n");
 
-	const char* message = "ping";
+	const char* message = "comemelapolla";
 	char message_received[MAX_BUFFER_SIZE];
 
 	//TCP Socket Creation AF_INET for IPv4 and SOCK_STREAM for TCP
@@ -58,12 +58,12 @@ int main() {
 
 	for (int i = 0; i < 5; ++i)
 	{
-		result = send(s, message, sizeof(message), 0);
+		result = send(s, message, strlen(message), 0);
 		if (result == SOCKET_ERROR) {
 			printWSErrorAndExit("Client error sending message");
 		}
 
-		result = recv(s, message_received, sizeof(message), 0);
+		result = recv(s, message_received, strlen(message), 0);
 		if (result == SOCKET_ERROR) {
 			printWSErrorAndExit("Client error receiving message");
 		}

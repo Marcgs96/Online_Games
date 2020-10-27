@@ -15,7 +15,6 @@ bool ModuleNetworkingServer::start(int port)
 	// - Bind the socket to a local interface
 	// - Enter in listen mode
 	// - Add the listenSocket to the managed list of sockets using addSocket()
-
 	listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 
 	//Remote Address creation
@@ -27,7 +26,7 @@ bool ModuleNetworkingServer::start(int port)
 	//Bind remote address
 	int result = bind(listenSocket, (const struct sockaddr*)&bindAddr, sizeof(bindAddr));
 	if (result == SOCKET_ERROR) {
-		reportError("Error binding listener socket!");
+		reportError("binding listener socket!");
 	}
 
 	listen(listenSocket, 1);

@@ -20,8 +20,6 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	serverAddress.sin_port = htons(serverPort);
 	inet_pton(AF_INET, serverAddressStr, &serverAddress.sin_addr);
 
-
-
 	int result = connect(connectSocket, (const struct sockaddr*)&serverAddress, sizeof(serverAddress));
 
 	if (result != SOCKET_ERROR) {
@@ -29,7 +27,7 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 		state = ClientState::Start;
 	}
 	else {
-		reportError("Error connecting the client socket to the remote adress.");
+		reportError("connecting the client socket");
 	}
 
 	return true;
@@ -50,7 +48,7 @@ bool ModuleNetworkingClient::update()
 			state = ClientState::Logging;
 		}
 		else {
-			reportError("Client error sending message");
+			reportError("sending client message");
 		}
 
 	}

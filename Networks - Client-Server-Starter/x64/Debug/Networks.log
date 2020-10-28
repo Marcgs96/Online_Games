@@ -1,4 +1,3 @@
 ﻿  UnityBuild.cpp
-D:\Downloads\Online_Games\Networks - Client-Server-Starter\ModuleNetworking.cpp(106,20): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
 D:\Downloads\Online_Games\Networks - Client-Server-Starter\ModuleNetworkingClient.cpp(46,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Networks.vcxproj -> D:\Downloads\Online_Games\Networks - Client-Server-Starter\x64\Debug\Networks.exe

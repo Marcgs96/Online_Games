@@ -89,32 +89,30 @@ bool ModuleNetworking::preUpdate()
 	// connected socket to the managed list of sockets.
 	// On recv() success, communicate the incoming data received to the
 	// subclass (use the callback onSocketReceivedData()).
+
 	// TODO(jesus): handle disconnections. Remember that a socket has been
 	// disconnected from its remote end either when recv() returned 0,
 	// or when it generated some errors such as ECONNRESET.
 	// Communicate detected disconnections to the subclass using the callback
 	// onSocketDisconnected().
 
-	std::list<SOCKET> disconnectedSockets;
+	std::vector<SOCKET> disconnectedSockets;
 
 	for (auto s : sockets) {
 		if (FD_ISSET(s, &readfdset)) {
-			if (isListenSocket(s)) {
-				//Client address creation
-				sockaddr_in clientAddress;
-				clientAddress.sin_family = AF_INET; // IPv4
-				clientAddress.sin_addr.S_un.S_addr = INADDR_ANY; // Any local IP address
+			if (isListenSocket(s)) { 
+				sockaddr_in clientAddress; //Client address creation
 				socklen_t clientAddressSize = sizeof(clientAddress); // Client addrs size
 
-				result = accept(s, (struct sockaddr*)& clientAddress, &clientAddressSize);
+				SOCKET clientSocket = accept(s, (struct sockaddr*)& clientAddress, &clientAddressSize);
 
-				if (result < 0)
+				if (clientSocket < 0)
 					reportError("creating connection socket");
 				else
 				{
 					LOG("Client successfully connected");
-					addSocket(result);
-					onSocketConnected(result, clientAddress);
+					addSocket(clientSocket);
+					onSocketConnected(clientSocket, clientAddress);
 				}					
 			}
 			else {
@@ -137,14 +135,12 @@ bool ModuleNetworking::preUpdate()
 
 	// TODO(jesus): Finally, remove all disconnected sockets from the list
 	// of managed sockets.
-	for (std::vector<SOCKET>::iterator it = sockets.begin(); it != sockets.end();) {
-		if (std::find(disconnectedSockets.begin(), disconnectedSockets.end(), (*it)) != disconnectedSockets.end()) {
-			it = sockets.erase(it);
+	for (std::vector<SOCKET>::iterator it = disconnectedSockets.begin(); it != disconnectedSockets.end(); ++it) {
+		std::vector<SOCKET>::iterator s_it = std::find(sockets.begin(), sockets.end(), (*it));
+		if (s_it != sockets.end()) {
+			sockets.erase(s_it);
 		}
-		else
-			++it;
 	}
-
 
 
 	return true;
@@ -157,7 +153,6 @@ bool ModuleNetworking::cleanUp()
 	NumModulesUsingWinsock--;
 	if (NumModulesUsingWinsock == 0)
 	{
-
 		if (WSACleanup() != 0)
 		{
 			reportError("ModuleNetworking::cleanUp() - WSACleanup");

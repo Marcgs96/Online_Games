@@ -4,6 +4,15 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 {
 	playerName = pplayerName;
 
+	commands.emplace("help", CommandType::Help);
+	commands.emplace("list", CommandType::List);
+	commands.emplace("kick", CommandType::Kick);
+	commands.emplace("whisper", CommandType::Whisper);
+	commands.emplace("change_name", CommandType::ChangeName);
+
+	helpMessage = "All available commands are: \n/list to list all users. \n/kick [username] to kick the player from the chat. \n/whisper [username] [message] to send a private message. \n/change_name [newname] to change your username.";
+
+
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
 	// - Create the remote address object
@@ -94,15 +103,22 @@ bool ModuleNetworkingClient::gui()
 			static char textInput[1024];
 			if (ImGui::InputText("", textInput, IM_ARRAYSIZE(textInput), ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				//If enter was hit, send chat message packet
-				OutputMemoryStream packet;
-				packet.Write(ClientMessage::ChatText);
-				std::string chatMessage = playerName + ": " + textInput;
-				packet.Write(chatMessage);
+				std::string textString = textInput;
+				if (textString[0] == '/') { // check if the text is a command
+					std::string command = textString.substr(1, textString.size());
+					HandleCommands(command);
+				}
+				else {
+					//If enter was hit, send chat message packet
+					OutputMemoryStream packet;
+					packet.Write(ClientMessage::ChatText);
+					std::string chatMessage = playerName + ": " + textString;
+					packet.Write(chatMessage);
 
-				if (!sendPacket(packet, connectSocket))
-				{
-					reportError("sending client chat message");
+					if (!sendPacket(packet, connectSocket))
+					{
+						reportError("sending client chat message");
+					}
 				}
 
 				memset(textInput, 0, IM_ARRAYSIZE(textInput));
@@ -154,5 +170,33 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 {
 	state = ClientState::Stopped;
+}
+
+void ModuleNetworkingClient::HandleCommands(std::string command)
+{
+	CommandType type = commands[command];
+
+	switch (type)
+	{
+	case ModuleNetworkingClient::CommandType::Help:
+		receivedMessages.push_back(helpMessage);
+		break;
+	case ModuleNetworkingClient::CommandType::List: {
+		OutputMemoryStream packet;
+		packet.Write(ClientMessage::UserList);
+		if (!sendPacket(packet, connectSocket))
+		{
+			reportError("sending client list command message");
+		}
+	}break;
+	case ModuleNetworkingClient::CommandType::Kick:
+		break;
+	case ModuleNetworkingClient::CommandType::Whisper:
+		break;
+	case ModuleNetworkingClient::CommandType::ChangeName:
+		break;
+	default:
+		break;
+	}
 }
 

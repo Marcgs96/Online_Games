@@ -2,6 +2,7 @@
 
 #include "ModuleNetworking.h"
 #include <list>
+#include <map>
 
 class ModuleNetworkingClient : public ModuleNetworking
 {
@@ -38,6 +39,11 @@ private:
 	void onSocketDisconnected(SOCKET socket) override;
 
 
+	//////////////////////////////////////////////////////////////////////
+	// ModuleNetworkingClient private methods
+	//////////////////////////////////////////////////////////////////////
+
+	void HandleCommands(std::string command);
 
 	//////////////////////////////////////////////////////////////////////
 	// Client state
@@ -51,6 +57,14 @@ private:
 		LoggedIn
 	};
 
+	enum class CommandType {
+		Help,
+		List,
+		Kick,
+		Whisper,
+		ChangeName
+	};
+
 	ClientState state = ClientState::Stopped;
 
 	sockaddr_in serverAddress = {};
@@ -58,5 +72,9 @@ private:
 
 	std::string playerName;
 	std::list<std::string> receivedMessages;
+
+	std::map<std::string, CommandType> commands;
+
+	std::string helpMessage;
 };
 

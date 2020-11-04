@@ -48,6 +48,8 @@ private:
 	void HandleHelloMessage(SOCKET socket, const InputMemoryStream& packet);
 
 	void HandleChatMessage(SOCKET socket, const InputMemoryStream& packet);
+	
+	void HandleListMessage(SOCKET socket, const InputMemoryStream& packet);
 
 	//////////////////////////////////////////////////////////////////////
 	// State

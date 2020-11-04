@@ -108,14 +108,33 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
+	std::string disconnectedPlayer;
 	// Remove the connected socket from the list
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
 		auto& connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
+			disconnectedPlayer = connectedSocket.playerName;
 			connectedSockets.erase(it);
 			break;
+		}
+	}
+
+
+	//Message about player disconnection to all other users
+	OutputMemoryStream packet;
+	packet.Write(ServerMessage::ChatText);
+	packet.Write(disconnectedPlayer + " has left the Barrens chat");
+
+	for (auto &connectedSocket : connectedSockets) {
+		if (sendPacket(packet, connectedSocket.socket))
+		{
+			LOG("Successfully sent disconnection chat packet");
+		}
+		else
+		{
+			reportError("sending disconnection chat packet");
 		}
 	}
 }
@@ -129,6 +148,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		case ClientMessage::Hello: HandleHelloMessage(socket, packet); break;
 		case ClientMessage::ChatText: HandleChatMessage(socket, packet); break;
+		case ClientMessage::UserList: HandleListMessage(socket, packet); break;
 	}
 }
 
@@ -169,7 +189,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 				//Send welcome message to the new player
 				OutputMemoryStream packet;
 				packet.Write(ServerMessage::Welcome);
-				packet.Write("Whalecum");
+				packet.Write("You have joined the Barrens chat.");
 				if (sendPacket(packet, connectedSocket.socket))
 				{
 					LOG("Successfully sent welcome packet");
@@ -178,6 +198,22 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 				{
 					//TODO: kick the fucker out
 					reportError("sending welcome packet");
+				}
+			}
+			else {
+
+				//Message about player connection to all other users.
+				OutputMemoryStream packet;
+				packet.Write(ServerMessage::ChatText);
+				packet.Write(playerName + " has joined the Barrens chat!");
+				if (sendPacket(packet, connectedSocket.socket))
+				{
+					LOG("Successfully sent new connection packet");
+				}
+				else
+				{
+					//TODO: kick the fucker out
+					reportError("sending new connection packet");
 				}
 			}
 		}
@@ -222,6 +258,30 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryS
 		{
 			reportError("sending chat packet");
 		}
+	}
+}
+
+void ModuleNetworkingServer::HandleListMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string userNames = "Current users connected to the server:\n";
+
+	for (auto& connectedSocket : connectedSockets) {
+		userNames.append("-" + connectedSocket.playerName + "\n");
+	}
+
+	//Create chat packet with the new chat message received
+	OutputMemoryStream outputPacket;
+	outputPacket.Write(ServerMessage::ChatText);
+	outputPacket.Write(userNames);
+
+	//Send new text message to client
+	if (sendPacket(outputPacket, socket))
+	{
+		LOG("Successfully sent chat packet");
+	}
+	else
+	{
+		reportError("sending chat packet");
 	}
 }
 

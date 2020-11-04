@@ -27,7 +27,6 @@ private:
 	bool gui() override;
 
 
-
 	//////////////////////////////////////////////////////////////////////
 	// ModuleNetworking virtual methods
 	//////////////////////////////////////////////////////////////////////
@@ -36,11 +35,19 @@ private:
 
 	void onSocketConnected(SOCKET socket, const sockaddr_in &socketAddress) override;
 
-	void onSocketReceivedData(SOCKET socket, byte * data) override;
+	void onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet) override;
 
 	void onSocketDisconnected(SOCKET socket) override;
 
+	//////////////////////////////////////////////////////////////////////
+	// ModuleNetworkingServer private methods
+	//////////////////////////////////////////////////////////////////////
 
+	bool IsUniquePlayer(std::string playerName);
+
+	void HandleHelloMessage(SOCKET socket, const InputMemoryStream& packet);
+
+	void HandleChatMessage(SOCKET socket, const InputMemoryStream& packet);
 
 	//////////////////////////////////////////////////////////////////////
 	// State

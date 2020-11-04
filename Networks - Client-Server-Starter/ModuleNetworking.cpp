@@ -58,11 +58,6 @@ bool ModuleNetworking::preUpdate()
 {
 	if (sockets.empty()) return true;
 
-	// NOTE(jesus): You can use this temporary buffer to store data from recv()
-	const uint32 incomingDataBufferSize = Kilobytes(1);
-	byte incomingDataBuffer[incomingDataBufferSize];
-
-	// TODO(jesus): select those sockets that have a read operation available
 	fd_set readfdset;
 	FD_ZERO(&readfdset);
 
@@ -80,31 +75,15 @@ bool ModuleNetworking::preUpdate()
 		reportError("Error selecting readable sockets");
 	}
 
-	// TODO(jesus): for those sockets selected, check wheter or not they are
-	// a listen socket or a standard socket and perform the corresponding
-	// operation (accept() an incoming connection or recv() incoming data,
-	// respectively).
-	// On accept() success, communicate the new connected socket to the
-	// subclass (use the callback onSocketConnected()), and add the new
-	// connected socket to the managed list of sockets.
-	// On recv() success, communicate the incoming data received to the
-	// subclass (use the callback onSocketReceivedData()).
-
-	// TODO(jesus): handle disconnections. Remember that a socket has been
-	// disconnected from its remote end either when recv() returned 0,
-	// or when it generated some errors such as ECONNRESET.
-	// Communicate detected disconnections to the subclass using the callback
-	// onSocketDisconnected().
-
 	std::vector<SOCKET> disconnectedSockets;
 
-	for (auto s : sockets) {
-		if (FD_ISSET(s, &readfdset)) {
-			if (isListenSocket(s)) { 
+	for (auto socket : sockets) {
+		if (FD_ISSET(socket, &readfdset)) {
+			if (isListenSocket(socket)) {
 				sockaddr_in clientAddress; //Client address creation
 				socklen_t clientAddressSize = sizeof(clientAddress); // Client addrs size
 
-				SOCKET clientSocket = accept(s, (struct sockaddr*)& clientAddress, &clientAddressSize);
+				SOCKET clientSocket = accept(socket, (struct sockaddr*)& clientAddress, &clientAddressSize);
 
 				if (clientSocket < 0)
 					reportError("creating connection socket");
@@ -116,25 +95,28 @@ bool ModuleNetworking::preUpdate()
 				}					
 			}
 			else {
-				result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-				if (result != SOCKET_ERROR) {
-					incomingDataBuffer[result] = '\0';
-					onSocketReceivedData(s, incomingDataBuffer);
+				InputMemoryStream packet;
+				int bytesRead = recv(socket, packet.GetBufferPtr(), packet.GetCapacity(), 0);
+				if (bytesRead > 0) {
+					packet.SetSize((uint32)bytesRead);
+					onSocketReceivedData(socket, packet);
 				}
 				else
 				{
-					reportError("receiving message");
-					shutdown(s, 2);
-					closesocket(s);
-					disconnectedSockets.push_back(s);
-					onSocketDisconnected(s);
+					if (bytesRead == 0)
+						LOG("Client disconnected successfully");
+					else
+						reportError("receiving message");
+
+					shutdown(socket, 2);
+					closesocket(socket);
+					disconnectedSockets.push_back(socket);
+					onSocketDisconnected(socket);
 				}
 			}
 		}
 	}
 
-	// TODO(jesus): Finally, remove all disconnected sockets from the list
-	// of managed sockets.
 	for (std::vector<SOCKET>::iterator it = disconnectedSockets.begin(); it != disconnectedSockets.end(); ++it) {
 		std::vector<SOCKET>::iterator s_it = std::find(sockets.begin(), sockets.end(), (*it));
 		if (s_it != sockets.end()) {
@@ -162,6 +144,19 @@ bool ModuleNetworking::cleanUp()
 
 	return true;
 }
+
+bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR)
+	{
+		reportError("send packet");
+		return false;
+	}
+	return true;
+}
+
+
 
 void ModuleNetworking::addSocket(SOCKET socket)
 {

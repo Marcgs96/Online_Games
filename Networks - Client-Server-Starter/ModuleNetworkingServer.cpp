@@ -106,24 +106,12 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSockets.push_back(connectedSocket);
 }
 
-void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, byte * data)
-{
-	// Set the player name of the corresponding connected socket proxy
-	for (auto &connectedSocket : connectedSockets)
-	{
-		if (connectedSocket.socket == socket)
-		{
-			connectedSocket.playerName = (const char *)data;
-		}
-	}
-}
-
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
 	// Remove the connected socket from the list
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
-		auto &connectedSocket = *it;
+		auto& connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
 			connectedSockets.erase(it);
@@ -131,4 +119,110 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 		}
 	}
 }
+
+void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
+{
+	ClientMessage clientMessage;
+	packet.Read(clientMessage);
+
+	switch (clientMessage)
+	{
+		case ClientMessage::Hello: HandleHelloMessage(socket, packet); break;
+		case ClientMessage::ChatText: HandleChatMessage(socket, packet); break;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// ModuleNetworkingServer private methods
+//////////////////////////////////////////////////////////////////////
+
+//Return whether the player name is found in the current connected clients or not
+bool ModuleNetworkingServer::IsUniquePlayer(std::string playerName)
+{
+	// Look for the playerName on all connected clients
+	for (auto& connectedSocket : connectedSockets)
+	{
+		if (connectedSocket.playerName == playerName)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// Handles the reception of a packet with Hello type
+void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string playerName;
+	packet.Read(playerName);
+
+	if (IsUniquePlayer(playerName))
+	{
+		// Set the player name of the corresponding connected socket proxy
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket == socket)
+			{
+				connectedSocket.playerName = playerName;
+
+				//Send welcome message to the new player
+				OutputMemoryStream packet;
+				packet.Write(ServerMessage::Welcome);
+				packet.Write("Whalecum");
+				if (sendPacket(packet, connectedSocket.socket))
+				{
+					LOG("Successfully sent welcome packet");
+				}
+				else
+				{
+					//TODO: kick the fucker out
+					reportError("sending welcome packet");
+				}
+			}
+		}
+	}
+	else
+	{
+		//Send non-welcome packet
+		OutputMemoryStream packet;
+		packet.Write(ServerMessage::NonWelcome);
+		packet.Write("Client name is already in use. Please change your name.");
+		if (sendPacket(packet, socket))
+		{
+			LOG("Successfully sent non-welcome packet");
+		}
+		else
+		{
+			//TODO: kick the fucker out
+			reportError("sending non-welcome packet");
+		}
+	}
+}
+
+// Handles the reception of a packet with Chat type
+void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string chatMessage;
+	packet.Read(chatMessage);
+
+	//Create chat packet with the new chat message received
+	OutputMemoryStream outputPacket;
+	outputPacket.Write(ServerMessage::ChatText);
+	outputPacket.Write(chatMessage);
+
+	for (auto& connectedSocket : connectedSockets)
+	{
+		//Send new text message to client
+		if (sendPacket(outputPacket, connectedSocket.socket))
+		{
+			LOG("Successfully sent chat packet");
+		}
+		else
+		{
+			reportError("sending chat packet");
+		}
+	}
+}
+
 

@@ -60,7 +60,8 @@ private:
 		List,
 		Kick,
 		Whisper,
-		ChangeName
+		ChangeName,
+		Ban
 	};
 
 	ClientState state = ClientState::Stopped;

@@ -11,6 +11,7 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	commands.emplace("/kick", CommandType::Kick);
 	commands.emplace("/whisper", CommandType::Whisper);
 	commands.emplace("/change_name", CommandType::ChangeName);
+	commands.emplace("/ban", CommandType::Ban);
 
 	helpMessage = "All available commands are: \n/list to list all users. \n/kick [username] to kick the player from the chat. \n/whisper [username] [message] to send a private message. \n/change_name [newname] to change your username.";
 
@@ -268,11 +269,28 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 
 			if (!sendPacket(packet, connectSocket))
 			{
-				reportError("sending whisper command");
+				reportError("sending change name command");
 			}
 		}
 	}
 		break;
+
+	case ModuleNetworkingClient::CommandType::Ban:
+	{
+		if (splitString.size() > 1) {
+			OutputMemoryStream packet;
+
+			packet.Write(ClientMessage::Ban);
+			packet.Write(playerName);
+			packet.Write(splitString[1]);
+
+			if (!sendPacket(packet, connectSocket))
+			{
+				reportError("sending ban command");
+			}
+		}
+	}
+	break;
 	default:
 		break;
 	}

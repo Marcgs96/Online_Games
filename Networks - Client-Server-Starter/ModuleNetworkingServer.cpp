@@ -152,6 +152,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		case ClientMessage::Kick: HandleKickMessage(socket, packet); break;
 		case ClientMessage::Whisper: HandleWhisperMessage(socket, packet); break;
 		case ClientMessage::ChangeName: HandleNameChangeMessage(socket, packet); break;
+		case ClientMessage::Ban: HandleNameBanMessage(socket, packet); break;
 	}
 }
 
@@ -180,6 +181,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 	std::string playerName;
 	packet.Read(playerName);
 
+
 	if (IsUniquePlayer(playerName))
 	{
 		// Set the player name of the corresponding connected socket proxy
@@ -187,6 +189,14 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 		{
 			if (connectedSocket.socket == socket)
 			{
+				for (auto it = blackList.begin(); it != blackList.end(); ++it) {
+					char ip[INET6_ADDRSTRLEN];
+					inet_ntop(connectedSocket.address.sin_family, &connectedSocket.address.sin_addr, (PSTR)ip, sizeof ip);
+					if (it->second == std::string(ip)) {
+						Kick(socket);
+						return;
+					}
+				}
 				connectedSocket.playerName = playerName;
 
 				//Send welcome message to the new player
@@ -406,6 +416,42 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 		}
 	}
 
+}
+
+void ModuleNetworkingServer::HandleNameBanMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string playerName;
+	std::string playerBanName;
+
+	packet.Read(playerName);
+	packet.Read(playerBanName);
+
+	bool exists = false;
+
+	for (auto& connectedSocket : connectedSockets) {
+
+		if (connectedSocket.playerName == playerBanName) {
+			char ip[INET6_ADDRSTRLEN];
+			inet_ntop(connectedSocket.address.sin_family, &connectedSocket.address.sin_addr, (PSTR)ip, sizeof ip);
+			blackList.emplace(playerBanName, std::string(ip));
+			Kick(connectedSocket.socket);
+			exists = true;
+		}
+	}
+
+	OutputMemoryStream outputPacket;
+	outputPacket.Write(ServerMessage::ChatText);
+	outputPacket.Write(playerBanName + " has been banned from the server by " + playerName + ".");
+
+	for (auto& connectedSocket : connectedSockets) {
+		if (sendPacket(outputPacket, connectedSocket.socket)) {
+			LOG("Successfully sent chat packet");
+		}
+		else
+		{
+			reportError("sending chat packet");
+		}
+	}
 }
 
 void ModuleNetworkingServer::Kick(SOCKET socket)

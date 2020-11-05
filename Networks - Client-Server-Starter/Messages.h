@@ -10,7 +10,8 @@ enum class ClientMessage
 	UserList,
 	Kick,
 	Whisper,
-	ChangeName
+	ChangeName,
+	Ban
 };
 
 enum class ServerMessage

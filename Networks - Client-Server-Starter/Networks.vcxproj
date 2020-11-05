@@ -344,6 +344,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="ByteSwap.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="MemoryStream.h" />
     <ClInclude Include="Messages.h" />
     <ClInclude Include="ModuleNetworkingClient.h" />

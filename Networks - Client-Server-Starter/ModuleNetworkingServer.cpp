@@ -149,6 +149,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		case ClientMessage::Hello: HandleHelloMessage(socket, packet); break;
 		case ClientMessage::ChatText: HandleChatMessage(socket, packet); break;
 		case ClientMessage::UserList: HandleListMessage(socket, packet); break;
+		case ClientMessage::Kick: HandleKickMessage(socket, packet); break;
 	}
 }
 
@@ -261,10 +262,12 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryS
 	}
 }
 
+//Handles user listing message
 void ModuleNetworkingServer::HandleListMessage(SOCKET socket, const InputMemoryStream& packet)
 {
 	std::string userNames = "Current users connected to the server:\n";
 
+	//Gather all current user names
 	for (auto& connectedSocket : connectedSockets) {
 		userNames.append("-" + connectedSocket.playerName + "\n");
 	}
@@ -283,6 +286,25 @@ void ModuleNetworkingServer::HandleListMessage(SOCKET socket, const InputMemoryS
 	{
 		reportError("sending chat packet");
 	}
+}
+
+//Handles kick message
+void ModuleNetworkingServer::HandleKickMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	for (auto& connectedSocket : connectedSockets) {	
+		if (connectedSocket.socket == socket)
+		{
+			Kick(connectedSocket.socket);
+		}
+	}
+}
+
+void ModuleNetworkingServer::Kick(SOCKET socket)
+{
+	shutdown(socket, 2);
+	closesocket(socket);
+	//disconnectedSockets.push_back(socket);
+	//onSocketDisconnected(socket);
 }
 
 

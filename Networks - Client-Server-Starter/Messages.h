@@ -7,7 +7,8 @@ enum class ClientMessage
 {
 	Hello,
 	ChatText,
-	UserList
+	UserList,
+	Kick
 };
 
 enum class ServerMessage

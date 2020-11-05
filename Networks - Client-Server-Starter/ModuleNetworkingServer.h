@@ -51,6 +51,10 @@ private:
 	
 	void HandleListMessage(SOCKET socket, const InputMemoryStream& packet);
 
+	void HandleKickMessage(SOCKET socket, const InputMemoryStream& packet);
+
+	void Kick(SOCKET socket);
+
 	//////////////////////////////////////////////////////////////////////
 	// State
 	//////////////////////////////////////////////////////////////////////

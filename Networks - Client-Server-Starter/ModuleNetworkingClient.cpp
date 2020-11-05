@@ -1,17 +1,18 @@
 #include "ModuleNetworkingClient.h"
+#include <iostream>
+#include <sstream>
 
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
 
-	commands.emplace("help", CommandType::Help);
-	commands.emplace("list", CommandType::List);
-	commands.emplace("kick", CommandType::Kick);
-	commands.emplace("whisper", CommandType::Whisper);
-	commands.emplace("change_name", CommandType::ChangeName);
+	commands.emplace("/help", CommandType::Help);
+	commands.emplace("/list", CommandType::List);
+	commands.emplace("/kick", CommandType::Kick);
+	commands.emplace("/whisper", CommandType::Whisper);
+	commands.emplace("/change_name", CommandType::ChangeName);
 
 	helpMessage = "All available commands are: \n/list to list all users. \n/kick [username] to kick the player from the chat. \n/whisper [username] [message] to send a private message. \n/change_name [newname] to change your username.";
-
 
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
@@ -105,8 +106,22 @@ bool ModuleNetworkingClient::gui()
 			{
 				std::string textString = textInput;
 				if (textString[0] == '/') { // check if the text is a command
-					std::string command = textString.substr(1, textString.size());
-					HandleCommands(command);
+					//std::string command = textString.substr(1, textString.find(' '));
+					//std::string command = textString.substr(textString.find(' '), textString.size());
+
+					std::string delimiter = " ";
+
+					size_t pos = 0;
+					std::vector<std::string> splitString;
+					while (textString.size() != 0) {
+						pos = textString.find(delimiter);
+						pos = pos != std::string::npos? pos:textString.size();
+
+						splitString.push_back(textString.substr(0, pos));
+						textString.erase(0, pos + delimiter.length());
+					}
+
+					HandleCommands(splitString);
 				}
 				else {
 					//If enter was hit, send chat message packet
@@ -172,28 +187,53 @@ void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 	state = ClientState::Stopped;
 }
 
-void ModuleNetworkingClient::HandleCommands(std::string command)
+void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString)
 {
-	CommandType type = commands[command];
+	if (splitString.size() < 0)
+	{
+		reportError("handling command since split failed");
+		return;
+	}
+
+
+	CommandType type = commands[splitString[0]];
 
 	switch (type)
 	{
 	case ModuleNetworkingClient::CommandType::Help:
 		receivedMessages.push_back(helpMessage);
 		break;
-	case ModuleNetworkingClient::CommandType::List: {
+	case ModuleNetworkingClient::CommandType::List: 
+	{
 		OutputMemoryStream packet;
 		packet.Write(ClientMessage::UserList);
+
 		if (!sendPacket(packet, connectSocket))
 		{
 			reportError("sending client list command message");
 		}
 	}break;
 	case ModuleNetworkingClient::CommandType::Kick:
+	{
+		OutputMemoryStream packet;
+		packet.Write(ClientMessage::Kick);
+		packet.Write(helpMessage[1]);
+
+		if (!sendPacket(packet, connectSocket))
+		{
+			reportError("sending kick command");
+		}
+	}
 		break;
 	case ModuleNetworkingClient::CommandType::Whisper:
+	{
+
+	}
 		break;
 	case ModuleNetworkingClient::CommandType::ChangeName:
+	{
+
+	}
 		break;
 	default:
 		break;

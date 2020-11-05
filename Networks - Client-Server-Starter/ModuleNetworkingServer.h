@@ -53,6 +53,10 @@ private:
 
 	void HandleKickMessage(SOCKET socket, const InputMemoryStream& packet);
 
+	void HandleWhisperMessage(SOCKET socket, const InputMemoryStream& packet);
+
+	void HandleNameChangeMessage(SOCKET socket, const InputMemoryStream& packet);
+
 	void Kick(SOCKET socket);
 
 	//////////////////////////////////////////////////////////////////////

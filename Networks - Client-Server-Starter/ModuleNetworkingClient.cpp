@@ -113,13 +113,15 @@ bool ModuleNetworkingClient::gui()
 
 					size_t pos = 0;
 					std::vector<std::string> splitString;
-					while (textString.size() != 0) {
+					for (int i = 0; i < 2; ++i) {
 						pos = textString.find(delimiter);
 						pos = pos != std::string::npos? pos:textString.size();
 
 						splitString.push_back(textString.substr(0, pos));
 						textString.erase(0, pos + delimiter.length());
 					}
+
+					splitString.push_back(textString);
 
 					HandleCommands(splitString);
 				}
@@ -179,6 +181,17 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			receivedMessages.push_back(chatMessage);
 		} break;
+		case ServerMessage::ChangeName:
+		{
+			std::string chatMessage;
+			std::string newName;
+			packet.Read(chatMessage);
+			packet.Read(newName);
+
+			receivedMessages.push_back(chatMessage);
+			playerName = newName;
+
+		} break;
 	}	
 }
 
@@ -215,24 +228,49 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 	}break;
 	case ModuleNetworkingClient::CommandType::Kick:
 	{
-		OutputMemoryStream packet;
-		packet.Write(ClientMessage::Kick);
-		packet.Write(helpMessage[1]);
 
-		if (!sendPacket(packet, connectSocket))
-		{
-			reportError("sending kick command");
+		if(splitString.size() > 1) {
+			OutputMemoryStream packet;
+
+			packet.Write(ClientMessage::Kick);
+			packet.Write(splitString[1]);
+			if (!sendPacket(packet, connectSocket))
+			{
+				reportError("sending kick command");
+			}
 		}
 	}
 		break;
 	case ModuleNetworkingClient::CommandType::Whisper:
 	{
+		if (splitString.size() > 1) {
+			OutputMemoryStream packet;
 
+			packet.Write(ClientMessage::Whisper);
+			packet.Write(splitString[1]);
+			packet.Write(splitString[2]);
+			packet.Write(playerName);
+			if (!sendPacket(packet, connectSocket))
+			{
+				reportError("sending whisper command");
+			}
+		}
 	}
 		break;
 	case ModuleNetworkingClient::CommandType::ChangeName:
 	{
+		if (splitString.size() > 1) {
+			OutputMemoryStream packet;
 
+			packet.Write(ClientMessage::ChangeName);
+			packet.Write(playerName);
+			packet.Write(splitString[1]);
+
+			if (!sendPacket(packet, connectSocket))
+			{
+				reportError("sending whisper command");
+			}
+		}
 	}
 		break;
 	default:

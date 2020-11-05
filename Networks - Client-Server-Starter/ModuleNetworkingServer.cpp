@@ -150,6 +150,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		case ClientMessage::ChatText: HandleChatMessage(socket, packet); break;
 		case ClientMessage::UserList: HandleListMessage(socket, packet); break;
 		case ClientMessage::Kick: HandleKickMessage(socket, packet); break;
+		case ClientMessage::Whisper: HandleWhisperMessage(socket, packet); break;
+		case ClientMessage::ChangeName: HandleNameChangeMessage(socket, packet); break;
 	}
 }
 
@@ -291,18 +293,127 @@ void ModuleNetworkingServer::HandleListMessage(SOCKET socket, const InputMemoryS
 //Handles kick message
 void ModuleNetworkingServer::HandleKickMessage(SOCKET socket, const InputMemoryStream& packet)
 {
+	std::string playername;
+	packet.Read(playername);
+	
 	for (auto& connectedSocket : connectedSockets) {	
-		if (connectedSocket.socket == socket)
+		if (connectedSocket.playerName == playername)
 		{
 			Kick(connectedSocket.socket);
 		}
 	}
 }
 
+void ModuleNetworkingServer::HandleWhisperMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string fromName;
+	std::string toName;
+	std::string message;
+	packet.Read(toName);
+	packet.Read(message);
+	packet.Read(fromName);
+
+	for (auto& connectedSocket : connectedSockets) {
+		if (connectedSocket.playerName == toName)
+		{
+			//Create chat packet with the new chat message received
+			OutputMemoryStream outputPacketFrom;
+			outputPacketFrom.Write(ServerMessage::ChatText);
+			outputPacketFrom.Write(fromName + " whispers: " + message);
+
+			if (sendPacket(outputPacketFrom, connectedSocket.socket))
+			{
+				LOG("Successfully sent chat packet");
+			}
+			else
+			{
+				reportError("sending chat packet");
+			}
+		}
+		else if (connectedSocket.socket == socket) {
+
+			OutputMemoryStream outputPacketTo;
+			outputPacketTo.Write(ServerMessage::ChatText);
+			outputPacketTo.Write("To " + toName + ": " + message);
+
+			if (sendPacket(outputPacketTo, socket)) {
+				LOG("Successfully sent chat packet");
+			}
+			else
+			{
+				reportError("sending chat packet");
+			}
+		}
+	}
+}
+
+void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string currentName;
+	std::string newName;
+	packet.Read(currentName);
+	packet.Read(newName);
+
+	for (auto& connectedSocket : connectedSockets) {
+		if (connectedSocket.playerName == newName) {
+
+			OutputMemoryStream outputPacket;
+			outputPacket.Write(ServerMessage::ChatText);
+			outputPacket.Write("The new name you want to use is not available");
+
+			if (sendPacket(outputPacket, socket)) {
+				LOG("Successfully sent chat packet");
+			}
+			else
+			{
+				reportError("sending chat packet");
+			}
+
+			return;
+		}
+	}
+
+	for (auto& connectedSocket : connectedSockets) {
+		if (connectedSocket.socket == socket) {
+			connectedSocket.playerName = newName;
+
+			OutputMemoryStream outputPacket;
+			outputPacket.Write(ServerMessage::ChangeName);
+			outputPacket.Write("You have changed your name to " + newName + " successfully.");
+			outputPacket.Write(newName);
+
+			if (sendPacket(outputPacket, socket)) {
+				LOG("Successfully sent chat packet");
+			}
+			else
+			{
+				reportError("sending chat packet");
+			}
+		}
+		else {
+
+			OutputMemoryStream outputPacket;
+			outputPacket.Write(ServerMessage::ChatText);
+			outputPacket.Write(currentName + " has changed his name to " + newName + ".");
+
+			if (sendPacket(outputPacket, connectedSocket.socket)) {
+				LOG("Successfully sent chat packet");
+			}
+			else
+			{
+				reportError("sending chat packet");
+			}
+		}
+	}
+
+}
+
 void ModuleNetworkingServer::Kick(SOCKET socket)
 {
 	shutdown(socket, 2);
 	closesocket(socket);
+	sockets.erase(std::find(sockets.begin(), sockets.end(), socket));
+	onSocketDisconnected(socket);
 	//disconnectedSockets.push_back(socket);
 	//onSocketDisconnected(socket);
 }

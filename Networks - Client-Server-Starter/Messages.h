@@ -8,7 +8,9 @@ enum class ClientMessage
 	Hello,
 	ChatText,
 	UserList,
-	Kick
+	Kick,
+	Whisper,
+	ChangeName
 };
 
 enum class ServerMessage
@@ -16,6 +18,7 @@ enum class ServerMessage
 	Welcome,
 	NonWelcome,
 	ChatText,
-	UserList
+	UserList,
+	ChangeName
 };
 

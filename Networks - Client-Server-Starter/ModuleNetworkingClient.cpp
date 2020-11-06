@@ -6,22 +6,17 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 {
 	playerName = pplayerName;
 
+	//Todo: read this from file
 	commands.emplace("/help", CommandType::Help);
 	commands.emplace("/list", CommandType::List);
 	commands.emplace("/kick", CommandType::Kick);
 	commands.emplace("/whisper", CommandType::Whisper);
 	commands.emplace("/change_name", CommandType::ChangeName);
 	commands.emplace("/ban", CommandType::Ban);
-
+	commands.emplace("/unban", CommandType::Unban);
 	helpMessage = "All available commands are: \n/list to list all users. \n/kick [username] to kick the player from the chat. \n/whisper [username] [message] to send a private message. \n/change_name [newname] to change your username.";
 
-	// TODO(jesus): TCP connection stuff
-	// - Create the socket
-	// - Create the remote address object
-	// - Connect to the remote address
-	// - Add the created socket to the managed list of sockets using addSocket()
 
-	// If everything was ok... change the state
 
 	connectSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -56,8 +51,6 @@ bool ModuleNetworkingClient::update()
 		packet.Write(ClientMessage::Hello);
 		packet.Write(playerName);
 
-		//int result = send(connectSocket, playerName.c_str(), playerName.size(), 0);
-		//if (result != SOCKET_ERROR) {
 		if (sendPacket(packet, connectSocket))
 		{
 			state = ClientState::Logging;
@@ -100,20 +93,26 @@ bool ModuleNetworkingClient::gui()
 			{
 				ImGui::Text(message.c_str());
 			}
+			if (scrollDown)
+			{
+				ImGui::SetScrollHere(1.0f);
+				scrollDown = false;
+			}
+
+
 			ImGui::EndChild();
 
 			static char textInput[1024];
-			if (ImGui::InputText("", textInput, IM_ARRAYSIZE(textInput), ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputText("", textInput, IM_ARRAYSIZE(textInput), ImGuiInputTextFlags_EnterReturnsTrue) /*&& !timedOut*/)
 			{
 				std::string textString = textInput;
 				if (textString[0] == '/') { // check if the text is a command
-					//std::string command = textString.substr(1, textString.find(' '));
-					//std::string command = textString.substr(textString.find(' '), textString.size());
 
 					std::string delimiter = " ";
-
 					size_t pos = 0;
 					std::vector<std::string> splitString;
+
+					//Split the command and the first parameter of it from the text input
 					for (int i = 0; i < 2; ++i) {
 						pos = textString.find(delimiter);
 						pos = pos != std::string::npos? pos:textString.size();
@@ -141,8 +140,9 @@ bool ModuleNetworkingClient::gui()
 
 				memset(textInput, 0, IM_ARRAYSIZE(textInput));
 			}
+			if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
+				ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 		}
-
 		ImGui::End();
 	}
 
@@ -162,6 +162,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			packet.Read(welcomeMessage);
 
 			receivedMessages.push_back(welcomeMessage);
+			scrollDown = true;
 
 			state = ClientState::LoggedIn;
 		} break;
@@ -181,6 +182,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			packet.Read(chatMessage);
 
 			receivedMessages.push_back(chatMessage);
+			scrollDown = true;
 		} break;
 		case ServerMessage::ChangeName:
 		{
@@ -190,8 +192,27 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			packet.Read(newName);
 
 			receivedMessages.push_back(chatMessage);
+			scrollDown = true;
 			playerName = newName;
 
+		} break;
+		case ServerMessage::Timeout:
+		{
+			std::string chatMessage;
+			packet.Read(chatMessage);
+
+			receivedMessages.push_back(chatMessage);
+			scrollDown = true;
+			timedOut = true;
+		} break;
+		case ServerMessage::ReleaseTimeout:
+		{
+			std::string chatMessage;
+			packet.Read(chatMessage);
+
+			receivedMessages.push_back(chatMessage);
+			scrollDown = true;
+			timedOut = false;
 		} break;
 	}	
 }
@@ -209,13 +230,13 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 		return;
 	}
 
-
 	CommandType type = commands[splitString[0]];
 
 	switch (type)
 	{
 	case ModuleNetworkingClient::CommandType::Help:
 		receivedMessages.push_back(helpMessage);
+		scrollDown = true;
 		break;
 	case ModuleNetworkingClient::CommandType::List: 
 	{
@@ -229,7 +250,6 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 	}break;
 	case ModuleNetworkingClient::CommandType::Kick:
 	{
-
 		if(splitString.size() > 1) {
 			OutputMemoryStream packet;
 
@@ -240,8 +260,7 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 				reportError("sending kick command");
 			}
 		}
-	}
-		break;
+	} break;
 	case ModuleNetworkingClient::CommandType::Whisper:
 	{
 		if (splitString.size() > 1) {
@@ -256,8 +275,7 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 				reportError("sending whisper command");
 			}
 		}
-	}
-		break;
+	} break;
 	case ModuleNetworkingClient::CommandType::ChangeName:
 	{
 		if (splitString.size() > 1) {
@@ -272,9 +290,7 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 				reportError("sending change name command");
 			}
 		}
-	}
-		break;
-
+	} break;
 	case ModuleNetworkingClient::CommandType::Ban:
 	{
 		if (splitString.size() > 1) {
@@ -289,8 +305,22 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 				reportError("sending ban command");
 			}
 		}
-	}
-	break;
+	} break;
+	case ModuleNetworkingClient::CommandType::Unban:
+	{
+		if (splitString.size() > 1) {
+			OutputMemoryStream packet;
+
+			packet.Write(ClientMessage::Unban);
+			packet.Write(playerName);
+			packet.Write(splitString[1]);
+
+			if (!sendPacket(packet, connectSocket))
+			{
+				reportError("sending unban command");
+			}
+		}
+	} break;
 	default:
 		break;
 	}

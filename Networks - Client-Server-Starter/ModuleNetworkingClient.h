@@ -52,7 +52,7 @@ private:
 		Stopped,
 		Start,
 		Logging,
-		LoggedIn
+		LoggedIn,
 	};
 
 	enum class CommandType {
@@ -61,7 +61,8 @@ private:
 		Kick,
 		Whisper,
 		ChangeName,
-		Ban
+		Ban,
+		Unban
 	};
 
 	ClientState state = ClientState::Stopped;
@@ -73,8 +74,8 @@ private:
 	std::list<std::string> receivedMessages;
 
 	std::map<std::string, CommandType> commands;
-
 	std::string helpMessage;
-	float userColor[4];
+	bool timedOut = false;
+	bool scrollDown = false;
 };
 

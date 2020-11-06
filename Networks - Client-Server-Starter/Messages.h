@@ -11,7 +11,8 @@ enum class ClientMessage
 	Kick,
 	Whisper,
 	ChangeName,
-	Ban
+	Ban,
+	Unban
 };
 
 enum class ServerMessage
@@ -20,6 +21,8 @@ enum class ServerMessage
 	NonWelcome,
 	ChatText,
 	UserList,
-	ChangeName
+	ChangeName,
+	Timeout,
+	ReleaseTimeout
 };
 

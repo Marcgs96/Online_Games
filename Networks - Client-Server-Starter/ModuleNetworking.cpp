@@ -124,7 +124,6 @@ bool ModuleNetworking::preUpdate()
 		}
 	}
 
-
 	return true;
 }
 

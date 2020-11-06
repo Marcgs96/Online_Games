@@ -14,8 +14,6 @@ public:
 
 	bool isRunning() const;
 
-
-
 private:
 
 	//////////////////////////////////////////////////////////////////////
@@ -57,7 +55,9 @@ private:
 
 	void HandleNameChangeMessage(SOCKET socket, const InputMemoryStream& packet);
 
-	void HandleNameBanMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandleBanMessage(SOCKET socket, const InputMemoryStream& packet);
+
+	void HandleUnbanMessage(SOCKET socket, const InputMemoryStream& packet);
 
 	void Kick(SOCKET socket);
 
@@ -80,9 +80,11 @@ private:
 		sockaddr_in address;
 		SOCKET socket;
 		std::string playerName;
+		float timeOutScore = .0f;
 	};
 
 	std::vector<ConnectedSocket> connectedSockets;
 	std::map<std::string, std::string> blackList;
+	std::map<SOCKET, float> timedOutClients;
 };
 

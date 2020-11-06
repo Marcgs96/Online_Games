@@ -1,7 +1,8 @@
 #include "ModuleNetworkingServer.h"
 
-
-
+#define MAX_TIMEOUT_SCORE 4.0f
+#define TIMEOUT_TIME 15.0f
+#define TIMEOUT_DAMPENING 0.5f
 
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingServer public methods
@@ -9,12 +10,6 @@
 
 bool ModuleNetworkingServer::start(int port)
 {
-	// TODO(jesus): TCP listen socket stuff
-	// - Create the listenSocket
-	// - Set address reuse
-	// - Bind the socket to a local interface
-	// - Enter in listen mode
-	// - Add the listenSocket to the managed list of sockets using addSocket()
 	listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 
 	//Remote Address creation
@@ -43,14 +38,42 @@ bool ModuleNetworkingServer::isRunning() const
 	return state != ServerState::Stopped;
 }
 
-
-
 //////////////////////////////////////////////////////////////////////
 // Module virtual methods
 //////////////////////////////////////////////////////////////////////
 
 bool ModuleNetworkingServer::update()
 {
+	for (std::map<SOCKET, float>::iterator it = timedOutClients.begin(); it != timedOutClients.end();)
+	{
+		it->second += 1.0f * Time.deltaTime;
+		if (it->second >= TIMEOUT_TIME)
+		{
+			OutputMemoryStream packet;
+			packet.Write(ServerMessage::ReleaseTimeout);
+			packet.Write("Your timeout has been lifted.");
+
+			if (sendPacket(packet, it->first))
+			{
+				it = timedOutClients.erase(it);
+				LOG("Successfully sent disconnection chat packet");
+			}
+			else
+			{
+				reportError("sending disconnection chat packet");
+			}		
+		}
+		else
+			++it;
+	}
+
+	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+	{		
+		it->timeOutScore -= TIMEOUT_DAMPENING * Time.deltaTime;
+		if (it->timeOutScore < 0.0f)
+			it->timeOutScore = 0.0f;
+	}
+
 	return true;
 }
 
@@ -86,8 +109,6 @@ bool ModuleNetworkingServer::gui()
 	return true;
 }
 
-
-
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworking virtual methods
 //////////////////////////////////////////////////////////////////////
@@ -121,7 +142,6 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 		}
 	}
 
-
 	//Message about player disconnection to all other users
 	OutputMemoryStream packet;
 	packet.Write(ServerMessage::ChatText);
@@ -152,7 +172,8 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		case ClientMessage::Kick: HandleKickMessage(socket, packet); break;
 		case ClientMessage::Whisper: HandleWhisperMessage(socket, packet); break;
 		case ClientMessage::ChangeName: HandleNameChangeMessage(socket, packet); break;
-		case ClientMessage::Ban: HandleNameBanMessage(socket, packet); break;
+		case ClientMessage::Ban: HandleBanMessage(socket, packet); break;
+		case ClientMessage::Unban: HandleUnbanMessage(socket, packet); break;
 	}
 }
 
@@ -189,6 +210,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 		{
 			if (connectedSocket.socket == socket)
 			{
+				//Check if this scoket ip has been banned from the server, if so kick the fucker out
 				for (auto it = blackList.begin(); it != blackList.end(); ++it) {
 					char ip[INET6_ADDRSTRLEN];
 					inet_ntop(connectedSocket.address.sin_family, &connectedSocket.address.sin_addr, (PSTR)ip, sizeof ip);
@@ -260,10 +282,33 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryS
 	outputPacket.Write(ServerMessage::ChatText);
 	outputPacket.Write(chatMessage);
 
-	for (auto& connectedSocket : connectedSockets)
+	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
+		if (it->socket == socket)
+		{
+			it->timeOutScore += 1.0f;
+			if (it->timeOutScore > MAX_TIMEOUT_SCORE)
+			{
+				timedOutClients.emplace(it->socket, 0.0f);
+				it->timeOutScore = 0.0f;
+				
+				OutputMemoryStream timeoutPacket;
+				timeoutPacket.Write(ServerMessage::Timeout);
+				timeoutPacket.Write("You have been timed out.");
+				if (sendPacket(timeoutPacket, it->socket))
+				{
+					LOG("Successfully sent timeout packet");
+				}
+				else
+				{
+					reportError("sending timeout packet");
+				}
+				return;
+			}
+		}
+
 		//Send new text message to client
-		if (sendPacket(outputPacket, connectedSocket.socket))
+		if (sendPacket(outputPacket, it->socket))
 		{
 			LOG("Successfully sent chat packet");
 		}
@@ -418,7 +463,7 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 
 }
 
-void ModuleNetworkingServer::HandleNameBanMessage(SOCKET socket, const InputMemoryStream& packet)
+void ModuleNetworkingServer::HandleBanMessage(SOCKET socket, const InputMemoryStream& packet)
 {
 	std::string playerName;
 	std::string playerBanName;
@@ -429,7 +474,6 @@ void ModuleNetworkingServer::HandleNameBanMessage(SOCKET socket, const InputMemo
 	bool exists = false;
 
 	for (auto& connectedSocket : connectedSockets) {
-
 		if (connectedSocket.playerName == playerBanName) {
 			char ip[INET6_ADDRSTRLEN];
 			inet_ntop(connectedSocket.address.sin_family, &connectedSocket.address.sin_addr, (PSTR)ip, sizeof ip);
@@ -438,18 +482,56 @@ void ModuleNetworkingServer::HandleNameBanMessage(SOCKET socket, const InputMemo
 			exists = true;
 		}
 	}
+	if (exists)
+	{
+		OutputMemoryStream outputPacket;
+		outputPacket.Write(ServerMessage::ChatText);
+		outputPacket.Write(playerBanName + " has been banned from the server by " + playerName + ".");
 
-	OutputMemoryStream outputPacket;
-	outputPacket.Write(ServerMessage::ChatText);
-	outputPacket.Write(playerBanName + " has been banned from the server by " + playerName + ".");
-
-	for (auto& connectedSocket : connectedSockets) {
-		if (sendPacket(outputPacket, connectedSocket.socket)) {
-			LOG("Successfully sent chat packet");
+		for (auto& connectedSocket : connectedSockets) {
+			if (sendPacket(outputPacket, connectedSocket.socket)) {
+				LOG("Successfully sent ban chat packet");
+			}
+			else
+			{
+				reportError("sending ban chat packet");
+			}
 		}
-		else
-		{
-			reportError("sending chat packet");
+	}
+}
+
+void ModuleNetworkingServer::HandleUnbanMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string playerName;
+	std::string playerUnbanName;
+
+	packet.Read(playerName);
+	packet.Read(playerUnbanName);
+
+	bool exists = false;
+
+	auto it = blackList.find(playerUnbanName);
+
+	if (it != blackList.end())
+	{
+		exists = true;
+		blackList.erase(it);
+	}
+
+	if (exists)
+	{
+		OutputMemoryStream outputPacket;
+		outputPacket.Write(ServerMessage::ChatText);
+		outputPacket.Write(playerUnbanName + " has been unbanned from the server by " + playerName + ".");
+
+		for (auto& connectedSocket : connectedSockets) {
+			if (sendPacket(outputPacket, connectedSocket.socket)) {
+				LOG("Successfully sent unban chat packet");
+			}
+			else
+			{
+				reportError("sending unban chat packet");
+			}
 		}
 	}
 }
@@ -458,10 +540,8 @@ void ModuleNetworkingServer::Kick(SOCKET socket)
 {
 	shutdown(socket, 2);
 	closesocket(socket);
-	sockets.erase(std::find(sockets.begin(), sockets.end(), socket));
 	onSocketDisconnected(socket);
-	//disconnectedSockets.push_back(socket);
-	//onSocketDisconnected(socket);
+	sockets.erase(std::find(sockets.begin(), sockets.end(), socket));
 }
 
 

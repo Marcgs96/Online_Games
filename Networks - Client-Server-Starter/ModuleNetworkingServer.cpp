@@ -50,8 +50,7 @@ bool ModuleNetworkingServer::update()
 		if (it->second >= TIMEOUT_TIME)
 		{
 			OutputMemoryStream packet;
-			packet.Write(ServerMessage::ReleaseTimeout);
-			packet.Write("Your timeout has been lifted.");
+			WritePacket(packet, ServerMessage::ReleaseTimeout, "Your timeout has been lifted, welcome back.");
 
 			if (sendPacket(packet, it->first))
 			{
@@ -144,8 +143,8 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 
 	//Message about player disconnection to all other users
 	OutputMemoryStream packet;
-	packet.Write(ServerMessage::ChatText);
-	packet.Write(disconnectedPlayer + " has left the Barrens chat");
+	std::string chatMessage = disconnectedPlayer + " has left the Barrens chat";
+	WritePacket(packet, ServerMessage::ChatText, chatMessage);
 
 	for (auto &connectedSocket : connectedSockets) {
 		if (sendPacket(packet, connectedSocket.socket))
@@ -180,6 +179,41 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingServer private methods
 //////////////////////////////////////////////////////////////////////
+
+void ModuleNetworkingServer::WritePacket(OutputMemoryStream& packet, ServerMessage type, std::string message)
+{
+	packet.Write(type);
+	packet.Write(message);
+
+	switch (type)
+	{
+	case ServerMessage::Welcome:
+		Color::Green().Write(packet);
+		break;
+	case ServerMessage::NonWelcome:
+		Color::Red().Write(packet);
+		break;
+	case ServerMessage::ChatText:
+		Color::White().Write(packet);
+		break;
+	case ServerMessage::UserList:
+		Color::Blue().Write(packet);
+		break;
+	case ServerMessage::ChangeName:
+		Color::Blue().Write(packet);
+		break;
+	case ServerMessage::Timeout:
+		Color::Red().Write(packet);
+		break;
+	case ServerMessage::ReleaseTimeout:
+		Color::Blue().Write(packet);
+		break;
+	default:
+		Color::White().Write(packet);
+		break;
+
+	}
+}
 
 //Return whether the player name is found in the current connected clients or not
 bool ModuleNetworkingServer::IsUniquePlayer(std::string playerName)
@@ -223,8 +257,8 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 
 				//Send welcome message to the new player
 				OutputMemoryStream packet;
-				packet.Write(ServerMessage::Welcome);
-				packet.Write("You have joined the Barrens chat.");
+				WritePacket(packet, ServerMessage::Welcome, "You have joined the Barrens chat.");
+
 				if (sendPacket(packet, connectedSocket.socket))
 				{
 					LOG("Successfully sent welcome packet");
@@ -239,8 +273,8 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 
 				//Message about player connection to all other users.
 				OutputMemoryStream packet;
-				packet.Write(ServerMessage::ChatText);
-				packet.Write(playerName + " has joined the Barrens chat!");
+				std::string chatMessage = playerName + " has joined the Barrens chat!";
+				WritePacket(packet, ServerMessage::ChatText, chatMessage);
 				if (sendPacket(packet, connectedSocket.socket))
 				{
 					LOG("Successfully sent new connection packet");
@@ -257,8 +291,8 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 	{
 		//Send non-welcome packet
 		OutputMemoryStream packet;
-		packet.Write(ServerMessage::NonWelcome);
-		packet.Write("Client name is already in use. Please change your name.");
+		WritePacket(packet, ServerMessage::NonWelcome, "Client name is already in use. Please change your name.");
+
 		if (sendPacket(packet, socket))
 		{
 			LOG("Successfully sent non-welcome packet");
@@ -279,8 +313,7 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryS
 
 	//Create chat packet with the new chat message received
 	OutputMemoryStream outputPacket;
-	outputPacket.Write(ServerMessage::ChatText);
-	outputPacket.Write(chatMessage);
+	WritePacket(outputPacket, ServerMessage::ChatText, chatMessage);
 
 	for (std::vector<ConnectedSocket>::iterator it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
@@ -293,8 +326,7 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET socket, const InputMemoryS
 				it->timeOutScore = 0.0f;
 				
 				OutputMemoryStream timeoutPacket;
-				timeoutPacket.Write(ServerMessage::Timeout);
-				timeoutPacket.Write("You have been timed out.");
+				WritePacket(timeoutPacket, ServerMessage::Timeout, "You have been timed out.");
 				if (sendPacket(timeoutPacket, it->socket))
 				{
 					LOG("Successfully sent timeout packet");
@@ -331,8 +363,8 @@ void ModuleNetworkingServer::HandleListMessage(SOCKET socket, const InputMemoryS
 
 	//Create chat packet with the new chat message received
 	OutputMemoryStream outputPacket;
-	outputPacket.Write(ServerMessage::ChatText);
-	outputPacket.Write(userNames);
+	WritePacket(outputPacket, ServerMessage::ChatText, userNames);
+
 
 	//Send new text message to client
 	if (sendPacket(outputPacket, socket))
@@ -373,8 +405,7 @@ void ModuleNetworkingServer::HandleWhisperMessage(SOCKET socket, const InputMemo
 		{
 			//Create chat packet with the new chat message received
 			OutputMemoryStream outputPacketFrom;
-			outputPacketFrom.Write(ServerMessage::ChatText);
-			outputPacketFrom.Write(fromName + " whispers: " + message);
+			WritePacket(outputPacketFrom, ServerMessage::ChatText, fromName + " whispers: " + message);
 
 			if (sendPacket(outputPacketFrom, connectedSocket.socket))
 			{
@@ -388,8 +419,7 @@ void ModuleNetworkingServer::HandleWhisperMessage(SOCKET socket, const InputMemo
 		else if (connectedSocket.socket == socket) {
 
 			OutputMemoryStream outputPacketTo;
-			outputPacketTo.Write(ServerMessage::ChatText);
-			outputPacketTo.Write("To " + toName + ": " + message);
+			WritePacket(outputPacketTo, ServerMessage::ChatText, "To " + toName + ": " + message);
 
 			if (sendPacket(outputPacketTo, socket)) {
 				LOG("Successfully sent chat packet");
@@ -413,8 +443,8 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 		if (connectedSocket.playerName == newName) {
 
 			OutputMemoryStream outputPacket;
-			outputPacket.Write(ServerMessage::ChatText);
-			outputPacket.Write("The new name you want to use is not available");
+			WritePacket(outputPacket, ServerMessage::ChatText, "The new name you want to use is not available");
+
 
 			if (sendPacket(outputPacket, socket)) {
 				LOG("Successfully sent chat packet");
@@ -433,8 +463,7 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 			connectedSocket.playerName = newName;
 
 			OutputMemoryStream outputPacket;
-			outputPacket.Write(ServerMessage::ChangeName);
-			outputPacket.Write("You have changed your name to " + newName + " successfully.");
+			WritePacket(outputPacket, ServerMessage::ChangeName, "You have changed your name to " + newName + " successfully.");
 			outputPacket.Write(newName);
 
 			if (sendPacket(outputPacket, socket)) {
@@ -448,8 +477,7 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 		else {
 
 			OutputMemoryStream outputPacket;
-			outputPacket.Write(ServerMessage::ChatText);
-			outputPacket.Write(currentName + " has changed his name to " + newName + ".");
+			WritePacket(outputPacket, ServerMessage::ChatText, currentName + " has changed his name to " + newName + ".");
 
 			if (sendPacket(outputPacket, connectedSocket.socket)) {
 				LOG("Successfully sent chat packet");
@@ -485,8 +513,7 @@ void ModuleNetworkingServer::HandleBanMessage(SOCKET socket, const InputMemorySt
 	if (exists)
 	{
 		OutputMemoryStream outputPacket;
-		outputPacket.Write(ServerMessage::ChatText);
-		outputPacket.Write(playerBanName + " has been banned from the server by " + playerName + ".");
+		WritePacket(outputPacket, ServerMessage::ChatText, playerBanName + " has been banned from the server by " + playerName + ".");
 
 		for (auto& connectedSocket : connectedSockets) {
 			if (sendPacket(outputPacket, connectedSocket.socket)) {
@@ -521,8 +548,7 @@ void ModuleNetworkingServer::HandleUnbanMessage(SOCKET socket, const InputMemory
 	if (exists)
 	{
 		OutputMemoryStream outputPacket;
-		outputPacket.Write(ServerMessage::ChatText);
-		outputPacket.Write(playerUnbanName + " has been unbanned from the server by " + playerName + ".");
+		WritePacket(outputPacket, ServerMessage::ChatText, playerUnbanName + " has been unbanned from the server by " + playerName + ".");
 
 		for (auto& connectedSocket : connectedSockets) {
 			if (sendPacket(outputPacket, connectedSocket.socket)) {

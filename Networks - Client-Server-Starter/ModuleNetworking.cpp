@@ -31,6 +31,7 @@ void ModuleNetworking::disconnect()
 	{
 		shutdown(socket, 2);
 		closesocket(socket);
+		onSocketDisconnected(socket);
 	}
 
 	sockets.clear();

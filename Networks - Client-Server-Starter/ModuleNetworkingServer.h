@@ -41,6 +41,8 @@ private:
 	// ModuleNetworkingServer private methods
 	//////////////////////////////////////////////////////////////////////
 
+	void WritePacket(OutputMemoryStream& packet, ServerMessage type, std::string message = "");
+
 	bool IsUniquePlayer(std::string playerName);
 
 	void HandleHelloMessage(SOCKET socket, const InputMemoryStream& packet);
@@ -86,5 +88,6 @@ private:
 	std::vector<ConnectedSocket> connectedSockets;
 	std::map<std::string, std::string> blackList;
 	std::map<SOCKET, float> timedOutClients;
+	Color server_color = Color::Blue();
 };
 

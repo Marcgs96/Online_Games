@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+#include "Color.h"
 #include <list>
 #include <map>
 
@@ -71,7 +72,7 @@ private:
 	SOCKET connectSocket = INVALID_SOCKET;
 
 	std::string playerName;
-	std::list<std::string> receivedMessages;
+	std::list<std::pair<std::string, Color>> receivedMessages;
 
 	std::map<std::string, CommandType> commands;
 	std::string helpMessage;

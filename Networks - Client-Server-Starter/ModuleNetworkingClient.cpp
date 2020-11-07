@@ -89,9 +89,9 @@ bool ModuleNetworkingClient::gui()
 				state = ClientState::Stopped;
 			}
 			ImGui::BeginChild("Chat", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 32), true);
-			for (std::string message : receivedMessages)
+			for (std::pair<std::string, Color> message : receivedMessages)
 			{
-				ImGui::Text(message.c_str());
+				ImGui::TextColored({ message.second.r, message.second.g, message.second.b, message.second.a }, message.first.c_str());
 			}
 			if (scrollDown)
 			{
@@ -103,7 +103,7 @@ bool ModuleNetworkingClient::gui()
 			ImGui::EndChild();
 
 			static char textInput[1024];
-			if (ImGui::InputText("", textInput, IM_ARRAYSIZE(textInput), ImGuiInputTextFlags_EnterReturnsTrue) /*&& !timedOut*/)
+			if (ImGui::InputText("", textInput, IM_ARRAYSIZE(textInput), ImGuiInputTextFlags_EnterReturnsTrue) && !timedOut)
 			{
 				std::string textString = textInput;
 				if (textString[0] == '/') { // check if the text is a command
@@ -152,65 +152,53 @@ bool ModuleNetworkingClient::gui()
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
 	ServerMessage serverMessage;
+	std::string message;
+	Color col;
 	packet.Read(serverMessage);
+	packet.Read(message);
+	col.Read(packet);
+
 
 	switch (serverMessage)
 	{
 		case ServerMessage::Welcome:
 		{
-			std::string welcomeMessage;
-			packet.Read(welcomeMessage);
-
-			receivedMessages.push_back(welcomeMessage);
+			receivedMessages.push_back({ message,  col});
 			scrollDown = true;
 
 			state = ClientState::LoggedIn;
 		} break;
 		case ServerMessage::NonWelcome:
 		{
-			std::string nonWelcomeMessage;
-			packet.Read(nonWelcomeMessage);
 
-			ELOG(nonWelcomeMessage.c_str());
+			ELOG(message.c_str());
 
 			disconnect();
 			state = ClientState::Stopped;
 		} break;
 		case ServerMessage::ChatText:
 		{
-			std::string chatMessage;
-			packet.Read(chatMessage);
-
-			receivedMessages.push_back(chatMessage);
+			receivedMessages.push_back({ message,  col });
 			scrollDown = true;
 		} break;
 		case ServerMessage::ChangeName:
 		{
-			std::string chatMessage;
 			std::string newName;
-			packet.Read(chatMessage);
 			packet.Read(newName);
-
-			receivedMessages.push_back(chatMessage);
+			receivedMessages.push_back({ message,  col });
 			scrollDown = true;
 			playerName = newName;
 
 		} break;
 		case ServerMessage::Timeout:
 		{
-			std::string chatMessage;
-			packet.Read(chatMessage);
-
-			receivedMessages.push_back(chatMessage);
+			receivedMessages.push_back({ message,  col });
 			scrollDown = true;
 			timedOut = true;
 		} break;
 		case ServerMessage::ReleaseTimeout:
 		{
-			std::string chatMessage;
-			packet.Read(chatMessage);
-
-			receivedMessages.push_back(chatMessage);
+			receivedMessages.push_back({ message,  col });
 			scrollDown = true;
 			timedOut = false;
 		} break;
@@ -220,6 +208,8 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 {
 	state = ClientState::Stopped;
+
+	receivedMessages.clear();
 }
 
 void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString)
@@ -235,7 +225,7 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 	switch (type)
 	{
 	case ModuleNetworkingClient::CommandType::Help:
-		receivedMessages.push_back(helpMessage);
+		receivedMessages.push_back({ helpMessage, Color::Blue() });
 		scrollDown = true;
 		break;
 	case ModuleNetworkingClient::CommandType::List: 

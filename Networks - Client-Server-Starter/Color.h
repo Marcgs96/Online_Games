@@ -51,6 +51,11 @@ public:
 		stream.Read(a);
 	}
 
+	bool IsEmpty() const
+	{
+		return r + g + b + a == 0;
+	}
+
 public:
 	float r, g, b, a;
 };

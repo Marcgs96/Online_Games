@@ -41,7 +41,7 @@ private:
 	// ModuleNetworkingServer private methods
 	//////////////////////////////////////////////////////////////////////
 
-	void WritePacket(OutputMemoryStream& packet, ServerMessage type, std::string message = "");
+	void WritePacket(OutputMemoryStream& packet, ServerMessage type, std::string message = "", Color textColor = Color::Clear());
 
 	bool IsUniquePlayer(std::string playerName);
 

@@ -151,28 +151,28 @@ bool ModuleNetworkingClient::gui()
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
-	ServerMessage serverMessage;
-	std::string message;
-	Color col;
-	packet.Read(serverMessage);
-	packet.Read(message);
-	col.Read(packet);
-
-
-	switch (serverMessage)
+	while (packet.RemainingByteCount() > 0)
 	{
+		ServerMessage serverMessage;
+		std::string message;
+		Color col;
+		packet.Read(serverMessage);
+		packet.Read(message);
+		col.Read(packet);
+
+
+		switch (serverMessage)
+		{
 		case ServerMessage::Welcome:
 		{
-			receivedMessages.push_back({ message,  col});
+			receivedMessages.push_back({ message,  col });
 			scrollDown = true;
 
 			state = ClientState::LoggedIn;
 		} break;
 		case ServerMessage::NonWelcome:
 		{
-
 			ELOG(message.c_str());
-
 			disconnect();
 			state = ClientState::Stopped;
 		} break;
@@ -202,7 +202,8 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			scrollDown = true;
 			timedOut = false;
 		} break;
-	}	
+		}
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
@@ -244,7 +245,9 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 			OutputMemoryStream packet;
 
 			packet.Write(ClientMessage::Kick);
+			packet.Write(playerName);
 			packet.Write(splitString[1]);
+
 			if (!sendPacket(packet, connectSocket))
 			{
 				reportError("sending kick command");

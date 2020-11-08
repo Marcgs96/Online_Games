@@ -1,7 +1,7 @@
 #include "ModuleNetworkingServer.h"
 
 #define MAX_TIMEOUT_SCORE 4.0f
-#define TIMEOUT_TIME 15.0f
+#define TIMEOUT_TIME 10.0f
 #define TIMEOUT_DAMPENING 0.5f
 
 //////////////////////////////////////////////////////////////////////

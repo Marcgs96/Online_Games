@@ -14,7 +14,7 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	commands.emplace("/change_name", CommandType::ChangeName);
 	commands.emplace("/ban", CommandType::Ban);
 	commands.emplace("/unban", CommandType::Unban);
-	helpMessage = "All available commands are: \n/list to list all users. \n/kick [username] to kick the player from the chat. \n/whisper [username] [message] to send a private message.\n/ban [username] to ban a username's IP.\n/unban [username] to unban a username's IP. \nDont spam the chat or you will get timedout.";
+	helpMessage = "All available commands are: \n/list to list all users. \n/whisper [username] [message] to send a private message.\n/change_name [newname] to change user name.\n/kick [username] to kick the player from the chat. \n/ban [username] to ban a username's IP.\n/unban [username] to unban a username's IP. \nDont spam the chat or you will get timedout.";
 
 
 
@@ -226,7 +226,7 @@ void ModuleNetworkingClient::HandleCommands(std::vector<std::string> splitString
 	switch (type)
 	{
 	case ModuleNetworkingClient::CommandType::Help:
-		receivedMessages.push_back({ helpMessage, Color::Blue() });
+		receivedMessages.push_back({ helpMessage, Color::Cyan() });
 		scrollDown = true;
 		break;
 	case ModuleNetworkingClient::CommandType::List: 

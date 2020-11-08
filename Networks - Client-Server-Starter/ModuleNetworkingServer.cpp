@@ -211,13 +211,13 @@ void ModuleNetworkingServer::WritePacket(OutputMemoryStream& packet, ServerMessa
 		break;
 	case ServerMessage::UserList:
 		if (textColor.IsEmpty())
-			Color::Blue().Write(packet);
+			Color::Cyan().Write(packet);
 		else
 			textColor.Write(packet);
 		break;
 	case ServerMessage::ChangeName:
 		if (textColor.IsEmpty())
-			Color::Blue().Write(packet);
+			Color::Cyan().Write(packet);
 		else
 			textColor.Write(packet);
 		break;
@@ -229,7 +229,7 @@ void ModuleNetworkingServer::WritePacket(OutputMemoryStream& packet, ServerMessa
 		break;
 	case ServerMessage::ReleaseTimeout:
 		if (textColor.IsEmpty())
-			Color::Blue().Write(packet);
+			Color::Cyan().Write(packet);
 		else
 			textColor.Write(packet);
 		break;
@@ -264,7 +264,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 	std::string playerName;
 	packet.Read(playerName);
 
-
+	bool loggedIn = false;
 	if (IsUniquePlayer(playerName))
 	{
 		// Set the player name of the corresponding connected socket proxy
@@ -286,6 +286,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 				//Send welcome message to the new player
 				OutputMemoryStream packet;
 				WritePacket(packet, ServerMessage::Welcome, "You have joined the Barrens chat.");
+				loggedIn = true;
 
 				if (sendPacket(packet, connectedSocket.socket))
 				{
@@ -295,21 +296,6 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 				{
 					//TODO: kick the fucker out
 					reportError("sending welcome packet");
-				}
-			}
-			else {
-
-				//Message about player connection to all other users.
-				OutputMemoryStream packet;
-				std::string chatMessage = playerName + " has joined the Barrens chat!";
-				WritePacket(packet, ServerMessage::ChatText, chatMessage, Color::Green());
-				if (sendPacket(packet, connectedSocket.socket))
-				{
-					LOG("Successfully sent new connection packet");
-				}
-				else
-				{
-					reportError("sending new connection packet");
 				}
 			}
 		}
@@ -328,6 +314,28 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET socket, const InputMemory
 		else
 		{
 			reportError("sending non-welcome packet");
+		}
+	}
+
+	if (loggedIn)
+	{
+		for (auto& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket != socket)
+			{
+				//Message about player connection to all other users.
+				OutputMemoryStream packet;
+				std::string chatMessage = playerName + " has joined the Barrens chat!";
+				WritePacket(packet, ServerMessage::ChatText, chatMessage, Color::Green());
+				if (sendPacket(packet, connectedSocket.socket))
+				{
+					LOG("Successfully sent new connection packet");
+				}
+				else
+				{
+					reportError("sending new connection packet");
+				}
+			}
 		}
 	}
 }
@@ -514,7 +522,7 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 			connectedSocket.playerName = newName;
 
 			OutputMemoryStream outputPacket;
-			WritePacket(outputPacket, ServerMessage::ChangeName, "You have changed your name to " + newName + " successfully.", Color::Blue());
+			WritePacket(outputPacket, ServerMessage::ChangeName, "You have changed your name to " + newName + " successfully.", Color::Cyan());
 			outputPacket.Write(newName);
 
 			if (sendPacket(outputPacket, socket)) {
@@ -528,7 +536,7 @@ void ModuleNetworkingServer::HandleNameChangeMessage(SOCKET socket, const InputM
 		else {
 
 			OutputMemoryStream outputPacket;
-			WritePacket(outputPacket, ServerMessage::ChatText, currentName + " has changed his name to " + newName + ".", Color::Blue());
+			WritePacket(outputPacket, ServerMessage::ChatText, currentName + " has changed his name to " + newName + ".", Color::Cyan());
 
 			if (sendPacket(outputPacket, connectedSocket.socket)) {
 				LOG("Successfully sent chat packet");
@@ -599,7 +607,7 @@ void ModuleNetworkingServer::HandleUnbanMessage(SOCKET socket, const InputMemory
 	if (exists)
 	{
 		OutputMemoryStream outputPacket;
-		WritePacket(outputPacket, ServerMessage::ChatText, playerUnbanName + " has been unbanned from the server by " + playerName + ".", Color::Blue());
+		WritePacket(outputPacket, ServerMessage::ChatText, playerUnbanName + " has been unbanned from the server by " + playerName + ".", Color::Cyan());
 
 		for (auto& connectedSocket : connectedSockets) {
 			if (sendPacket(outputPacket, connectedSocket.socket)) {

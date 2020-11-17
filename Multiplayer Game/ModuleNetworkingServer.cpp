@@ -36,6 +36,8 @@ void ModuleNetworkingServer::onStart()
 	}
 
 	state = ServerState::Listening;
+
+	secondsSinceSendPingPacket = 0.0f;
 }
 
 void ModuleNetworkingServer::onGui()
@@ -187,6 +189,12 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				}
 			}
 		}
+		else if (message == ClientMessage::Ping) {
+			if (proxy != nullptr)
+			{
+				proxy->secondsSinceLastReceivedPacket = 0.0f;
+			}
+		}
 
 		// TODO(you): UDP virtual connection lab session
 	}
@@ -210,11 +218,20 @@ void ModuleNetworkingServer::onUpdate()
 			}
 		}
 
+		secondsSinceSendPingPacket += Time.deltaTime;
+
 		for (ClientProxy &clientProxy : clientProxies)
 		{
 			if (clientProxy.connected)
 			{
 				// TODO(you): UDP virtual connection lab session
+
+				if (secondsSinceSendPingPacket >= PING_INTERVAL_SECONDS) {
+					OutputMemoryStream pingPacket;
+					pingPacket << PROTOCOL_ID;
+					pingPacket << ServerMessage::Ping;
+					sendPacket(pingPacket, clientProxy.address);
+				}
 
 				// Don't let the client proxy point to a destroyed game object
 				if (!IsValid(clientProxy.gameObject))
@@ -225,8 +242,19 @@ void ModuleNetworkingServer::onUpdate()
 				// TODO(you): World state replication lab session
 
 				// TODO(you): Reliability on top of UDP lab session
+
+				clientProxy.secondsSinceLastReceivedPacket += Time.deltaTime;
+
+				if (clientProxy.secondsSinceLastReceivedPacket >= DISCONNECT_TIMEOUT_SECONDS) {
+					
+					destroyClientProxy(&clientProxy);
+					return;
+				}
 			}
 		}
+
+		if (secondsSinceSendPingPacket >= PING_INTERVAL_SECONDS)
+			secondsSinceSendPingPacket = 0;
 	}
 }
 

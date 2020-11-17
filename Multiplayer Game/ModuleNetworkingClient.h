@@ -67,6 +67,8 @@ private:
 	float secondsSinceLastHello = 0.0f;
 
 
+
+
 	// Input ///////////
 
 	static const int MAX_INPUT_DATA_SIMULTANEOUS_PACKETS = 64;
@@ -85,6 +87,11 @@ private:
 	//////////////////////////////////////////////////////////////////////
 
 	// TODO(you): UDP virtual connection lab session
+
+	// Connected stage
+
+	float secondsSinceLastPing = 0.0f;
+	float secondsSinceLastReceivedPacket = 0.0f;
 
 
 

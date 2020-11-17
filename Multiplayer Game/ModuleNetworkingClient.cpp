@@ -51,6 +51,8 @@ void ModuleNetworkingClient::onStart()
 
 	secondsSinceLastHello = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
+	secondsSinceLastPing = 0.0f;
+	secondsSinceLastReceivedPacket = 0.0f;
 }
 
 void ModuleNetworkingClient::onGui()
@@ -132,6 +134,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(you): World state replication lab session
 
 		// TODO(you): Reliability on top of UDP lab session
+
+		secondsSinceLastReceivedPacket = 0;
 	}
 }
 
@@ -163,6 +167,24 @@ void ModuleNetworkingClient::onUpdate()
 	else if (state == ClientState::Connected)
 	{
 		// TODO(you): UDP virtual connection lab session
+		secondsSinceLastPing += Time.deltaTime;
+		secondsSinceLastReceivedPacket += Time.deltaTime;
+
+		if (secondsSinceLastReceivedPacket >= DISCONNECT_TIMEOUT_SECONDS) {
+			disconnect();
+			return;
+		}
+
+		if (secondsSinceLastPing >= PING_INTERVAL_SECONDS) {
+			//Send ping packet
+
+			OutputMemoryStream packet;
+			packet << PROTOCOL_ID;
+			packet << ClientMessage::Ping;
+
+			sendPacket(packet, serverAddress);
+			secondsSinceLastPing = 0;
+		}
 
 		// Process more inputs if there's space
 		if (inputDataBack - inputDataFront < ArrayCount(inputData))

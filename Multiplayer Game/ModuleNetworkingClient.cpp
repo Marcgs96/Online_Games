@@ -105,6 +105,7 @@ void ModuleNetworkingClient::onGui()
 void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)
 {
 	// TODO(you): UDP virtual connection lab session
+	secondsSinceLastReceivedPacket = 0;
 
 	uint32 protoId;
 	packet >> protoId;
@@ -132,10 +133,13 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	else if (state == ClientState::Connected)
 	{
 		// TODO(you): World state replication lab session
+		if (message == ServerMessage::Replication)
+		{
+			repManagerClient.read(packet);
+		}
 
 		// TODO(you): Reliability on top of UDP lab session
-
-		secondsSinceLastReceivedPacket = 0;
+	
 	}
 }
 

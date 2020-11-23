@@ -38,13 +38,13 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
-			gameObject->behaviour->write(packet);
+			gameObject->write(packet);
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
-			gameObject->behaviour->write(packet);
+			gameObject->write(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

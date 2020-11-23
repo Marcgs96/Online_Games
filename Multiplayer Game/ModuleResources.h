@@ -25,6 +25,8 @@ public:
 
 	bool finishedLoading = false;
 
+	Texture* GetTextureByFile(std::string fileName);
+
 private:
 
 	bool init() override;

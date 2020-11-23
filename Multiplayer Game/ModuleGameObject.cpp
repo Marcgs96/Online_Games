@@ -1,4 +1,5 @@
 #include "Networks.h"
+#include "ModuleGameObject.h"
 
 bool ModuleGameObject::init()
 {
@@ -120,4 +121,99 @@ void Destroy(GameObject * gameObject)
 void Destroy(GameObject * gameObject, float delaySeconds)
 {
 	ModuleGameObject::Destroy(gameObject, delaySeconds);
+}
+
+void GameObject::write(OutputMemoryStream& packet)
+{
+	// Write object properties
+	packet.Write(this->position.x);
+	packet.Write(this->position.y);
+
+	packet.Write(this->size.x);
+	packet.Write(this->size.y);
+
+	packet.Write(this->angle);
+
+	//If it has a sprite, write it
+	if (this->sprite)
+	{
+		packet.Write(true);
+		packet.Write(std::string(this->sprite->texture->filename));
+		packet.Write(this->sprite->order);
+	}
+	else
+	{
+		packet.Write(false);
+	}
+
+	if (this->collider)
+	{
+		packet.Write(true);
+		packet.Write(this->collider->type);
+		packet.Write(this->collider->isTrigger);
+	}
+	else
+	{
+		packet.Write(false);
+	}
+
+	if (this->behaviour)
+	{
+		packet.Write(true);
+		packet.Write(this->behaviour->type());
+	}
+	else
+	{
+		packet.Write(false);
+	}
+}
+
+void GameObject::read(const InputMemoryStream& packet)
+{
+	packet.Read(this->position.x);
+	packet.Read(this->position.y);
+
+	packet.Read(this->size.x);
+	packet.Read(this->size.y);
+
+	packet.Read(this->angle);
+
+	bool ret = false;
+	packet.Read(ret);
+	//If it has a sprite, read it
+	if (ret)
+	{
+		std::string filename;
+		packet.Read(filename);
+
+		if (sprite == nullptr)
+		{
+			sprite = App->modRender->addSprite(this);
+			sprite->texture = App->modResources->GetTextureByFile(filename);
+		}
+		packet.Read(this->sprite->order);
+	}
+
+	packet.Read(ret);
+	if (ret)
+	{
+		ColliderType type = ColliderType::None;
+		packet.Read(type);
+		if (collider == nullptr)
+		{
+			collider = App->modCollision->addCollider(type, this);
+		}
+		packet.Read(this->collider->isTrigger);
+	}
+
+	packet.Read(ret);
+	if (ret)
+	{
+		BehaviourType type = BehaviourType::None;
+		packet.Read(type);
+		if (behaviour == nullptr)
+		{
+			behaviour = App->modBehaviour->addBehaviour(type, this);
+		}
+	}
 }

@@ -23,18 +23,14 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* gameObject = App->modGameObject->Instantiate();
-			BehaviourType bType = BehaviourType::None;
-			packet.Read(bType);
-			gameObject->behaviour = 
-
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(gameObject, networkId);
-			gameObject->behaviour->read(packet);
+			gameObject->read(packet);
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			gameObject->behaviour->read(packet);
+			gameObject->read(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

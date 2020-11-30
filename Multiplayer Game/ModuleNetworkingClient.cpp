@@ -135,11 +135,11 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(you): World state replication lab session
 		if (message == ServerMessage::Replication)
 		{
+			// TODO(you): Reliability on top of UDP lab session
 			packet.Read(inputDataFront);
-			repManagerClient.read(packet);
-		}
-
-		// TODO(you): Reliability on top of UDP lab session
+			if(deliveryManager.processSequenceNumber(packet))
+				repManagerClient.read(packet);
+		}	
 	}
 }
 
@@ -181,10 +181,10 @@ void ModuleNetworkingClient::onUpdate()
 
 		if (secondsSinceLastPing >= PING_INTERVAL_SECONDS) {
 			//Send ping packet
-
 			OutputMemoryStream packet;
 			packet << PROTOCOL_ID;
 			packet << ClientMessage::Ping;
+			deliveryManager.writeSequenceNumbersPendingAck(packet);
 
 			sendPacket(packet, serverAddress);
 			secondsSinceLastPing = 0;

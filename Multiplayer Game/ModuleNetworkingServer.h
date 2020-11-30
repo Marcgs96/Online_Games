@@ -12,6 +12,8 @@ public:
 
 	void setListenPort(int port);
 
+	void DeliverySuccess(DeliveryManager* manager);
+
 
 
 private:
@@ -56,6 +58,7 @@ private:
 		ReplicationManagerServer repManagerServer;
 		float secondsSinceLastReplication = 0;
 		// TODO(you): Reliability on top of UDP lab session
+		DeliveryManager deliveryManager;
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		InputController gamepad;

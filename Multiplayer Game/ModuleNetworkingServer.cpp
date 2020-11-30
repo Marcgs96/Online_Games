@@ -11,6 +11,10 @@ void ModuleNetworkingServer::setListenPort(int port)
 	listenPort = port;
 }
 
+void ModuleNetworkingServer::DeliverySuccess(DeliveryManager* manager)
+{
+	LOG("Delivery was successfull");
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -194,6 +198,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			if (proxy != nullptr)
 			{
 				proxy->secondsSinceLastReceivedPacket = 0.0f;
+				proxy->deliveryManager.processAckdSequenceNumbers(packet);
 			}
 		}
 
@@ -247,6 +252,16 @@ void ModuleNetworkingServer::onUpdate()
 					replicationPacket << PROTOCOL_ID;
 					replicationPacket.Write(ServerMessage::Replication);
 					replicationPacket << clientProxy.nextExpectedInputSequenceNumber - 1;
+					Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(replicationPacket);
+
+					if (delivery)
+					{
+						//delivery->delegate->onDeliveryFailure = SendReplicationPacket();
+
+						delivery->delegate->onDeliverySuccess += ModuleNetworkingServer::DeliverySuccess(&clientProxy.deliveryManager);
+					}
+
+
 					clientProxy.repManagerServer.write(replicationPacket);
 					sendPacket(replicationPacket, clientProxy.address);
 
@@ -255,7 +270,7 @@ void ModuleNetworkingServer::onUpdate()
 				
 
 				// TODO(you): Reliability on top of UDP lab session
-
+				clientProxy.deliveryManager.processTimedOutPackets();
 
 
 				clientProxy.secondsSinceLastReceivedPacket += Time.deltaTime;
@@ -502,3 +517,4 @@ void NetworkDestroy(GameObject * gameObject, float delaySeconds)
 
 	App->modNetServer->destroyNetworkObject(gameObject, delaySeconds);
 }
+

@@ -1,3 +1,2 @@
 ﻿  UnityBuild.cpp
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleResources.cpp(26): warning C4715: 'ModuleResources::GetTextureByFile': no todas las rutas de acceso de control devuelven un valor
-  Networks.vcxproj -> C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\x64\Debug\Networks.exe
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingServer.cpp(261,45): error C2659: '+=': function as left operand

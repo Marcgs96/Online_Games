@@ -22,7 +22,6 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
 {
-	packet.Write(ServerMessage::Replication);
 	for (auto it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet.Write(it->second.networkId);

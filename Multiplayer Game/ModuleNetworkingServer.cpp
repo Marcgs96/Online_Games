@@ -245,6 +245,8 @@ void ModuleNetworkingServer::onUpdate()
 				if (clientProxy.secondsSinceLastReplication >= REPLICATION_INTERVAL_SECONDS) {
 					OutputMemoryStream replicationPacket;
 					replicationPacket << PROTOCOL_ID;
+					replicationPacket.Write(ServerMessage::Replication);
+					replicationPacket << clientProxy.nextExpectedInputSequenceNumber - 1;
 					clientProxy.repManagerServer.write(replicationPacket);
 					sendPacket(replicationPacket, clientProxy.address);
 

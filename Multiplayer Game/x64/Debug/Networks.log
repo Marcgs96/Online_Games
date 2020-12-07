@@ -1,4 +1,4 @@
 ﻿  UnityBuild.cpp
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(143,35): warning C4018: '<=': no coinciden signed/unsigned
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(143,40): warning C4018: '<': no coinciden signed/unsigned
 C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleResources.cpp(26): warning C4715: 'ModuleResources::GetTextureByFile': no todas las rutas de acceso de control devuelven un valor
   Networks.vcxproj -> C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\x64\Debug\Networks.exe

@@ -137,14 +137,15 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			// TODO(you): Reliability on top of UDP lab session
 			packet.Read(inputDataFront);
-			if(deliveryManager.processSequenceNumber(packet))
+			if (deliveryManager.processSequenceNumber(packet)) {
 				repManagerClient.read(packet);
 
-			for (int i = inputDataFront; i <= inputDataBack; i++) {
-				inputControllerFromInputPacketData(inputData[i], Input);
-				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-				if (playerGameObject != nullptr)
-					playerGameObject->behaviour->onInput(Input);
+				for (int i = inputDataFront + 1; i < inputDataBack; i++) {
+					inputControllerFromInputPacketData(inputData[i], Input);
+					GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+					if (playerGameObject != nullptr)
+						playerGameObject->behaviour->onInput(Input);
+				}
 			}
 		}	
 	}

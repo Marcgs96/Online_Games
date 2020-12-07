@@ -149,8 +149,6 @@ void ModuleNetworkingClient::onUpdate()
 
 
 	// TODO(you): UDP virtual connection lab session
-
-
 	if (state == ClientState::Connecting)
 	{
 		secondsSinceLastHello += Time.deltaTime;
@@ -200,6 +198,11 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.horizontalAxis = Input.horizontalAxis;
 			inputPacketData.verticalAxis = Input.verticalAxis;
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
+
+			// TODO(you): Latency management lab session
+			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+			if (playerGameObject != nullptr)
+				playerGameObject->behaviour->onInput(Input);
 		}
 
 		secondsSinceLastInputDelivery += Time.deltaTime;
@@ -229,8 +232,6 @@ void ModuleNetworkingClient::onUpdate()
 
 			sendPacket(packet, serverAddress);
 		}
-
-		// TODO(you): Latency management lab session
 
 		// Update camera for player
 		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);

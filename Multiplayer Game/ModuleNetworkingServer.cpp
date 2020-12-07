@@ -258,7 +258,7 @@ void ModuleNetworkingServer::onUpdate()
 					{
 						//delivery->delegate->onDeliveryFailure = SendReplicationPacket();
 
-						delivery->delegate->onDeliverySuccess += ModuleNetworkingServer::DeliverySuccess(&clientProxy.deliveryManager);
+						//delivery->delegate->onDeliverySuccess += ModuleNetworkingServer::DeliverySuccess(&clientProxy.deliveryManager);
 					}
 
 

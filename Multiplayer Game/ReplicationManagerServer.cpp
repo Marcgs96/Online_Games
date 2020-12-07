@@ -5,9 +5,13 @@
 
 void ReplicationManagerServer::create(uint32 networkId)
 {
-	//commands.emplace(networkId, ReplicationAction::Create);
-	commands[networkId].action = ReplicationAction::Create;
-	commands[networkId].networkId = networkId;
+	ReplicationCommand command;
+	command.action = ReplicationAction::Create;
+	command.networkId = networkId;
+
+	commands.emplace(networkId, command);
+	//commands[networkId].action = ReplicationAction::Create;
+	//commands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::update(uint32 networkId)
@@ -37,13 +41,13 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
-			gameObject->write(packet);
+			gameObject->writeCreate(packet);
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
-			gameObject->write(packet);
+			gameObject->writeUpdate(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

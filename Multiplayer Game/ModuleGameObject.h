@@ -38,8 +38,24 @@ struct GameObject
 	};
 	State state = NON_EXISTING;
 
-	void write(OutputMemoryStream& packet);
-	void read(const InputMemoryStream& packet);
+
+	// Interpolation Component
+
+	void Interpolate();
+	vec2 initial_position = vec2{ 0.0f, 0.0f };
+	float initial_angle = 0.0f;
+
+	vec2 final_position = vec2{ 0.0f, 0.0f };
+	float final_angle = 0.0f;
+
+	float secondsElapsed = 0.0f;
+	////////////////////////////
+
+	//Serialization
+	void writeCreate(OutputMemoryStream& packet);
+	void writeUpdate(OutputMemoryStream& packet);
+	void readCreate(const InputMemoryStream& packet);
+	void readUpdate(const InputMemoryStream& packet);
 
 private:
 

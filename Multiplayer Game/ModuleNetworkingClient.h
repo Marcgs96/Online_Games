@@ -14,7 +14,7 @@ public:
 
 	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
 
-
+	uint32 GetNetworkId() { return networkId; }
 
 private:
 
@@ -35,7 +35,6 @@ private:
 	void onConnectionReset(const sockaddr_in &fromAddress) override;
 
 	void onDisconnect() override;
-
 
 
 	//////////////////////////////////////////////////////////////////////
@@ -65,8 +64,6 @@ private:
 	// Connecting stage
 
 	float secondsSinceLastHello = 0.0f;
-
-
 
 
 	// Input ///////////

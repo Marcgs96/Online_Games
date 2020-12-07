@@ -23,14 +23,18 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* gameObject = App->modGameObject->Instantiate();
+
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(gameObject, networkId);
-			gameObject->read(packet);
+			gameObject->readCreate(packet);
+
+			if (networkId == App->modNetClient->GetNetworkId())
+				gameObject->networkInterpolationEnabled = false;
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			gameObject->read(packet);
+			gameObject->readUpdate(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

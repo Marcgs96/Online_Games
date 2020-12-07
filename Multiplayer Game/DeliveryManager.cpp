@@ -10,6 +10,7 @@ Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet)
 	Delivery* newDelivery = new Delivery();
 	newDelivery->sequenceNumber = nextSequenceNumber++;
 	newDelivery->dispatchTime = Time.time;
+	//pendingDeliveries.push_back(newDelivery);
 
 	return newDelivery;
 }
@@ -36,6 +37,8 @@ void DeliveryManager::writeSequenceNumbersPendingAck(OutputMemoryStream& packet)
 	{
 		packet.Write(sequenceNumber);
 	}
+
+	pendingAckSequenceNumbers.clear();
 }
 
 void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet)
@@ -49,7 +52,7 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 		{
 			if ((*it)->sequenceNumber == sequenceNumber)
 			{
-				(*it)->delegate->onDeliverySuccess(this);
+				//(*it)->delegate->onDeliverySuccess(this);
 				delete* it;
 				it = pendingDeliveries.erase(it);
 			}
@@ -65,7 +68,7 @@ void DeliveryManager::processTimedOutPackets()
 	{
 		if (Time.time - (*it)->dispatchTime >= PACKET_DELIVERY_TIMEOUT_SECONDS)
 		{
-			(*it)->delegate->onDeliveryFailure(this);
+			//(*it)->delegate->onDeliveryFailure(this);
 			delete* it;
 			it = pendingDeliveries.erase(it);
 		}

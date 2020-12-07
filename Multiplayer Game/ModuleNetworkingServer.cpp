@@ -74,6 +74,7 @@ void ModuleNetworkingServer::onGui()
 					if (clientProxies[i].gameObject != nullptr)
 					{
 						ImGui::Text(" - gameObject net id: %d", clientProxies[i].gameObject->networkId);
+						ImGui::Text(" - gameObject position: %f %f", clientProxies[i].gameObject->position.x, clientProxies[i].gameObject->position.y);
 					}
 					else
 					{

@@ -138,11 +138,13 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			// TODO(you): Reliability on top of UDP lab session
 			packet.Read(inputDataFront);
 			if (deliveryManager.processSequenceNumber(packet)) {
+
+				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 				repManagerClient.read(packet);
 
 				for (int i = inputDataFront + 1; i < inputDataBack; i++) {
 					inputControllerFromInputPacketData(inputData[i], Input);
-					GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+					
 					if (playerGameObject != nullptr)
 						playerGameObject->behaviour->onInput(Input);
 				}
@@ -250,6 +252,17 @@ void ModuleNetworkingClient::onUpdate()
 		else
 		{
 			// This means that the player has been destroyed (e.g. killed)
+		}
+
+		// Interpolation of other objects
+		uint16 networkObjectsCount = 0;
+		GameObject* networkGameObjects[MAX_NETWORK_OBJECTS] = {};
+		App->modLinkingContext->getNetworkGameObjects(networkGameObjects, &networkObjectsCount);
+
+		for (int i = 0; i < networkObjectsCount; ++i)
+		{
+			if (networkGameObjects[i]->networkId != networkId)
+				networkGameObjects[i]->Interpolate();
 		}
 	}
 }

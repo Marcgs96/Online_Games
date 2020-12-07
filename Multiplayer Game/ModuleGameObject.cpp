@@ -123,7 +123,20 @@ void Destroy(GameObject * gameObject, float delaySeconds)
 	ModuleGameObject::Destroy(gameObject, delaySeconds);
 }
 
-void GameObject::write(OutputMemoryStream& packet)
+void GameObject::Interpolate()
+{
+	float t = secondsElapsed / REPLICATION_INTERVAL_SECONDS;
+
+	if (t < 1)
+	{
+		position = lerp(initial_position, final_position, t);
+		angle = lerp(initial_angle, final_angle, t);
+
+		secondsElapsed += Time.deltaTime;
+	}
+}
+
+void GameObject::writeCreate(OutputMemoryStream& packet)
 {
 	// Write object properties
 	packet.Write(this->position.x);
@@ -168,18 +181,31 @@ void GameObject::write(OutputMemoryStream& packet)
 	}
 }
 
-void GameObject::read(const InputMemoryStream& packet)
+void GameObject::writeUpdate(OutputMemoryStream& packet)
+{
+	packet.Write(this->position.x);
+	packet.Write(this->position.y);
+
+	packet.Write(this->angle);
+}
+
+void GameObject::readCreate(const InputMemoryStream& packet)
 {
 	packet.Read(this->position.x);
 	packet.Read(this->position.y);
+
+	initial_position = final_position = position;
 
 	packet.Read(this->size.x);
 	packet.Read(this->size.y);
 
 	packet.Read(this->angle);
 
+	initial_angle = final_angle = angle;
+
 	bool ret = false;
 	packet.Read(ret);
+
 	//If it has a sprite, read it
 	if (ret)
 	{
@@ -215,5 +241,28 @@ void GameObject::read(const InputMemoryStream& packet)
 		{
 			behaviour = App->modBehaviour->addBehaviour(type, this);
 		}
+	}
+}
+
+void GameObject::readUpdate(const InputMemoryStream& packet)
+{
+	if (networkInterpolationEnabled)
+	{
+		initial_position = position;
+		initial_angle = angle;
+
+		packet.Read(final_position.x);
+		packet.Read(final_position.y);
+
+		packet.Read(final_angle);
+
+		secondsElapsed = 0;
+	}
+	else
+	{
+		packet.Read(position.x);
+		packet.Read(position.y);
+
+		packet.Read(angle);
 	}
 }

@@ -9,6 +9,9 @@ struct Sprite
 	vec4 color = vec4{ 1.0f, 1.0f, 1.0f, 1.0f }; // NOTE(jesus): Color to tint the sprite
 	Texture * texture = nullptr;                 // NOTE(jesus): Texture with the actual image
 	int  order = 0;                              // NOTE(jesus): determines the drawing order
+
+	void write(OutputMemoryStream& packet);
+	void read(const InputMemoryStream& packet);
 };
 
 const uint8 MAX_ANIMATION_CLIP_FRAMES = 25;

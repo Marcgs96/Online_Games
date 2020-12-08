@@ -151,8 +151,7 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	if (this->sprite)
 	{
 		packet.Write(true);
-		packet.Write(std::string(this->sprite->texture->filename));
-		packet.Write(this->sprite->order);
+		sprite->write(packet);
 	}
 	else
 	{
@@ -162,8 +161,8 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	if (this->collider)
 	{
 		packet.Write(true);
-		packet.Write(this->collider->type);
-		packet.Write(this->collider->isTrigger);
+		packet.Write(collider->type);
+		packet.Write(collider->isTrigger);
 	}
 	else
 	{
@@ -174,6 +173,7 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	{
 		packet.Write(true);
 		packet.Write(this->behaviour->type());
+		behaviour->write(packet);
 	}
 	else
 	{
@@ -187,6 +187,16 @@ void GameObject::writeUpdate(OutputMemoryStream& packet)
 	packet.Write(this->position.y);
 
 	packet.Write(this->angle);
+
+	if (this->behaviour)
+	{
+		packet.Write(true);
+		behaviour->write(packet);
+	}
+	else
+	{
+		packet.Write(false);
+	}
 }
 
 void GameObject::readCreate(const InputMemoryStream& packet)
@@ -209,38 +219,30 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 	//If it has a sprite, read it
 	if (ret)
 	{
-		std::string filename;
-		packet.Read(filename);
-
-		if (sprite == nullptr)
-		{
-			sprite = App->modRender->addSprite(this);
-			sprite->texture = App->modResources->GetTextureByFile(filename);
-		}
-		packet.Read(this->sprite->order);
+		sprite = App->modRender->addSprite(this);
+		sprite->read(packet);
 	}
 
+	//Check if it has collider
 	packet.Read(ret);
 	if (ret)
 	{
 		ColliderType type = ColliderType::None;
 		packet.Read(type);
-		if (collider == nullptr)
-		{
-			collider = App->modCollision->addCollider(type, this);
-		}
+
+		collider = App->modCollision->addCollider(type, this);
 		packet.Read(this->collider->isTrigger);
 	}
 
+	//Check if it has behaviour
 	packet.Read(ret);
 	if (ret)
 	{
 		BehaviourType type = BehaviourType::None;
 		packet.Read(type);
-		if (behaviour == nullptr)
-		{
-			behaviour = App->modBehaviour->addBehaviour(type, this);
-		}
+
+		behaviour = App->modBehaviour->addBehaviour(type, this);
+		behaviour->read(packet);
 	}
 }
 
@@ -257,6 +259,14 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 		packet.Read(final_angle);
 
 		secondsElapsed = 0;
+
+		//Check if it has behaviour
+		bool ret = false;
+		packet.Read(ret);
+		if (ret)
+		{
+			behaviour->read(packet);
+		}
 	}
 	else
 	{
@@ -264,5 +274,13 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 		packet.Read(position.y);
 
 		packet.Read(angle);
+
+		//Check if it has behaviour
+		bool ret = false;
+		packet.Read(ret);
+		if (ret)
+		{
+			behaviour->read(packet);
+		}
 	}
 }

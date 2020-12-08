@@ -757,3 +757,19 @@ void ModuleRender::CleanupRenderTarget()
 		g_mainRenderTargetView = NULL;
 	}
 }
+
+void Sprite::write(OutputMemoryStream& packet)
+{
+	packet.Write(std::string(texture->filename));
+	packet.Write(order);
+	//Todo? add pivot and color to serialization
+}
+
+void Sprite::read(const InputMemoryStream& packet)
+{
+	std::string filename;
+	packet.Read(filename);
+	texture = App->modResources->GetTextureByFile(filename);
+
+	packet.Read(order);
+}

@@ -11,6 +11,22 @@ public:
 	virtual void onDeliveryFailure(DeliveryManager* deliverManager) = 0;
 };
 
+class ReplicationDeliveryDelegate
+{
+public:
+	void onDeliverySuccess(DeliveryManager* deliverManager)
+	{
+
+	}
+	void onDeliveryFailure(DeliveryManager* deliverManager)
+	{
+
+	}
+
+	//std::vector<ReplicationCommand> commands;
+	//ReplicationManagerServer* replicationManager = nullptr;
+};
+
 struct Delivery
 {
 	uint32 sequenceNumber = 0;

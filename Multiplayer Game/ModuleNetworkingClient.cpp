@@ -139,14 +139,19 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			packet.Read(inputDataFront);
 			if (deliveryManager.processSequenceNumber(packet)) {
 
-				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 				repManagerClient.read(packet);
 
+				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+				if (playerGameObject == nullptr)
+					return;
+
+				InputController prevInput;
+				prevInput = inputControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevInput);
+
 				for (int i = inputDataFront + 1; i < inputDataBack; i++) {
-					inputControllerFromInputPacketData(inputData[i], Input);
-					
-					if (playerGameObject != nullptr)
-						playerGameObject->behaviour->onInput(Input);
+
+					prevInput = inputControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevInput);
+					playerGameObject->behaviour->onInput(prevInput);
 				}
 			}
 		}	

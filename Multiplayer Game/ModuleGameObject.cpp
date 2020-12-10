@@ -130,7 +130,7 @@ void GameObject::Interpolate()
 	if (t < 1)
 	{
 		position = lerp(initial_position, final_position, t);
-		angle = lerp(initial_angle, final_angle, t);
+		angle = slerp(initial_angle, final_angle, t);
 
 		secondsElapsed += Time.deltaTime;
 	}

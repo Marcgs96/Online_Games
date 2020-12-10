@@ -1,7 +1,6 @@
 #pragma once
 
 
-
 ////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
 ////////////////////////////////////////////////////////////////////////
@@ -33,6 +32,17 @@ inline float lerp(float a, float b, float t)
 {
 	float result = a + t * (b - a);
 	return result;
+}
+
+inline float clamp(float x, float upper, float lower)
+{
+	return min(upper, max(x, lower));
+}
+
+inline float slerp(float a, float b, float t)
+{
+	float dt = clamp(t - floor(t / 360) * 360, 0, 360);
+	return lerp(a, a + (dt > 180 ? dt - 360 : dt), t);
 }
 
 

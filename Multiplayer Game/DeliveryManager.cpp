@@ -10,7 +10,8 @@ Delivery* DeliveryManager::writeSequenceNumber(OutputMemoryStream& packet)
 	Delivery* newDelivery = new Delivery();
 	newDelivery->sequenceNumber = nextSequenceNumber++;
 	newDelivery->dispatchTime = Time.time;
-	//pendingDeliveries.push_back(newDelivery);
+	//newDelivery->delegate = new DeliveryDelegate();
+	pendingDeliveries.push_back(newDelivery);
 
 	return newDelivery;
 }

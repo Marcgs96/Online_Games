@@ -3,6 +3,8 @@
 #include <list>
 
 class DeliveryManager;
+class ReplicationManagerServer;
+struct ReplicationCommand;
 
 class DeliveryDelegate
 {
@@ -11,20 +13,26 @@ public:
 	virtual void onDeliveryFailure(DeliveryManager* deliverManager) = 0;
 };
 
-class ReplicationDeliveryDelegate
+class ReplicationDeliveryDelegate : public DeliveryDelegate
 {
 public:
+
+	ReplicationDeliveryDelegate(ReplicationManagerServer* repManager);
+
 	void onDeliverySuccess(DeliveryManager* deliverManager)
 	{
 
 	}
 	void onDeliveryFailure(DeliveryManager* deliverManager)
 	{
-
+		repeatReplication();
 	}
 
-	//std::vector<ReplicationCommand> commands;
-	//ReplicationManagerServer* replicationManager = nullptr;
+private:
+	void repeatReplication();
+
+	std::vector<ReplicationCommand> commands;
+	ReplicationManagerServer* replicationManager = nullptr;
 };
 
 struct Delivery

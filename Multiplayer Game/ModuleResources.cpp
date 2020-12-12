@@ -23,6 +23,7 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "spacecraft3.png") return spacecraft3;
 	else if (fileName == "laser.png") return laser;
 	else if (fileName == "explosion1.png") return explosion1;
+	else if (fileName == "ranger.png") return ranger;
 }
 
 bool ModuleResources::init()
@@ -36,6 +37,7 @@ bool ModuleResources::init()
 	spacecraft1 = App->modTextures->loadTexture("spacecraft1.png");
 	spacecraft2 = App->modTextures->loadTexture("spacecraft2.png");
 	spacecraft3 = App->modTextures->loadTexture("spacecraft3.png");
+	ranger = App->modTextures->loadTexture("ranger.png");
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -47,6 +49,7 @@ bool ModuleResources::init()
 	loadTextureAsync("spacecraft3.png",      &spacecraft3);
 	loadTextureAsync("laser.png",            &laser);
 	loadTextureAsync("explosion1.png",       &explosion1);
+	loadTextureAsync("ranger.png", &ranger);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
@@ -104,6 +107,12 @@ void ModuleResources::onTaskFinished(Task * task)
 			float h = 1.0f / 4.0f;
 			explosionClip->addFrameRect(vec4{ x, y, w, h });
 		}
+
+		//Create ranger walk animation clip
+		rangerWalkClip = App->modRender->addAnimationClip();
+		rangerWalkClip->frameTime = 0.1f;
+		rangerWalkClip->addFrameRect(vec4{ 0, 0, 0.16f, 0.33f });
+		rangerWalkClip->addFrameRect(vec4{ 0.16f, 0, 0.16f, 0.33f });
 	}
 }
 

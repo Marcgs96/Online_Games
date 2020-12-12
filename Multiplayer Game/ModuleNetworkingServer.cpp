@@ -253,15 +253,12 @@ void ModuleNetworkingServer::onUpdate()
 					replicationPacket << PROTOCOL_ID;
 					replicationPacket.Write(ServerMessage::Replication);
 					replicationPacket << clientProxy.nextExpectedInputSequenceNumber - 1;
-					Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(replicationPacket);
 
+					Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(replicationPacket);
 					if (delivery)
 					{
-						//delivery->delegate->onDeliveryFailure = SendReplicationPacket();
-
-						//delivery->delegate->onDeliverySuccess += ModuleNetworkingServer::DeliverySuccess(&clientProxy.deliveryManager);
+						delivery->delegate = new ReplicationDeliveryDelegate(&clientProxy.repManagerServer);
 					}
-
 
 					clientProxy.repManagerServer.write(replicationPacket);
 					sendPacket(replicationPacket, clientProxy.address);
@@ -382,6 +379,9 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	gameObject->sprite->order = 5;
 	if (spaceshipType == 0) {
 		gameObject->sprite->texture = App->modResources->spacecraft1;
+		/*gameObject->sprite->texture = App->modResources->ranger;
+		gameObject->animation = App->modRender->addAnimation(gameObject);
+		gameObject->animation->clip = App->modResources->rangerWalkClip;*/
 	}
 	else if (spaceshipType == 1) {
 		gameObject->sprite->texture = App->modResources->spacecraft2;

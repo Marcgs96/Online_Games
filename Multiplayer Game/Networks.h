@@ -39,7 +39,7 @@
 
 #define SCENE_TRANSITION_TIME_SECONDS                   1.0f
 #define DISCONNECT_TIMEOUT_SECONDS                      5.0f
-#define PACKET_DELIVERY_TIMEOUT_SECONDS                 0.5f
+#define PACKET_DELIVERY_TIMEOUT_SECONDS                 0.75f
 #define DEFAULT_PACKET_SIZE                     Kilobytes(4)
 #define PING_INTERVAL_SECONDS                           0.5f
 #define REPLICATION_INTERVAL_SECONDS					0.1f

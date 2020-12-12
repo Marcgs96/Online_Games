@@ -5,17 +5,20 @@
 
 void ReplicationManagerServer::create(uint32 networkId)
 {
-	ReplicationCommand command;
+	/*ReplicationCommand command;
 	command.action = ReplicationAction::Create;
 	command.networkId = networkId;
 
-	commands.emplace(networkId, command);
-	//commands[networkId].action = ReplicationAction::Create;
-	//commands[networkId].networkId = networkId;
+	commands.emplace(networkId, command);*/
+	commands[networkId].action = ReplicationAction::Create;
+	commands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::update(uint32 networkId)
 {
+	if (commands[networkId].action == ReplicationAction::Create || commands[networkId].action == ReplicationAction::Destroy)
+		return;
+
 	commands[networkId].action = ReplicationAction::Update;
 }
 

@@ -110,9 +110,9 @@ void ModuleResources::onTaskFinished(Task * task)
 			explosionClip->addFrameRect(vec4{ x, y, w, h });
 		}
 
-		//Create palyer idle animation clip
+		//Create player idle animation clip
 		playerIdleClip = App->modRender->addAnimationClip();
-		playerIdleClip->frameTime = 0.1f;
+		playerIdleClip->frameTime = 0.2f;
 		playerIdleClip->loop = true;
 		for (int i = 0; i < 4; ++i)
 		{

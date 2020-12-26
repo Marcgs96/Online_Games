@@ -43,6 +43,8 @@ void Player::start()
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
 	lifebar->sprite->order = 5;
+
+	//Todo: Create weapon and spell
 }
 
 void Player::onInput(const InputController &input)
@@ -137,11 +139,13 @@ void Player::onCollisionTriggered(Collider &c1, Collider &c2)
 
 void Player::write(OutputMemoryStream & packet)
 {
+	packet << playerType;
 	packet << hitPoints;
 }
 
 void Player::read(const InputMemoryStream & packet)
 {
+	packet >> playerType;
 	packet >> hitPoints;
 }
 
@@ -180,20 +184,26 @@ void Player::HandleCombatInput(const InputController& input)
 	{
 		if (isServer)
 		{
-			Attack();
+			UseWeapon();
 		}
 	}
 	if (input.actionRight == ButtonState::Press)
 	{
 		if (isServer)
 		{
-			CastSpell();
+			UseSpell();
 		}
 	}
 }
 
-void Player::Attack()
+void Player::UseWeapon()
 {
+	/*if (weapon)
+	{
+		Weapon* weapon_behav = (Weapon*)weapon->behaviour;
+		weapon_behav.Use();
+	}*/
+
 	GameObject* laser = NetworkInstantiate();
 
 	laser->position = gameObject->position;
@@ -210,6 +220,14 @@ void Player::Attack()
 	laser->tag = gameObject->tag;
 }
 
+void Player::UseSpell()
+{
+	/*if (spell)
+	{
+		spell.Use();
+	}*/
+}
+
 bool Player::ChangeState(PlayerState newState)
 {
 	if (newState == currentState)
@@ -219,13 +237,43 @@ bool Player::ChangeState(PlayerState newState)
 	switch (currentState)
 	{
 	case PlayerState::Idle:
-		gameObject->sprite->texture = App->modResources->player_idle;
-		gameObject->animation->clip = App->modResources->playerIdleClip;
+	{
+		switch (playerType)
+		{
+		case PlayerType::Berserk:
+			gameObject->sprite->texture = App->modResources->player_idle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		case PlayerType::Wizard:
+			gameObject->sprite->texture = App->modResources->player_idle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		case PlayerType::Hunter:
+			gameObject->sprite->texture = App->modResources->player_idle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		}
+	}	
 		break;
 
 	case PlayerState::Running:
-		gameObject->sprite->texture = App->modResources->player_run;
-		gameObject->animation->clip = App->modResources->playerRunClip;
+	{
+		switch (playerType)
+		{
+		case PlayerType::Berserk:
+			gameObject->sprite->texture = App->modResources->player_run;
+			gameObject->animation->clip = App->modResources->playerRunClip;
+			break;
+		case PlayerType::Wizard:
+			gameObject->sprite->texture = App->modResources->player_run;
+			gameObject->animation->clip = App->modResources->playerRunClip;
+			break;
+		case PlayerType::Hunter:
+			gameObject->sprite->texture = App->modResources->player_run;
+			gameObject->animation->clip = App->modResources->playerRunClip;
+			break;
+		}
+	}
 		break;
 	}
 

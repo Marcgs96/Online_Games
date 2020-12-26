@@ -48,18 +48,18 @@ void ScreenMainMenu::gui()
 	static char playerNameStr[64] = "";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
 
-	const char* spaceshipTypes[] = { "Type 0", "Type 1", "Type 2" };
-	static const char* spaceshipTypeStr = spaceshipTypes[0];
-	static uint8 spaceshipType = 0;
-	if (ImGui::BeginCombo("Spaceship##combo", spaceshipTypeStr)) // The second parameter is the label previewed before opening the combo.
+	const char* classTypes[] = { "Berserk", "Wizard", "Hunter" };
+	static const char* classTypeStr = classTypes[0];
+	static uint8 classType = 0;
+	if (ImGui::BeginCombo("Class##combo", classTypeStr)) // The second parameter is the label previewed before opening the combo.
 	{
-		for (uint8 i = 0; i < IM_ARRAYSIZE(spaceshipTypes); i++)
+		for (uint8 i = 0; i < IM_ARRAYSIZE(classTypes); i++)
 		{
-			bool is_selected = (spaceshipTypeStr == spaceshipTypes[i]); // You can store your selection however you want, outside or inside your objects
-			if (ImGui::Selectable(spaceshipTypes[i], is_selected))
+			bool is_selected = (classTypeStr == classTypes[i]); // You can store your selection however you want, outside or inside your objects
+			if (ImGui::Selectable(classTypes[i], is_selected))
 			{
-				spaceshipTypeStr = spaceshipTypes[i];
-				spaceshipType = i;
+				classTypeStr = classTypes[i];
+				classType = i;
 			}
 			if (is_selected)
 				ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
@@ -78,7 +78,7 @@ void ScreenMainMenu::gui()
 			App->modScreen->screenGame->serverPort = remoteServerPort;
 			App->modScreen->screenGame->serverAddress = serverAddressStr;
 			App->modScreen->screenGame->playerName = playerNameStr;
-			App->modScreen->screenGame->spaceshipType = spaceshipType;
+			App->modScreen->screenGame->classType = classType;
 			App->modScreen->swapScreensWithTransition(this, App->modScreen->screenGame);
 		}
 		else

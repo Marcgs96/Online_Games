@@ -16,7 +16,7 @@ void ScreenGame::enable()
 	else
 	{
 		App->modNetClient->setServerAddress(serverAddress, serverPort);
-		App->modNetClient->setPlayerInfo(playerName, spaceshipType);
+		App->modNetClient->setPlayerInfo(playerName, classType);
 		App->modNetClient->setEnabled(true);
 	}
 

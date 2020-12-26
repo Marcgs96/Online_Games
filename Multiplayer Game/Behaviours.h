@@ -34,6 +34,13 @@ enum class BehaviourType : uint8
 	Laser,
 };
 
+enum class PlayerType : uint8
+{
+	Berserk,
+	Wizard,
+	Hunter,
+	None
+};
 
 struct Laser : public Behaviour
 {
@@ -53,6 +60,8 @@ struct Player : public Behaviour
 	uint8 hitPoints = MAX_HIT_POINTS;
 
 	GameObject *lifebar = nullptr;
+	GameObject* weapon = nullptr;
+	//Spell* spell = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::Player; }
 
@@ -76,11 +85,12 @@ struct Player : public Behaviour
 		Running
 	};
 	PlayerState currentState = PlayerState::Idle;
+	PlayerType playerType = PlayerType::None;
 
-	virtual void HandleMovementInput(const InputController& input);
-	virtual void HandleCombatInput(const InputController& input);
+	void HandleMovementInput(const InputController& input);
+	void HandleCombatInput(const InputController& input);
 
-	virtual void Attack();
-	virtual void CastSpell() {};
-	virtual bool ChangeState(PlayerState newState);
+	void UseWeapon();
+	void UseSpell();
+	bool ChangeState(PlayerState newState);
 };

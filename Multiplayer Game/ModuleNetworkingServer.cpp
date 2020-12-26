@@ -112,9 +112,9 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				if (proxy != nullptr)
 				{
 					std::string playerName;
-					uint8 spaceshipType;
+					uint8 classType;
 					packet >> playerName;
-					packet >> spaceshipType;
+					packet >> classType;
 
 					proxy->address.sin_family = fromAddress.sin_family;
 					proxy->address.sin_addr.S_un.S_addr = fromAddress.sin_addr.S_un.S_addr;
@@ -125,7 +125,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 					// Create new network object
 					vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f};
-					proxy->gameObject = spawnPlayer(spaceshipType, initialPosition, 0);
+					proxy->gameObject = spawnPlayer(classType, initialPosition, 0);
 				}
 				else
 				{
@@ -365,7 +365,7 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 // Spawning
 //////////////////////////////////////////////////////////////////////
 
-GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle)
+GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, vec2 initialPosition, float initialAngle)
 {
 	// Create a new game object with the player properties
 	GameObject *gameObject = NetworkInstantiate();
@@ -376,17 +376,23 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	// Create sprite
 	gameObject->sprite = App->modRender->addSprite(gameObject);
 	gameObject->sprite->order = 5;
-	if (spaceshipType == 0) {
-		//gameObject->sprite->texture = App->modResources->spacecraft1;
+	if (classType == 0) {
 		gameObject->sprite->texture = App->modResources->player_idle;
+
 		gameObject->animation = App->modRender->addAnimation(gameObject);
 		gameObject->animation->clip = App->modResources->playerIdleClip;
 	}
-	else if (spaceshipType == 1) {
-		gameObject->sprite->texture = App->modResources->spacecraft2;
+	else if (classType == 1) {
+		gameObject->sprite->texture = App->modResources->player_idle;
+
+		gameObject->animation = App->modRender->addAnimation(gameObject);
+		gameObject->animation->clip = App->modResources->playerIdleClip;
 	}
 	else {
-		gameObject->sprite->texture = App->modResources->spacecraft3;
+		gameObject->sprite->texture = App->modResources->player_idle;
+
+		gameObject->animation = App->modRender->addAnimation(gameObject);
+		gameObject->animation->clip = App->modResources->playerIdleClip;
 	}
 
 	// Create collider
@@ -394,9 +400,11 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
 
 	// Create behaviour
-	Player* playerBehaviour = App->modBehaviour->addSpaceship(gameObject);
+	Player* playerBehaviour = App->modBehaviour->addPlayer(gameObject);
+	playerBehaviour->playerType = (PlayerType)classType;
 	gameObject->behaviour = playerBehaviour;
 	gameObject->behaviour->isServer = true;
+
 
 	return gameObject;
 }

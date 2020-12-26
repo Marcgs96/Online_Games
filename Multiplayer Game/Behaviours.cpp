@@ -47,40 +47,10 @@ void Player::start()
 
 void Player::onInput(const InputController &input)
 {
+	HandleMovementInput(input);
+	HandleCombatInput(input);
 
-	if (input.horizontalAxis != 0.0f)
-	{
-		/*const float rotateSpeed = 180.0f;
-		gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
-		*/
-	}
-
-	//Movement
-	vec2 movement_vector;
-
-	movement_vector.x = input.horizontalAxis;
-	movement_vector.y = input.verticalAxis;
-
-	if (!isZero(movement_vector))
-	{
-		const float advanceSpeed = 200.0f;
-		gameObject->position += movement_vector * advanceSpeed * Time.deltaTime;
-		ChangeState(PlayerState::Running);
-
-		if (isServer)
-		{
-			NetworkUpdate(gameObject);
-		}
-	}
-	else
-	{
-		bool changed = ChangeState(PlayerState::Idle);
-		if(isServer && changed)
-			NetworkUpdate(gameObject);
-	}
-		
-
-
+	
 	if (input.actionDown == ButtonState::Pressed)
 	{
 		/*const float advanceSpeed = 200.0f;
@@ -92,26 +62,13 @@ void Player::onInput(const InputController &input)
 		}*/
 	}
 
-	if (input.actionLeft == ButtonState::Press)
+	if (input.horizontalAxis != 0.0f)
 	{
-		if (isServer)
-		{
-			GameObject *laser = NetworkInstantiate();
-
-			laser->position = gameObject->position;
-			laser->angle = gameObject->angle;
-			laser->size = { 20, 60 };
-
-			laser->sprite = App->modRender->addSprite(laser);
-			laser->sprite->order = 3;
-			laser->sprite->texture = App->modResources->laser;
-
-			Laser *laserBehaviour = App->modBehaviour->addLaser(laser);
-			laserBehaviour->isServer = isServer;
-
-			laser->tag = gameObject->tag;
-		}
+		/*const float rotateSpeed = 180.0f;
+		gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
+		*/
 	}
+
 }
 
 void Player::update()
@@ -186,6 +143,71 @@ void Player::write(OutputMemoryStream & packet)
 void Player::read(const InputMemoryStream & packet)
 {
 	packet >> hitPoints;
+}
+
+void Player::HandleMovementInput(const InputController& input)
+{
+	vec2 movement_vector;
+
+	movement_vector.x = input.horizontalAxis;
+	movement_vector.y = -input.verticalAxis;
+
+	if (!isZero(movement_vector))
+	{
+		const float advanceSpeed = 200.0f;
+		gameObject->position += movement_vector * advanceSpeed * Time.deltaTime;
+
+		ChangeState(PlayerState::Running);
+		if (movement_vector.x != 0) //Flip character according to direction
+			gameObject->size.x = movement_vector.x > 0 ? abs(gameObject->size.x): -abs(gameObject->size.x);
+
+		if (isServer)
+		{
+			NetworkUpdate(gameObject);
+		}
+	}
+	else
+	{
+		bool changed = ChangeState(PlayerState::Idle);
+		if (isServer && changed)
+			NetworkUpdate(gameObject);
+	}
+}
+
+void Player::HandleCombatInput(const InputController& input)
+{
+	if (input.actionLeft == ButtonState::Press)
+	{
+		if (isServer)
+		{
+			Attack();
+		}
+	}
+	if (input.actionRight == ButtonState::Press)
+	{
+		if (isServer)
+		{
+			CastSpell();
+		}
+	}
+}
+
+void Player::Attack()
+{
+	GameObject* laser = NetworkInstantiate();
+
+	laser->position = gameObject->position;
+	laser->angle = gameObject->angle;
+	laser->size = { 20, 60 };
+
+	laser->sprite = App->modRender->addSprite(laser);
+	laser->sprite->order = 3;
+	laser->sprite->texture = App->modResources->laser;
+
+	Laser* laserBehaviour = App->modBehaviour->addLaser(laser);
+	laserBehaviour->isServer = isServer;
+
+	laser->tag = gameObject->tag;
 }
 
 bool Player::ChangeState(PlayerState newState)

@@ -77,5 +77,10 @@ struct Player : public Behaviour
 	};
 	PlayerState currentState = PlayerState::Idle;
 
+	virtual void HandleMovementInput(const InputController& input);
+	virtual void HandleCombatInput(const InputController& input);
+
+	virtual void Attack();
+	virtual void CastSpell() {};
 	virtual bool ChangeState(PlayerState newState);
 };

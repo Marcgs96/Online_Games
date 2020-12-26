@@ -30,7 +30,7 @@ struct Behaviour
 enum class BehaviourType : uint8
 {
 	None,
-	Spaceship,
+	Player,
 	Laser,
 };
 
@@ -47,14 +47,14 @@ struct Laser : public Behaviour
 };
 
 
-struct Spaceship : public Behaviour
+struct Player : public Behaviour
 {
 	static const uint8 MAX_HIT_POINTS = 5;
 	uint8 hitPoints = MAX_HIT_POINTS;
 
 	GameObject *lifebar = nullptr;
 
-	BehaviourType type() const override { return BehaviourType::Spaceship; }
+	BehaviourType type() const override { return BehaviourType::Player; }
 
 	void start() override;
 
@@ -69,4 +69,13 @@ struct Spaceship : public Behaviour
 	void write(OutputMemoryStream &packet) override;
 
 	void read(const InputMemoryStream &packet) override;
+
+	// Player State
+	enum PlayerState{
+		Idle,
+		Running
+	};
+	PlayerState currentState = PlayerState::Idle;
+
+	virtual bool ChangeState(PlayerState newState);
 };

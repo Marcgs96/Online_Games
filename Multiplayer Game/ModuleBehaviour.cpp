@@ -3,7 +3,7 @@
 
 bool ModuleBehaviour::update()
 {
-	for (Spaceship &behaviour : spaceships)
+	for (Player &behaviour : spaceships)
 	{
 		handleBehaviourLifeCycle(&behaviour);
 	}
@@ -20,7 +20,7 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 {
 	switch (behaviourType)
 	{
-	case BehaviourType::Spaceship:
+	case BehaviourType::Player:
 		return addSpaceship(parentGameObject);
 	case BehaviourType::Laser:
 		return addLaser(parentGameObject);
@@ -29,9 +29,9 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 	}
 }
 
-Spaceship *ModuleBehaviour::addSpaceship(GameObject *parentGameObject)
+Player* ModuleBehaviour::addSpaceship(GameObject *parentGameObject)
 {
-	for (Spaceship &behaviour : spaceships)
+	for (Player &behaviour : spaceships)
 	{
 		if (behaviour.gameObject == nullptr)
 		{

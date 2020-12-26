@@ -23,7 +23,8 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "spacecraft3.png") return spacecraft3;
 	else if (fileName == "laser.png") return laser;
 	else if (fileName == "explosion1.png") return explosion1;
-	else if (fileName == "player_walk.png") return player_walk;
+	else if (fileName == "player_idle.png") return player_idle;
+	else if (fileName == "player_run.png") return player_run;
 }
 bool ModuleResources::init()
 {
@@ -36,7 +37,8 @@ bool ModuleResources::init()
 	spacecraft1 = App->modTextures->loadTexture("spacecraft1.png");
 	spacecraft2 = App->modTextures->loadTexture("spacecraft2.png");
 	spacecraft3 = App->modTextures->loadTexture("spacecraft3.png");
-	ranger = App->modTextures->loadTexture("player_walk.png");
+	player_idle = App->modTextures->loadTexture("player_idle.png");
+	player_run = App->modTextures->loadTexture("player_run.png");
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -48,7 +50,8 @@ bool ModuleResources::init()
 	loadTextureAsync("spacecraft3.png",      &spacecraft3);
 	loadTextureAsync("laser.png",            &laser);
 	loadTextureAsync("explosion1.png",       &explosion1);
-	loadTextureAsync("player_walk.png", &player_walk);
+	loadTextureAsync("player_idle.png",		 &player_idle);
+	loadTextureAsync("player_run.png",		 &player_run);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
@@ -107,17 +110,30 @@ void ModuleResources::onTaskFinished(Task * task)
 			explosionClip->addFrameRect(vec4{ x, y, w, h });
 		}
 
-		//Create ranger walk animation clip
-		playerWalkClip = App->modRender->addAnimationClip();
-		playerWalkClip->frameTime = 0.1f;
-		playerWalkClip->loop = true;
+		//Create palyer idle animation clip
+		playerIdleClip = App->modRender->addAnimationClip();
+		playerIdleClip->frameTime = 0.1f;
+		playerIdleClip->loop = true;
 		for (int i = 0; i < 4; ++i)
 		{
 			float x = (i % 4) / 4.0f;
 			float y = 0;
 			float w = 1.0f / 4.0f;
 			float h = 1.0f;
-			playerWalkClip->addFrameRect(vec4{ x, y, w, h });
+			playerIdleClip->addFrameRect(vec4{ x, y, w, h });
+		}
+
+		//Create player run animation clip
+		playerRunClip = App->modRender->addAnimationClip();
+		playerRunClip->frameTime = 0.1f;
+		playerRunClip->loop = true;
+		for (int i = 0; i < 7; ++i)
+		{
+			float x = (i % 7) / 7.0f;
+			float y = 0;
+			float w = 1.0f / 7.0f;
+			float h = 1.0f;
+			playerRunClip->addFrameRect(vec4{ x, y, w, h });
 		}
 	}
 }

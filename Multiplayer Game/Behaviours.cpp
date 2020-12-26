@@ -35,7 +35,7 @@ void Laser::update()
 
 
 
-void Spaceship::start()
+void Player::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
 
@@ -45,28 +45,51 @@ void Spaceship::start()
 	lifebar->sprite->order = 5;
 }
 
-void Spaceship::onInput(const InputController &input)
+void Player::onInput(const InputController &input)
 {
+
 	if (input.horizontalAxis != 0.0f)
 	{
-		const float rotateSpeed = 180.0f;
+		/*const float rotateSpeed = 180.0f;
 		gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
+		*/
+	}
+
+	//Movement
+	vec2 movement_vector;
+
+	movement_vector.x = input.horizontalAxis;
+	movement_vector.y = input.verticalAxis;
+
+	if (!isZero(movement_vector))
+	{
+		const float advanceSpeed = 200.0f;
+		gameObject->position += movement_vector * advanceSpeed * Time.deltaTime;
+		ChangeState(PlayerState::Running);
 
 		if (isServer)
 		{
 			NetworkUpdate(gameObject);
 		}
 	}
+	else
+	{
+		bool changed = ChangeState(PlayerState::Idle);
+		if(isServer && changed)
+			NetworkUpdate(gameObject);
+	}
+		
+
 
 	if (input.actionDown == ButtonState::Pressed)
 	{
-		const float advanceSpeed = 200.0f;
+		/*const float advanceSpeed = 200.0f;
 		gameObject->position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
 
 		if (isServer)
 		{
 			NetworkUpdate(gameObject);
-		}
+		}*/
 	}
 
 	if (input.actionLeft == ButtonState::Press)
@@ -91,22 +114,24 @@ void Spaceship::onInput(const InputController &input)
 	}
 }
 
-void Spaceship::update()
+void Player::update()
 {
+	//LifeBar update
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
+
 	const float lifeRatio = max(0.01f, (float)(hitPoints) / (MAX_HIT_POINTS));
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
 }
 
-void Spaceship::destroy()
+void Player::destroy()
 {
 	Destroy(lifebar);
 }
 
-void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
+void Player::onCollisionTriggered(Collider &c1, Collider &c2)
 {
 	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
 	{
@@ -153,12 +178,34 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 	}
 }
 
-void Spaceship::write(OutputMemoryStream & packet)
+void Player::write(OutputMemoryStream & packet)
 {
 	packet << hitPoints;
 }
 
-void Spaceship::read(const InputMemoryStream & packet)
+void Player::read(const InputMemoryStream & packet)
 {
 	packet >> hitPoints;
+}
+
+bool Player::ChangeState(PlayerState newState)
+{
+	if (newState == currentState)
+		return false;
+
+	currentState = newState;
+	switch (currentState)
+	{
+	case PlayerState::Idle:
+		gameObject->sprite->texture = App->modResources->player_idle;
+		gameObject->animation->clip = App->modResources->playerIdleClip;
+		break;
+
+	case PlayerState::Running:
+		gameObject->sprite->texture = App->modResources->player_run;
+		gameObject->animation->clip = App->modResources->playerRunClip;
+		break;
+	}
+
+	return true;
 }

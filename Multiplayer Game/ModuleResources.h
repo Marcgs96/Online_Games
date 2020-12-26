@@ -7,7 +7,6 @@ struct Texture;
 class ModuleResources : public Module
 {
 public:
-
 	Texture *background = nullptr;
 	Texture *space = nullptr;
 	Texture *asteroid1 = nullptr;
@@ -17,10 +16,10 @@ public:
 	Texture *spacecraft3 = nullptr;
 	Texture *laser = nullptr;
 	Texture *explosion1 = nullptr;
-	Texture* ranger = nullptr;
+	Texture* player_walk = nullptr;
 
 	AnimationClip *explosionClip = nullptr;
-	AnimationClip* rangerWalkClip = nullptr;
+	AnimationClip* playerWalkClip = nullptr;
 
 	AudioClip *audioClipLaser = nullptr;
 	AudioClip *audioClipExplosion = nullptr;

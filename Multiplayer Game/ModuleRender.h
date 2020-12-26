@@ -65,6 +65,9 @@ struct Animation
 	{
 		return !clip->loop && elapsedTime > clip->frameCount * clip->frameTime;
 	}
+
+	void write(OutputMemoryStream& packet);
+	void read(const InputMemoryStream& packet);
 };
 
 class ModuleRender : public Module

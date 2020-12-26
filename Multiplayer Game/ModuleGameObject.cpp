@@ -152,6 +152,11 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	{
 		packet.Write(true);
 		sprite->write(packet);
+		if (this->animation)
+		{
+			packet.Write(true);
+			animation->write(packet);
+		}
 	}
 	else
 	{
@@ -221,6 +226,12 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 	{
 		sprite = App->modRender->addSprite(this);
 		sprite->read(packet);
+		packet.Read(ret);
+		if (ret)
+		{
+			animation = App->modRender->addAnimation(this);
+			animation->read(packet);
+		}
 	}
 
 	//Check if it has collider

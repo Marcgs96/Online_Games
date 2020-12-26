@@ -773,3 +773,20 @@ void Sprite::read(const InputMemoryStream& packet)
 
 	packet.Read(order);
 }
+
+void Animation::write(OutputMemoryStream& packet)
+{
+	packet.Write(clip->id);
+	packet.Write(elapsedTime);
+	packet.Write(currentFrame);
+}
+
+void Animation::read(const InputMemoryStream& packet)
+{
+	uint16 clip_id = 0;
+	packet.Read(clip_id);
+	clip = App->modRender->getAnimationClip(clip_id);
+
+	packet.Read(elapsedTime);
+	packet.Read(currentFrame);
+}

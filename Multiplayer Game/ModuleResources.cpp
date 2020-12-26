@@ -23,9 +23,8 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "spacecraft3.png") return spacecraft3;
 	else if (fileName == "laser.png") return laser;
 	else if (fileName == "explosion1.png") return explosion1;
-	else if (fileName == "ranger.png") return ranger;
+	else if (fileName == "player_walk.png") return player_walk;
 }
-
 bool ModuleResources::init()
 {
 	background = App->modTextures->loadTexture("background.jpg");
@@ -37,7 +36,7 @@ bool ModuleResources::init()
 	spacecraft1 = App->modTextures->loadTexture("spacecraft1.png");
 	spacecraft2 = App->modTextures->loadTexture("spacecraft2.png");
 	spacecraft3 = App->modTextures->loadTexture("spacecraft3.png");
-	ranger = App->modTextures->loadTexture("ranger.png");
+	ranger = App->modTextures->loadTexture("player_walk.png");
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -49,7 +48,7 @@ bool ModuleResources::init()
 	loadTextureAsync("spacecraft3.png",      &spacecraft3);
 	loadTextureAsync("laser.png",            &laser);
 	loadTextureAsync("explosion1.png",       &explosion1);
-	loadTextureAsync("ranger.png", &ranger);
+	loadTextureAsync("player_walk.png", &player_walk);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
@@ -109,10 +108,17 @@ void ModuleResources::onTaskFinished(Task * task)
 		}
 
 		//Create ranger walk animation clip
-		rangerWalkClip = App->modRender->addAnimationClip();
-		rangerWalkClip->frameTime = 0.1f;
-		rangerWalkClip->addFrameRect(vec4{ 0, 0, 0.16f, 0.33f });
-		rangerWalkClip->addFrameRect(vec4{ 0.16f, 0, 0.16f, 0.33f });
+		playerWalkClip = App->modRender->addAnimationClip();
+		playerWalkClip->frameTime = 0.1f;
+		playerWalkClip->loop = true;
+		for (int i = 0; i < 4; ++i)
+		{
+			float x = (i % 4) / 4.0f;
+			float y = 0;
+			float w = 1.0f / 4.0f;
+			float h = 1.0f;
+			playerWalkClip->addFrameRect(vec4{ x, y, w, h });
+		}
 	}
 }
 

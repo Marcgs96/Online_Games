@@ -157,6 +157,8 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 			packet.Write(true);
 			animation->write(packet);
 		}
+		else
+			packet.Write(false);
 	}
 	else
 	{
@@ -226,6 +228,7 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 	{
 		sprite = App->modRender->addSprite(this);
 		sprite->read(packet);
+
 		packet.Read(ret);
 		if (ret)
 		{

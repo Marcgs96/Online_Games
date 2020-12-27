@@ -11,11 +11,9 @@ public:
 	Texture *space = nullptr;
 	Texture *asteroid1 = nullptr;
 	Texture *asteroid2 = nullptr;
-	Texture *spacecraft1 = nullptr;
-	Texture *spacecraft2 = nullptr;
-	Texture *spacecraft3 = nullptr;
+
 	Texture *laser = nullptr;
-	Texture *explosion1 = nullptr;
+	Texture *death = nullptr;
 
 	Texture* berserkerIdle = nullptr;
 	Texture* berserkerRun = nullptr;
@@ -26,13 +24,13 @@ public:
 	Texture* hunterIdle = nullptr;
 	Texture* hunterRun = nullptr;
 
-	AnimationClip *explosionClip = nullptr;
+	AnimationClip *deathClip = nullptr;
 
 	AnimationClip* playerIdleClip = nullptr;
 	AnimationClip* playerRunClip = nullptr;
 
 	AudioClip *audioClipLaser = nullptr;
-	AudioClip *audioClipExplosion = nullptr;
+	AudioClip *audioClipDeath = nullptr;
 
 	bool finishedLoading = false;
 

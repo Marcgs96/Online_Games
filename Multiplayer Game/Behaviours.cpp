@@ -104,35 +104,31 @@ void Player::onCollisionTriggered(Collider &c1, Collider &c2)
 				NetworkUpdate(gameObject);
 			}
 
-			float size = 30 + 50.0f * Random.next();
-			vec2 position = gameObject->position + 50.0f * vec2{Random.next() - 0.5f, Random.next() - 0.5f};
-
 			if (hitPoints <= 0)
 			{
-				// Centered big explosion
-				size = 250.0f + 100.0f * Random.next();
-				position = gameObject->position;
+				// Centered death effect
+				float size = 35.0f;
+				vec2 position = gameObject->position;
 
+				GameObject* deathEffect = NetworkInstantiate();
+				deathEffect->position = position;
+				deathEffect->size = vec2{ size, size };
+
+				deathEffect->sprite = App->modRender->addSprite(deathEffect);
+				deathEffect->sprite->texture = App->modResources->death;
+				deathEffect->sprite->order = 100;
+
+				deathEffect->animation = App->modRender->addAnimation(deathEffect);
+				deathEffect->animation->clip = App->modResources->deathClip;
+
+				NetworkDestroy(deathEffect, 2.0f);
+				// NOTE(jesus): Only played in the server right now...
+				// You need to somehow make this happen in clients
+				App->modSound->playAudioClip(App->modResources->audioClipDeath);
+
+				//Destroy player
 				NetworkDestroy(gameObject);
 			}
-
-			GameObject *explosion = NetworkInstantiate();
-			explosion->position = position;
-			explosion->size = vec2{ size, size };
-			explosion->angle = 365.0f * Random.next();
-
-			explosion->sprite = App->modRender->addSprite(explosion);
-			explosion->sprite->texture = App->modResources->explosion1;
-			explosion->sprite->order = 100;
-
-			explosion->animation = App->modRender->addAnimation(explosion);
-			explosion->animation->clip = App->modResources->explosionClip;
-
-			NetworkDestroy(explosion, 2.0f);
-
-			// NOTE(jesus): Only played in the server right now...
-			// You need to somehow make this happen in clients
-			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 		}
 	}
 }
@@ -140,12 +136,21 @@ void Player::onCollisionTriggered(Collider &c1, Collider &c2)
 void Player::write(OutputMemoryStream & packet)
 {
 	packet << playerType;
+	packet << currentState;
+	packet << gameObject->size.x;
 	packet << hitPoints;
 }
 
 void Player::read(const InputMemoryStream & packet)
 {
 	packet >> playerType;
+
+	PlayerState new_state;
+	packet >> new_state;
+	ChangeState(new_state);
+
+	packet >> gameObject->size.x;
+
 	packet >> hitPoints;
 }
 

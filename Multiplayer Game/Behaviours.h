@@ -82,7 +82,8 @@ struct Player : public Behaviour
 	// Player State
 	enum PlayerState{
 		Idle,
-		Running
+		Running,
+		Dead
 	};
 	PlayerState currentState = PlayerState::Idle;
 	PlayerType playerType = PlayerType::None;
@@ -92,5 +93,6 @@ struct Player : public Behaviour
 
 	void UseWeapon();
 	void UseSpell();
+	void Respawn();
 	bool ChangeState(PlayerState newState);
 };

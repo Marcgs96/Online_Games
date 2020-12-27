@@ -90,14 +90,14 @@ void Player::destroy()
 	Destroy(lifebar);
 }
 
-void Player::onCollisionTriggered(Collider &c1, Collider &c2)
+void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 {
 	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
 	{
 		if (isServer)
 		{
 			NetworkDestroy(c2.gameObject); // Destroy the laser
-		
+
 			if (hitPoints > 0)
 			{
 				hitPoints--;
@@ -126,32 +126,14 @@ void Player::onCollisionTriggered(Collider &c1, Collider &c2)
 				// You need to somehow make this happen in clients
 				App->modSound->playAudioClip(App->modResources->audioClipDeath);
 
-				//Destroy player
-				NetworkDestroy(gameObject);
+				//Kill player
+				//NetworkDestroy(gameObject);
+				ChangeState(PlayerState::Dead);
+				Respawn();
+				NetworkUpdate(gameObject);
 			}
 		}
 	}
-}
-
-void Player::write(OutputMemoryStream & packet)
-{
-	packet << playerType;
-	packet << currentState;
-	packet << gameObject->size.x;
-	packet << hitPoints;
-}
-
-void Player::read(const InputMemoryStream & packet)
-{
-	packet >> playerType;
-
-	PlayerState new_state;
-	packet >> new_state;
-	ChangeState(new_state);
-
-	packet >> gameObject->size.x;
-
-	packet >> hitPoints;
 }
 
 void Player::HandleMovementInput(const InputController& input)
@@ -233,6 +215,13 @@ void Player::UseSpell()
 	}*/
 }
 
+void Player::Respawn()
+{
+	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+	hitPoints = MAX_HIT_POINTS;
+	ChangeState(PlayerState::Idle);
+}
+
 bool Player::ChangeState(PlayerState newState)
 {
 	if (newState == currentState)
@@ -283,4 +272,24 @@ bool Player::ChangeState(PlayerState newState)
 	}
 
 	return true;
+}
+
+void Player::write(OutputMemoryStream& packet)
+{
+	packet << playerType;
+	packet << currentState;
+	packet << gameObject->size.x;
+	packet << hitPoints;
+}
+
+void Player::read(const InputMemoryStream& packet)
+{
+	PlayerState new_state;
+
+	packet >> playerType;
+	packet >> new_state;
+	packet >> gameObject->size.x;
+	packet >> hitPoints;
+
+	ChangeState(new_state);
 }

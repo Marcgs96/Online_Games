@@ -48,7 +48,7 @@ void ScreenMainMenu::gui()
 	static char playerNameStr[64] = "";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
 
-	const char* classTypes[] = { "Berserk", "Wizard", "Hunter" };
+	const char* classTypes[] = { "Berserker", "Wizard", "Hunter" };
 	static const char* classTypeStr = classTypes[0];
 	static uint8 classType = 0;
 	if (ImGui::BeginCombo("Class##combo", classTypeStr)) // The second parameter is the label previewed before opening the combo.

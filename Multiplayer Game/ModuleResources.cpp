@@ -23,8 +23,12 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "spacecraft3.png") return spacecraft3;
 	else if (fileName == "laser.png") return laser;
 	else if (fileName == "explosion1.png") return explosion1;
-	else if (fileName == "player_idle.png") return player_idle;
-	else if (fileName == "player_run.png") return player_run;
+	else if (fileName == "berserker_idle.png") return berserkerIdle;
+	else if (fileName == "berserker_run.png") return berserkerRun;
+	else if (fileName == "wizard_idle.png") return wizardIdle;
+	else if (fileName == "wizard_run.png") return wizardRun;
+	else if (fileName == "hunter_idle.png") return hunterIdle;
+	else if (fileName == "hunter_run.png") return hunterRun;
 }
 bool ModuleResources::init()
 {
@@ -37,8 +41,12 @@ bool ModuleResources::init()
 	spacecraft1 = App->modTextures->loadTexture("spacecraft1.png");
 	spacecraft2 = App->modTextures->loadTexture("spacecraft2.png");
 	spacecraft3 = App->modTextures->loadTexture("spacecraft3.png");
-	player_idle = App->modTextures->loadTexture("player_idle.png");
-	player_run = App->modTextures->loadTexture("player_run.png");
+	berserkerIdle = App->modTextures->loadTexture("berserker_idle.png");
+	berserkerRun = App->modTextures->loadTexture("berserker_run.png");
+	wizardIdle = App->modTextures->loadTexture("wizard_idle.png");
+	wizardRun = App->modTextures->loadTexture("wizard_run.png");
+	hunterIdle = App->modTextures->loadTexture("hunter_idle.png");
+	hunterRun = App->modTextures->loadTexture("hunter_run.png");
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -50,8 +58,12 @@ bool ModuleResources::init()
 	loadTextureAsync("spacecraft3.png",      &spacecraft3);
 	loadTextureAsync("laser.png",            &laser);
 	loadTextureAsync("explosion1.png",       &explosion1);
-	loadTextureAsync("player_idle.png",		 &player_idle);
-	loadTextureAsync("player_run.png",		 &player_run);
+	loadTextureAsync("berserker_idle.png",	 &berserkerIdle);
+	loadTextureAsync("berserker_run.png",	 &berserkerRun);
+	loadTextureAsync("wizard_idle.png",		 &wizardIdle);
+	loadTextureAsync("wizard_run.png",		 &wizardRun);
+	loadTextureAsync("hunter_idle.png",		 &hunterIdle);
+	loadTextureAsync("hunter_run.png",		 &hunterRun);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");

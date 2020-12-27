@@ -16,10 +16,18 @@ public:
 	Texture *spacecraft3 = nullptr;
 	Texture *laser = nullptr;
 	Texture *explosion1 = nullptr;
-	Texture* player_idle = nullptr;
-	Texture* player_run = nullptr;
+
+	Texture* berserkerIdle = nullptr;
+	Texture* berserkerRun = nullptr;
+
+	Texture* wizardIdle = nullptr;
+	Texture* wizardRun = nullptr;
+
+	Texture* hunterIdle = nullptr;
+	Texture* hunterRun = nullptr;
 
 	AnimationClip *explosionClip = nullptr;
+
 	AnimationClip* playerIdleClip = nullptr;
 	AnimationClip* playerRunClip = nullptr;
 

@@ -36,7 +36,7 @@ enum class BehaviourType : uint8
 
 enum class PlayerType : uint8
 {
-	Berserk,
+	Berserker,
 	Wizard,
 	Hunter,
 	None

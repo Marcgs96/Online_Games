@@ -377,19 +377,19 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, vec2 initialPo
 	gameObject->sprite = App->modRender->addSprite(gameObject);
 	gameObject->sprite->order = 5;
 	if (classType == 0) {
-		gameObject->sprite->texture = App->modResources->player_idle;
+		gameObject->sprite->texture = App->modResources->berserkerIdle;
 
 		gameObject->animation = App->modRender->addAnimation(gameObject);
 		gameObject->animation->clip = App->modResources->playerIdleClip;
 	}
 	else if (classType == 1) {
-		gameObject->sprite->texture = App->modResources->player_idle;
+		gameObject->sprite->texture = App->modResources->wizardIdle;
 
 		gameObject->animation = App->modRender->addAnimation(gameObject);
 		gameObject->animation->clip = App->modResources->playerIdleClip;
 	}
 	else {
-		gameObject->sprite->texture = App->modResources->player_idle;
+		gameObject->sprite->texture = App->modResources->hunterIdle;
 
 		gameObject->animation = App->modRender->addAnimation(gameObject);
 		gameObject->animation->clip = App->modResources->playerIdleClip;

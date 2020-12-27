@@ -240,16 +240,16 @@ bool Player::ChangeState(PlayerState newState)
 	{
 		switch (playerType)
 		{
-		case PlayerType::Berserk:
-			gameObject->sprite->texture = App->modResources->player_idle;
+		case PlayerType::Berserker:
+			gameObject->sprite->texture = App->modResources->berserkerIdle;
 			gameObject->animation->clip = App->modResources->playerIdleClip;
 			break;
 		case PlayerType::Wizard:
-			gameObject->sprite->texture = App->modResources->player_idle;
+			gameObject->sprite->texture = App->modResources->wizardIdle;
 			gameObject->animation->clip = App->modResources->playerIdleClip;
 			break;
 		case PlayerType::Hunter:
-			gameObject->sprite->texture = App->modResources->player_idle;
+			gameObject->sprite->texture = App->modResources->hunterIdle;
 			gameObject->animation->clip = App->modResources->playerIdleClip;
 			break;
 		}
@@ -260,16 +260,16 @@ bool Player::ChangeState(PlayerState newState)
 	{
 		switch (playerType)
 		{
-		case PlayerType::Berserk:
-			gameObject->sprite->texture = App->modResources->player_run;
+		case PlayerType::Berserker:
+			gameObject->sprite->texture = App->modResources->berserkerRun;
 			gameObject->animation->clip = App->modResources->playerRunClip;
 			break;
 		case PlayerType::Wizard:
-			gameObject->sprite->texture = App->modResources->player_run;
+			gameObject->sprite->texture = App->modResources->wizardRun;
 			gameObject->animation->clip = App->modResources->playerRunClip;
 			break;
 		case PlayerType::Hunter:
-			gameObject->sprite->texture = App->modResources->player_run;
+			gameObject->sprite->texture = App->modResources->hunterRun;
 			gameObject->animation->clip = App->modResources->playerRunClip;
 			break;
 		}

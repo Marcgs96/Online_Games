@@ -1,40 +1,6 @@
 #include "Networks.h"
 #include "Behaviours.h"
 
-
-
-void Laser::start()
-{
-	gameObject->networkInterpolationEnabled = false;
-
-	App->modSound->playAudioClip(App->modResources->audioClipLaser);
-}
-
-void Laser::update()
-{
-	secondsSinceCreation += Time.deltaTime;
-
-	const float pixelsPerSecond = 1000.0f;
-	gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
-
-	if (isServer)
-	{
-		const float neutralTimeSeconds = 0.1f;
-		if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
-			gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
-		}
-
-		const float lifetimeSeconds = 2.0f;
-		if (secondsSinceCreation >= lifetimeSeconds) {
-			NetworkDestroy(gameObject);
-		}
-	}
-}
-
-
-
-
-
 void Player::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
@@ -92,11 +58,11 @@ void Player::destroy()
 
 void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 {
-	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
+	if (c2.type == ColliderType::Projectile && c2.gameObject->tag != gameObject->tag)
 	{
 		if (isServer)
 		{
-			NetworkDestroy(c2.gameObject); // Destroy the laser
+			NetworkDestroy(c2.gameObject); // Destroy the Projectile
 
 			if (hitPoints > 0)
 			{
@@ -189,26 +155,11 @@ void Player::HandleCombatInput(const InputController& input)
 
 void Player::UseWeapon()
 {
-	/*if (weapon)
+	if (weapon)
 	{
-		Weapon* weapon_behav = (Weapon*)weapon->behaviour;
-		weapon_behav.Use();
-	}*/
-
-	GameObject* laser = NetworkInstantiate();
-
-	laser->position = gameObject->position;
-	laser->angle = gameObject->angle;
-	laser->size = { 20, 60 };
-
-	laser->sprite = App->modRender->addSprite(laser);
-	laser->sprite->order = 3;
-	laser->sprite->texture = App->modResources->laser;
-
-	Laser* laserBehaviour = App->modBehaviour->addLaser(laser);
-	laserBehaviour->isServer = isServer;
-
-	laser->tag = gameObject->tag;
+		Weapon* weaponBehaviour = (Weapon*)weapon->behaviour;
+		weaponBehaviour->Use();
+	}
 }
 
 void Player::UseSpell()
@@ -308,3 +259,121 @@ void DeathGhost::update()
 	const float advanceSpeed = 50.0f;
 	gameObject->position.y -= advanceSpeed * Time.deltaTime;
 }
+
+void Projectile::start()
+{
+	gameObject->networkInterpolationEnabled = false;
+}
+
+void Projectile::update()
+{
+	secondsSinceCreation += Time.deltaTime;
+
+	if (isServer)
+	{
+		const float neutralTimeSeconds = 0.1f;
+		if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
+			gameObject->collider = App->modCollision->addCollider(ColliderType::Projectile, gameObject);
+		}
+
+		const float lifetimeSeconds = 10.0f;
+		if (secondsSinceCreation >= lifetimeSeconds) {
+			NetworkDestroy(gameObject);
+		}
+	}
+}
+
+void AxeProjectile::start()
+{
+	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+}
+
+void AxeProjectile::update()
+{
+	if (angleIncrementRatio >= PI)
+		angleIncrementRatio = 0;
+
+	gameObject->angle += angleIncrementRatio;
+	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+}
+
+void StaffProjectile::start()
+{
+	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+}
+
+void StaffProjectile::update()
+{
+	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+}
+
+
+void BowProjectile::start()
+{
+	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+}
+
+void BowProjectile::update()
+{
+	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+}
+
+
+void Weapon::start()
+{
+
+}
+
+void Weapon::update()
+{
+
+}
+
+void Weapon::Use()
+{
+
+	switch (weaponType)
+	{
+	case WeaponType::Axe: {
+
+		} break;
+	case WeaponType::Staff: {
+
+		} break;
+	case WeaponType::Bow: {
+
+		} break;
+	default: {
+
+		} break;
+	}
+
+	//GameObject* Projectile = NetworkInstantiate();
+
+	//Projectile->position = gameObject->position;
+	//Projectile->angle = gameObject->angle;
+	//Projectile->size = { 20, 60 };
+
+	//Projectile->sprite = App->modRender->addSprite(Projectile);
+	//Projectile->sprite->order = 3;
+	//Projectile->sprite->texture = App->modResources->laser;
+
+	//Projectile* ProjectileBehaviour = App->modBehaviour->addProjectile(Projectile);
+	//ProjectileBehaviour->isServer = isServer;
+
+	//Projectile->tag = gameObject->tag;
+}
+
+void Weapon::onMouseInput(const MouseController& input)
+{
+	HandleWeaponRotation(input);
+}
+
+void Weapon::HandleWeaponRotation(const MouseController& input)
+{
+	vec2 mousePosition = { input.x, input.y };
+	float angle = atan2(mousePosition.y, mousePosition.x);
+
+	gameObject->angle = angle;
+}
+

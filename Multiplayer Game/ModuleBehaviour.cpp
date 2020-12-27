@@ -8,7 +8,7 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(&behaviour);
 	}
 	
-	for (Laser &behaviour : lasers)
+	for (Projectile &behaviour : projectiles)
 	{
 		handleBehaviourLifeCycle(&behaviour);
 	}
@@ -27,8 +27,8 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 	{
 	case BehaviourType::Player:
 		return addPlayer(parentGameObject);
-	case BehaviourType::Laser:
-		return addLaser(parentGameObject);
+	case BehaviourType::Projectile:
+		return addProjectile(parentGameObject);
 	case BehaviourType::DeathGhost:
 		return addDeathGhost(parentGameObject);
 	default:
@@ -53,9 +53,9 @@ Player* ModuleBehaviour::addPlayer(GameObject *parentGameObject)
 	return nullptr;
 }
 
-Laser *ModuleBehaviour::addLaser(GameObject *parentGameObject)
+Projectile*ModuleBehaviour::addProjectile(GameObject *parentGameObject)
 {
-	for (Laser &behaviour : lasers)
+	for (Projectile &behaviour : projectiles)
 	{
 		if (behaviour.gameObject == nullptr)
 		{

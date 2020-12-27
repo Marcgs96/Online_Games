@@ -15,6 +15,8 @@ struct Behaviour
 
 	virtual void onInput(const InputController &input) { }
 
+	virtual void onMouseInput(const MouseController &input) { }
+
 	virtual void update() { }
 
 	virtual void destroy() { }
@@ -31,8 +33,12 @@ enum class BehaviourType : uint8
 {
 	None,
 	Player,
-	Laser,
-	DeathGhost
+	Projectile,
+	DeathGhost,
+	Weapon,
+	StaffProjectile,
+	AxeProjectile,
+	BowProjectile
 };
 
 enum class PlayerType : uint8
@@ -43,11 +49,64 @@ enum class PlayerType : uint8
 	None
 };
 
-struct Laser : public Behaviour
+enum class WeaponType : uint8
+{
+	Axe,
+	Staff,
+	Bow,
+	None
+};
+
+struct Weapon : public Behaviour 
+{
+	BehaviourType type() const override { return BehaviourType::Weapon; }
+
+	WeaponType weaponType = WeaponType::None;
+
+	void start() override;
+	void update() override;
+	void Use();
+
+	void onMouseInput(const MouseController& input) override;
+	void HandleWeaponRotation(const MouseController& input);
+};
+
+struct Projectile : public Behaviour
 {
 	float secondsSinceCreation = 0.0f;
+	float velocity = 1000.0f;
+	uint8 damagePoints = 0;
 
-	BehaviourType type() const override { return BehaviourType::Laser; }
+	BehaviourType type() const override { return BehaviourType::Projectile; }
+
+	virtual void start() override;
+
+	virtual void update() override;
+};
+
+struct AxeProjectile : public Projectile
+{
+	float angleIncrementRatio = 0.01;
+	BehaviourType type() const override { return BehaviourType::AxeProjectile; }
+
+	void start() override;
+
+	void update() override;
+};
+
+struct StaffProjectile : public Projectile
+{
+	BehaviourType type() const override { return BehaviourType::StaffProjectile; }
+
+	void start() override;
+
+	void update() override;
+};
+
+struct BowProjectile : public Projectile
+{
+
+	BehaviourType type() const override { return BehaviourType::BowProjectile; }
 
 	void start() override;
 

@@ -107,7 +107,7 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 			if (hitPoints <= 0)
 			{
 				// Centered death effect
-				float size = 35.0f;
+				float size = 40.0f;
 				vec2 position = gameObject->position;
 
 				GameObject* deathEffect = NetworkInstantiate();
@@ -121,10 +121,14 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 				deathEffect->animation = App->modRender->addAnimation(deathEffect);
 				deathEffect->animation->clip = App->modResources->deathClip;
 
+				DeathGhost* ghost_behav = App->modBehaviour->addDeathGhost(deathEffect);
+				deathEffect->behaviour = ghost_behav;
+				deathEffect->behaviour->isServer = isServer;
+
 				NetworkDestroy(deathEffect, 2.0f);
 				// NOTE(jesus): Only played in the server right now...
 				// You need to somehow make this happen in clients
-				App->modSound->playAudioClip(App->modResources->audioClipDeath);
+				//App->modSound->playAudioClip(App->modResources->audioClipDeath);
 
 				//Kill player
 				//NetworkDestroy(gameObject);
@@ -292,4 +296,15 @@ void Player::read(const InputMemoryStream& packet)
 	packet >> hitPoints;
 
 	ChangeState(new_state);
+}
+
+void DeathGhost::start()
+{
+	App->modSound->playAudioClip(App->modResources->audioClipDeath);
+}
+
+void DeathGhost::update()
+{
+	const float advanceSpeed = 50.0f;
+	gameObject->position.y -= advanceSpeed * Time.deltaTime;
 }

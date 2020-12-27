@@ -32,6 +32,7 @@ enum class BehaviourType : uint8
 	None,
 	Player,
 	Laser,
+	DeathGhost
 };
 
 enum class PlayerType : uint8
@@ -95,4 +96,12 @@ struct Player : public Behaviour
 	void UseSpell();
 	void Respawn();
 	bool ChangeState(PlayerState newState);
+};
+
+struct DeathGhost : public Behaviour
+{
+	BehaviourType type() const override { return BehaviourType::DeathGhost; }
+
+	void start() override;
+	void update() override;
 };

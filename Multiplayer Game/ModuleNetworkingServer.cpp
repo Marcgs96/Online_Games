@@ -405,7 +405,6 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, vec2 initialPo
 	gameObject->behaviour = playerBehaviour;
 	gameObject->behaviour->isServer = true;
 
-
 	return gameObject;
 }
 

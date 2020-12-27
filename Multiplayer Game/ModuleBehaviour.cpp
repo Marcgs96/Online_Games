@@ -13,6 +13,11 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(&behaviour);
 	}
 
+	for (DeathGhost& behaviour : deathGhosts)
+	{
+		handleBehaviourLifeCycle(&behaviour);
+	}
+
 	return true;
 }
 
@@ -24,6 +29,8 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 		return addPlayer(parentGameObject);
 	case BehaviourType::Laser:
 		return addLaser(parentGameObject);
+	case BehaviourType::DeathGhost:
+		return addDeathGhost(parentGameObject);
 	default:
 		return nullptr;
 	}
@@ -49,6 +56,23 @@ Player* ModuleBehaviour::addPlayer(GameObject *parentGameObject)
 Laser *ModuleBehaviour::addLaser(GameObject *parentGameObject)
 {
 	for (Laser &behaviour : lasers)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+DeathGhost* ModuleBehaviour::addDeathGhost(GameObject* parentGameObject)
+{
+	for (DeathGhost& behaviour : deathGhosts)
 	{
 		if (behaviour.gameObject == nullptr)
 		{

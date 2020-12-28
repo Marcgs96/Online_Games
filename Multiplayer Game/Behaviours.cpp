@@ -20,14 +20,17 @@ void Player::start()
 	case PlayerType::Berserker:
 		weapon->sprite->texture = App->modResources->axe;
 		wBehaviour->weaponType = WeaponType::Axe;
+		weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
 		break;
 	case PlayerType::Wizard:
 		weapon->sprite->texture = App->modResources->staff;
 		wBehaviour->weaponType = WeaponType::Staff;
+		weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
 		break;
 	case PlayerType::Hunter:
 		weapon->sprite->texture = App->modResources->bow;
 		wBehaviour->weaponType = WeaponType::Bow;
+		weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
 		break;
 	case PlayerType::None:
 		break;
@@ -37,9 +40,8 @@ void Player::start()
 
 	wBehaviour->player = this->gameObject;
 	weapon->behaviour = wBehaviour;
-	weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
 	weapon->sprite->order = 6;
-	weapon->size = vec2{ 50, 25 };
+	weapon->size = vec2{ 75, 50 };
 }
 
 void Player::onInput(const InputController &input)
@@ -426,16 +428,18 @@ void Weapon::onMouseInput(const MouseController& input)
 void Weapon::HandleWeaponRotation(const MouseController& input)
 {
 	vec2 mousePosition = { input.x, input.y };
+	vec2 positionScreen = App->modRender->WorldToScreen(gameObject->position);
+	vec2 position = positionScreen - App->modRender->cameraPosition;
 
-	float angle = atan2(mousePosition.y - gameObject->position.y, mousePosition.x - gameObject->position.x);
+	float angle = atan2(mousePosition.y - position.y, mousePosition.x - position.x) * (180 / PI);
 
-	gameObject->angle = angle * (180 / PI);
+	gameObject->angle = angle;
 
-	//if (angle <= PI / 2) {
-	//	gameObject->sprite->order = 1;
-	//}
-	//else {
-	//	gameObject->sprite->order = 6;
-	//}
+	if (angle <= 0) {
+		gameObject->sprite->order = 1;
+	}
+	else {
+		gameObject->sprite->order = 6;
+	}
 }
 

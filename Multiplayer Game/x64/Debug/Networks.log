@@ -1,7 +1,7 @@
 ﻿  UnityBuild.cpp
 C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.h(90,28): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(404,30): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(404,39): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(430,30): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(430,39): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
 C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': no coinciden signed/unsigned
 C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleResources.cpp(35): warning C4715: 'ModuleResources::GetTextureByFile': no todas las rutas de acceso de control devuelven un valor
   Networks.vcxproj -> C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\x64\Debug\Networks.exe

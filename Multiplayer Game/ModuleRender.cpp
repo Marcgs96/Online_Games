@@ -444,6 +444,21 @@ void ModuleRender::resizeBuffers(unsigned int width, unsigned int height)
 	}
 }
 
+vec2 ModuleRender::WorldToScreen(vec2 worldPosition)
+{
+	// Setup viewport
+	RECT rect;
+	::GetClientRect(hwnd, &rect);
+	float screenWidth = (float)(rect.right - rect.left);
+	float screenHeight = (float)(rect.bottom - rect.top);
+
+	vec2 screenPosition;
+	screenPosition.x = worldPosition.x + screenWidth / 2;
+	screenPosition.y = worldPosition.y + screenHeight / 2;
+
+	return screenPosition;
+}
+
 void ModuleRender::present()
 {
 	g_pSwapChain->Present(1, 0); // Present with vsync

@@ -15,7 +15,7 @@ void ModuleResources::TaskLoadTexture::execute()
 Texture* ModuleResources::GetTextureByFile(std::string fileName)
 {
 	if (fileName == "background.jpg") return background;
-	else if (fileName == "space_background.jpg") return space;
+	else if (fileName == "arena.png") return space;
 	else if (fileName == "asteroid1.png") return asteroid1;
 	else if (fileName == "asteroid2.png") return asteroid2;
 	else if (fileName == "laser.png") return laser;
@@ -58,7 +58,7 @@ bool ModuleResources::init()
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
-	loadTextureAsync("space_background.jpg", &space);
+	loadTextureAsync("arena.png", &space);
 	loadTextureAsync("asteroid1.png",        &asteroid1);
 	loadTextureAsync("asteroid2.png",        &asteroid2);
 	loadTextureAsync("laser.png",            &laser);

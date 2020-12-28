@@ -68,6 +68,9 @@ struct Weapon : public Behaviour
 	void update() override;
 	void Use();
 
+	void write(OutputMemoryStream& packet) override;
+	void read(const InputMemoryStream& packet) override;
+
 	void onMouseInput(const MouseController& input) override;
 	void HandleWeaponRotation(const MouseController& input);
 };
@@ -77,12 +80,18 @@ struct Projectile : public Behaviour
 	float secondsSinceCreation = 0.0f;
 	float velocity = 1000.0f;
 	uint8 damagePoints = 0;
+	
+	uint32 shooterID = 0;
 
 	BehaviourType type() const override { return BehaviourType::Projectile; }
 
 	virtual void start() override;
 
 	virtual void update() override;
+
+	void write(OutputMemoryStream& packet) override;
+
+	void read(const InputMemoryStream& packet) override;
 };
 
 struct AxeProjectile : public Projectile
@@ -117,10 +126,17 @@ struct BowProjectile : public Projectile
 
 struct Player : public Behaviour
 {
-	static const uint8 MAX_HIT_POINTS = 5;
-	uint8 hitPoints = MAX_HIT_POINTS;
+	static const uint8 BASE_HP = 5;
+	static const uint8 BASE_LEVEL = 1;
+	static const uint8 HP_INCREMENT = 1;
+	static const uint8 MAX_LEVEL = 10;
+	#define HitPoints(x) BASE_HP + (x * HP_INCREMENT) - 1;
+	#define LevelSize(x) 50 + (x * 50 * 0.3f);
 
-	GameObject *lifebar = nullptr;
+	uint8 level = BASE_LEVEL;
+	uint8 hitPoints = BASE_HP;
+
+	GameObject* lifebar = nullptr;
 	GameObject* weapon = nullptr;
 	//Spell* spell = nullptr;
 
@@ -130,7 +146,7 @@ struct Player : public Behaviour
 
 	void onInput(const InputController &input) override;
 
-	void onMouseInput(const MouseController& input) override { if (weapon) weapon->behaviour->onMouseInput(input); };
+	void onMouseInput(const MouseController& input) override;
 
 	void update() override;
 
@@ -156,7 +172,9 @@ struct Player : public Behaviour
 
 	void UseWeapon();
 	void UseSpell();
+	void Die();
 	void Respawn();
+	void LevelUp();
 	bool ChangeState(PlayerState newState);
 };
 

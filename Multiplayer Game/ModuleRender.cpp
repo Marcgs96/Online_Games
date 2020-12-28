@@ -781,6 +781,8 @@ void Sprite::write(OutputMemoryStream& packet)
 	packet.Write(color.b);
 	packet.Write(color.a);
 	packet.Write(order);
+	packet.Write(pivot.x);
+	packet.Write(pivot.y);
 	//Todo? add pivot and color to serialization
 }
 
@@ -794,6 +796,8 @@ void Sprite::read(const InputMemoryStream& packet)
 	packet.Read(color.b);
 	packet.Read(color.a);
 	packet.Read(order);
+	packet.Read(pivot.x);
+	packet.Read(pivot.y);
 }
 
 void Animation::write(OutputMemoryStream& packet)

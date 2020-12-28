@@ -12,7 +12,7 @@ public:
 
 	void setServerAddress(const char *serverAddress, uint16 serverPort);
 
-	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
+	void setPlayerInfo(const char *playerName, uint8 playerType);
 
 	uint32 GetNetworkId() { return networkId; }
 
@@ -55,7 +55,7 @@ private:
 
 	sockaddr_in serverAddress = {};
 	std::string playerName = "player";
-	uint8 spaceshipType = 0;
+	uint8 playerType = 0;
 
 	uint32 playerId = 0;
 	uint32 networkId = 0;

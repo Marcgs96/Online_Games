@@ -11,37 +11,43 @@ void Player::start()
 	lifebar->sprite->order = 5;
 
 	//Todo: Create weapon and spell
-	weapon = Instantiate();
-	Weapon* wBehaviour = App->modBehaviour->addWeapon(weapon);
-	weapon->sprite = App->modRender->addSprite(weapon);
-
-	switch (playerType)
+	if (isServer)
 	{
-	case PlayerType::Berserker:
-		weapon->sprite->texture = App->modResources->axe;
-		wBehaviour->weaponType = WeaponType::Axe;
-		weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
-		break;
-	case PlayerType::Wizard:
-		weapon->sprite->texture = App->modResources->staff;
-		wBehaviour->weaponType = WeaponType::Staff;
-		weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
-		break;
-	case PlayerType::Hunter:
-		weapon->sprite->texture = App->modResources->bow;
-		wBehaviour->weaponType = WeaponType::Bow;
-		weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
-		break;
-	case PlayerType::None:
-		break;
-	default:
-		break;
-	}
+		weapon = NetworkInstantiate();
+		Weapon* wBehaviour = App->modBehaviour->addWeapon(weapon);
+		weapon->sprite = App->modRender->addSprite(weapon);
 
-	wBehaviour->player = this->gameObject;
-	weapon->behaviour = wBehaviour;
-	weapon->sprite->order = 6;
-	weapon->size = vec2{ 75, 50 };
+		switch (playerType)
+		{
+		case PlayerType::Berserker:
+			weapon->sprite->texture = App->modResources->axe;
+			wBehaviour->weaponType = WeaponType::Axe;
+			weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
+			break;
+		case PlayerType::Wizard:
+			weapon->sprite->texture = App->modResources->staff;
+			wBehaviour->weaponType = WeaponType::Staff;
+			weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
+			break;
+		case PlayerType::Hunter:
+			weapon->sprite->texture = App->modResources->bow;
+			wBehaviour->weaponType = WeaponType::Bow;
+			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
+			break;
+		case PlayerType::None:
+			break;
+		default:
+			break;
+		}
+
+		wBehaviour->player = this->gameObject;
+		wBehaviour->isServer = isServer;
+		weapon->behaviour = wBehaviour;
+
+		weapon->sprite->order = 6;
+		weapon->size = vec2{ 75, 50 };
+		weapon->tag = gameObject->tag;
+	}
 }
 
 void Player::onInput(const InputController &input)
@@ -50,27 +56,16 @@ void Player::onInput(const InputController &input)
 		return;
 
 	HandleMovementInput(input);
-	HandleCombatInput(input);
+}
 
-	
-	if (input.actionDown == ButtonState::Pressed)
+void Player::onMouseInput(const MouseController& input)
+{
+	if (input.mouse1 == ButtonState::Press && isServer)
 	{
-		/*const float advanceSpeed = 200.0f;
-		gameObject->position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
-
-		if (isServer)
-		{
-			NetworkUpdate(gameObject);
-		}*/
+		UseWeapon();
 	}
-
-	if (input.horizontalAxis != 0.0f)
-	{
-		/*const float rotateSpeed = 180.0f;
-		gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
-		*/
-	}
-
+	if (weapon) 
+		weapon->behaviour->onMouseInput(input);
 }
 
 
@@ -80,7 +75,8 @@ void Player::update()
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
 
-	const float lifeRatio = max(0.01f, (float)(hitPoints) / (MAX_HIT_POINTS));
+	const uint8 max_hp = HitPoints(level);
+	const float lifeRatio = max(0.01f, (float)(hitPoints) / (max_hp));
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
@@ -95,8 +91,7 @@ void Player::update()
 			Respawn();
 			NetworkUpdate(gameObject);
 			time_dead = 0.0f;
-		}
-			
+		}		
 	}
 }
 
@@ -111,8 +106,6 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 	{
 		if (isServer)
 		{
-			NetworkDestroy(c2.gameObject); // Destroy the Projectile
-
 			if (hitPoints > 0)
 			{
 				hitPoints--;
@@ -121,35 +114,24 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 
 			if (hitPoints <= 0)
 			{
-				// Centered death effect
-				float size = 40.0f;
-				vec2 position = gameObject->position;
+				Die();
 
-				GameObject* deathEffect = NetworkInstantiate();
-				deathEffect->position = position;
-				deathEffect->size = vec2{ size, size };
+				Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
+				if (projectile)
+				{
+					GameObject* shooter = App->modLinkingContext->getNetworkGameObject(projectile->shooterID);
+					if (shooter)
+					{
+						Player* player = (Player*)shooter->behaviour;
+						player->LevelUp();
+					}
+				}
+					
 
-				deathEffect->sprite = App->modRender->addSprite(deathEffect);
-				deathEffect->sprite->texture = App->modResources->death;
-				deathEffect->sprite->order = 100;
-
-				deathEffect->animation = App->modRender->addAnimation(deathEffect);
-				deathEffect->animation->clip = App->modResources->deathClip;
-
-				DeathGhost* ghost_behav = App->modBehaviour->addDeathGhost(deathEffect);
-				deathEffect->behaviour = ghost_behav;
-				deathEffect->behaviour->isServer = isServer;
-
-				NetworkDestroy(deathEffect, 2.0f);
-				// NOTE(jesus): Only played in the server right now...
-				// You need to somehow make this happen in clients
-				//App->modSound->playAudioClip(App->modResources->audioClipDeath);
-
-				//Kill player
-				//NetworkDestroy(gameObject);
-				ChangeState(PlayerState::Dead);
 				NetworkUpdate(gameObject);
 			}
+
+			NetworkDestroy(c2.gameObject); // Destroy the Projectile
 		}
 	}
 }
@@ -185,13 +167,6 @@ void Player::HandleMovementInput(const InputController& input)
 
 void Player::HandleCombatInput(const InputController& input)
 {
-	if (input.actionLeft == ButtonState::Press)
-	{
-		if (isServer)
-		{
-			UseWeapon();
-		}
-	}
 	if (input.actionRight == ButtonState::Press)
 	{
 		if (isServer)
@@ -218,14 +193,55 @@ void Player::UseSpell()
 	}*/
 }
 
+void Player::Die()
+{
+	// Centered death effect
+	float size = 40.0f;
+	vec2 position = gameObject->position;
+
+	GameObject* deathEffect = NetworkInstantiate();
+	deathEffect->position = position;
+	deathEffect->size = vec2{ size, size };
+
+	deathEffect->sprite = App->modRender->addSprite(deathEffect);
+	deathEffect->sprite->texture = App->modResources->death;
+	deathEffect->sprite->order = 100;
+
+	deathEffect->animation = App->modRender->addAnimation(deathEffect);
+	deathEffect->animation->clip = App->modResources->deathClip;
+
+	DeathGhost* ghost_behav = App->modBehaviour->addDeathGhost(deathEffect);
+	deathEffect->behaviour = ghost_behav;
+	deathEffect->behaviour->isServer = isServer;
+
+	NetworkDestroy(deathEffect, 2.0f);
+
+	//Kill player
+	//NetworkDestroy(gameObject);
+	ChangeState(PlayerState::Dead);
+}
+
 void Player::Respawn()
 {
 	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
 	gameObject->hasTeleported = true;
 	gameObject->collider->isTrigger = true;
 	gameObject->sprite->color.a = 1.0f;
-	hitPoints = MAX_HIT_POINTS;
+
+	level = BASE_LEVEL;
+	hitPoints = HitPoints(level);
 	ChangeState(PlayerState::Idle);
+}
+
+void Player::LevelUp()
+{
+	level = max(level + 1, MAX_LEVEL);
+
+	float newSize = LevelSize(level);
+	gameObject->size.x = newSize;
+	gameObject->size.y = newSize;
+
+	NetworkUpdate(gameObject);
 }
 
 bool Player::ChangeState(PlayerState newState)
@@ -304,18 +320,6 @@ void Player::read(const InputMemoryStream& packet)
 	ChangeState(new_state);
 }
 
-void DeathGhost::start()
-{
-	App->modSound->playAudioClip(App->modResources->audioClipDeath);
-}
-
-void DeathGhost::update()
-{
-	const float advanceSpeed = 50.0f;
-	gameObject->position.y -= advanceSpeed * Time.deltaTime;
-	gameObject->sprite->color.a -= 0.5f * Time.deltaTime;
-}
-
 void Projectile::start()
 {
 	gameObject->networkInterpolationEnabled = false;
@@ -324,6 +328,11 @@ void Projectile::start()
 void Projectile::update()
 {
 	secondsSinceCreation += Time.deltaTime;
+
+	//THis is from laser////
+	const float pixelsPerSecond = 1000.0f;
+	gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
+	//////////////
 
 	if (isServer)
 	{
@@ -337,6 +346,16 @@ void Projectile::update()
 			NetworkDestroy(gameObject);
 		}
 	}
+}
+
+void Projectile::write(OutputMemoryStream& packet)
+{
+	packet << shooterID;
+}
+
+void Projectile::read(const InputMemoryStream& packet)
+{
+	packet >> shooterID;
 }
 
 void AxeProjectile::start()
@@ -404,20 +423,39 @@ void Weapon::Use()
 		} break;
 	}
 
-	//GameObject* Projectile = NetworkInstantiate();
+	if (isServer)
+	{
+		GameObject* projectile = NetworkInstantiate();
 
-	//Projectile->position = gameObject->position;
-	//Projectile->angle = gameObject->angle;
-	//Projectile->size = { 20, 60 };
+		projectile->position = gameObject->position;
+		projectile->angle = gameObject->angle;
+		projectile->size = { 20, 60 };
 
-	//Projectile->sprite = App->modRender->addSprite(Projectile);
-	//Projectile->sprite->order = 3;
-	//Projectile->sprite->texture = App->modResources->laser;
+		projectile->sprite = App->modRender->addSprite(projectile);
+		projectile->sprite->order = 3;
+		projectile->sprite->texture = App->modResources->laser;
 
-	//Projectile* ProjectileBehaviour = App->modBehaviour->addProjectile(Projectile);
-	//ProjectileBehaviour->isServer = isServer;
+		Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile);
+		projectileBehaviour->isServer = isServer;
+		projectileBehaviour->shooterID = player->networkId;
 
-	//Projectile->tag = gameObject->tag;
+		projectile->tag = gameObject->tag;
+	}
+}
+
+void Weapon::write(OutputMemoryStream& packet)
+{
+	packet << weaponType;
+	packet << player->networkId;
+}
+
+void Weapon::read(const InputMemoryStream& packet)
+{
+	packet >> weaponType;
+	uint32 playerID;
+	packet >> playerID;
+	player = App->modLinkingContext->getNetworkGameObject(playerID);	
+	((Player*)player->behaviour)->weapon = gameObject;
 }
 
 void Weapon::onMouseInput(const MouseController& input)
@@ -443,3 +481,14 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 	}
 }
 
+void DeathGhost::start()
+{
+	App->modSound->playAudioClip(App->modResources->audioClipDeath);
+}
+
+void DeathGhost::update()
+{
+	const float advanceSpeed = 50.0f;
+	gameObject->position.y -= advanceSpeed * Time.deltaTime;
+	gameObject->sprite->color.a -= 0.5f * Time.deltaTime;
+}

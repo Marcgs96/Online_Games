@@ -12,10 +12,10 @@ void ModuleNetworkingClient::setServerAddress(const char * pServerAddress, uint1
 	serverPort = pServerPort;
 }
 
-void ModuleNetworkingClient::setPlayerInfo(const char * pPlayerName, uint8 pSpaceshipType)
+void ModuleNetworkingClient::setPlayerInfo(const char * pPlayerName, uint8 pPlayerType)
 {
 	playerName = pPlayerName;
-	spaceshipType = pSpaceshipType;
+	playerType = pPlayerType;
 }
 
 
@@ -77,8 +77,8 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Separator();
 
-			ImGui::Text("Spaceship info:");
-			ImGui::Text(" - Type: %u", spaceshipType);
+			ImGui::Text("Player info:");
+			ImGui::Text(" - Type: %u", playerType);
 			ImGui::Text(" - Network id: %u", networkId);
 
 			vec2 playerPosition = {};
@@ -180,7 +180,7 @@ void ModuleNetworkingClient::onUpdate()
 			packet << PROTOCOL_ID;
 			packet << ClientMessage::Hello;
 			packet << playerName;
-			packet << spaceshipType;
+			packet << playerType;
 
 			sendPacket(packet, serverAddress);
 		}
@@ -230,7 +230,6 @@ void ModuleNetworkingClient::onUpdate()
 				playerGameObject->behaviour->onMouseInput(Mouse);
 			}
 		}
-
 		secondsSinceLastInputDelivery += Time.deltaTime;
 
 		// Input delivery interval timed out: create a new input packet

@@ -153,7 +153,19 @@ struct MouseController
 {
 	int16 x = 0;
 	int16 y = 0;
-	ButtonState buttons[5] = {};
+	union
+	{
+		ButtonState buttons[5] = {};
+		struct
+		{
+			ButtonState mouse1;
+			ButtonState mouse2;
+			ButtonState mouse3;
+			ButtonState mouse4;
+			ButtonState mouse5;
+		};
+	};
+
 };
 
 // NOTE(jesus): Global object to access the input controller

@@ -40,6 +40,10 @@ struct Delivery
 	uint32 sequenceNumber = 0;
 	double dispatchTime = 0.0;
 	DeliveryDelegate* delegate = nullptr;
+
+	void clear() {
+		delete delegate;
+	}
 };
 
 class DeliveryManager

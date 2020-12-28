@@ -190,10 +190,22 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 
 void GameObject::writeUpdate(OutputMemoryStream& packet)
 {
+	packet.Write(this->hasTeleported);
+
 	packet.Write(this->position.x);
 	packet.Write(this->position.y);
 
 	packet.Write(this->angle);
+
+	if (this->sprite)
+	{
+		packet.Write(true);
+		sprite->write(packet);
+	}
+	else
+	{
+		packet.Write(false);
+	}
 
 	if (this->behaviour)
 	{
@@ -262,7 +274,9 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 
 void GameObject::readUpdate(const InputMemoryStream& packet)
 {
-	if (networkInterpolationEnabled)
+	packet.Read(hasTeleported);
+
+	if (networkInterpolationEnabled && !hasTeleported)
 	{
 		initial_position = position;
 		initial_angle = angle;
@@ -273,28 +287,28 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 		packet.Read(final_angle);
 
 		secondsElapsed = 0;
-
-		//Check if it has behaviour
-		bool ret = false;
-		packet.Read(ret);
-		if (ret)
-		{
-			behaviour->read(packet);
-		}
 	}
 	else
 	{
+		hasTeleported = false;
 		packet.Read(position.x);
 		packet.Read(position.y);
 
 		packet.Read(angle);
+	}
 
-		//Check if it has behaviour
-		bool ret = false;
-		packet.Read(ret);
-		if (ret)
-		{
-			behaviour->read(packet);
-		}
+	//If it has a sprite, read it
+	bool ret = false;
+	packet.Read(ret);
+	if (ret)
+	{
+		sprite->read(packet);
+	}
+
+	//Check if it has behaviour
+	packet.Read(ret);
+	if (ret)
+	{
+		behaviour->read(packet);
 	}
 }

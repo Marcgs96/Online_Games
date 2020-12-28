@@ -79,6 +79,20 @@ void DeliveryManager::processTimedOutPackets()
 	}
 }
 
+void DeliveryManager::clear()
+{
+	nextSequenceNumber = 0;
+	for (std::list<Delivery*>::iterator it = pendingDeliveries.begin(); it != pendingDeliveries.end(); ++it)
+	{
+		(*it)->clear();
+		delete (*it);
+	}
+	pendingDeliveries.clear();
+
+	nextExpectedSequenceNumber = 0;
+	pendingAckSequenceNumbers.clear();
+}
+
 ReplicationDeliveryDelegate::ReplicationDeliveryDelegate(ReplicationManagerServer* repManager) :replicationManager(repManager)
 {
 	for (std::unordered_map<uint32, ReplicationCommand>::iterator it = replicationManager->commands.begin(); it != replicationManager->commands.end(); ++it)

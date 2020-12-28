@@ -305,5 +305,6 @@ void ModuleNetworkingClient::onDisconnect()
 		Destroy(networkGameObjects[i]);
 	}
 
+	deliveryManager.clear();
 	App->modRender->cameraPosition = {};
 }

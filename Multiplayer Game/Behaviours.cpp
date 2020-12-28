@@ -44,6 +44,9 @@ void Player::start()
 
 void Player::onInput(const InputController &input)
 {
+	if (currentState == PlayerState::Dead)
+		return;
+
 	HandleMovementInput(input);
 	HandleCombatInput(input);
 
@@ -79,6 +82,20 @@ void Player::update()
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
+
+	if (currentState == PlayerState::Dead && isServer)
+	{
+		static float time_dead = 0.0f;
+		time_dead += Time.deltaTime;
+
+		if (time_dead >= 2.0f)
+		{
+			Respawn();
+			NetworkUpdate(gameObject);
+			time_dead = 0.0f;
+		}
+			
+	}
 }
 
 void Player::destroy()
@@ -129,7 +146,6 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 				//Kill player
 				//NetworkDestroy(gameObject);
 				ChangeState(PlayerState::Dead);
-				Respawn();
 				NetworkUpdate(gameObject);
 			}
 		}
@@ -203,6 +219,9 @@ void Player::UseSpell()
 void Player::Respawn()
 {
 	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+	gameObject->hasTeleported = true;
+	gameObject->collider->isTrigger = true;
+	gameObject->sprite->color.a = 1.0f;
 	hitPoints = MAX_HIT_POINTS;
 	ChangeState(PlayerState::Idle);
 }
@@ -254,6 +273,10 @@ bool Player::ChangeState(PlayerState newState)
 		}
 	}
 		break;
+	case PlayerState::Dead:
+		gameObject->collider->isTrigger = false;
+		gameObject->sprite->color.a = 0.0f;	
+		break;
 	}
 
 	return true;
@@ -288,6 +311,7 @@ void DeathGhost::update()
 {
 	const float advanceSpeed = 50.0f;
 	gameObject->position.y -= advanceSpeed * Time.deltaTime;
+	gameObject->sprite->color.a -= 0.5f * Time.deltaTime;
 }
 
 void Projectile::start()

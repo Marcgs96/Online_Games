@@ -761,6 +761,10 @@ void ModuleRender::CleanupRenderTarget()
 void Sprite::write(OutputMemoryStream& packet)
 {
 	packet.Write(std::string(texture->filename));
+	packet.Write(color.r);
+	packet.Write(color.g);
+	packet.Write(color.b);
+	packet.Write(color.a);
 	packet.Write(order);
 	//Todo? add pivot and color to serialization
 }
@@ -770,7 +774,10 @@ void Sprite::read(const InputMemoryStream& packet)
 	std::string filename;
 	packet.Read(filename);
 	texture = App->modResources->GetTextureByFile(filename);
-
+	packet.Read(color.r);
+	packet.Read(color.g);
+	packet.Read(color.b);
+	packet.Read(color.a);
 	packet.Read(order);
 }
 

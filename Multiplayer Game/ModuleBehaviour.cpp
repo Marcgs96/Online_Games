@@ -18,6 +18,11 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(&behaviour);
 	}
 
+	for (Weapon& behaviour : weapons) 
+	{
+		handleBehaviourLifeCycle(&behaviour);
+	}
+
 	return true;
 }
 
@@ -30,7 +35,9 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 	case BehaviourType::Projectile:
 		return addProjectile(parentGameObject);
 	case BehaviourType::DeathGhost:
-		return addDeathGhost(parentGameObject);
+		return addDeathGhost(parentGameObject);	
+	case BehaviourType::Weapon:
+		return addWeapon(parentGameObject);
 	default:
 		return nullptr;
 	}
@@ -73,6 +80,23 @@ Projectile*ModuleBehaviour::addProjectile(GameObject *parentGameObject)
 DeathGhost* ModuleBehaviour::addDeathGhost(GameObject* parentGameObject)
 {
 	for (DeathGhost& behaviour : deathGhosts)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+Weapon* ModuleBehaviour::addWeapon(GameObject* parentGameObject)
+{
+	for (Weapon& behaviour : weapons)
 	{
 		if (behaviour.gameObject == nullptr)
 		{

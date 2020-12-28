@@ -62,6 +62,7 @@ struct Weapon : public Behaviour
 	BehaviourType type() const override { return BehaviourType::Weapon; }
 
 	WeaponType weaponType = WeaponType::None;
+	GameObject* player = nullptr;
 
 	void start() override;
 	void update() override;
@@ -128,6 +129,8 @@ struct Player : public Behaviour
 	void start() override;
 
 	void onInput(const InputController &input) override;
+
+	void onMouseInput(const MouseController& input) override { if (weapon) weapon->behaviour->onMouseInput(input); };
 
 	void update() override;
 

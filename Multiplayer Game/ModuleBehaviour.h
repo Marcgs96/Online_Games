@@ -12,6 +12,7 @@ public:
 	Player * addPlayer(GameObject *parentGameObject);
 	Projectile * addProjectile(GameObject *parentGameObject);
 	DeathGhost* addDeathGhost(GameObject* parentGameObject);
+	Weapon* addWeapon(GameObject* parentGameObject);
 
 private:
 
@@ -20,5 +21,6 @@ private:
 	Player players[MAX_CLIENTS];
 	Projectile projectiles[MAX_GAME_OBJECTS];
 	DeathGhost deathGhosts[MAX_CLIENTS];
+	Weapon weapons[MAX_CLIENTS];
 };
 

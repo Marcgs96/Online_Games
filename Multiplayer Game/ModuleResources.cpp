@@ -26,6 +26,12 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "wizard_run.png") return wizardRun;
 	else if (fileName == "hunter_idle.png") return hunterIdle;
 	else if (fileName == "hunter_run.png") return hunterRun;
+	else if (fileName == "Waraxe.png") return axe;
+	else if (fileName == "Staff.png") return staff;
+	else if (fileName == "Bow.png") return bow;
+	else if (fileName == "Waraxe_p.png") return axeProjectile;
+	else if (fileName == "Staff_p.png") return staffProjectile;
+	else if (fileName == "Bow_p.png") return bowProjectile;
 }
 bool ModuleResources::init()
 {
@@ -42,6 +48,13 @@ bool ModuleResources::init()
 	wizardRun = App->modTextures->loadTexture("wizard_run.png");
 	hunterIdle = App->modTextures->loadTexture("hunter_idle.png");
 	hunterRun = App->modTextures->loadTexture("hunter_run.png");
+	axe = App->modTextures->loadTexture("Waraxe.png");
+	staff = App->modTextures->loadTexture("Staff.png");
+	bow = App->modTextures->loadTexture("Bow.png");
+	axeProjectile = App->modTextures->loadTexture("Waraxe_p.png");
+	staffProjectile = App->modTextures->loadTexture("Staff_p.png");
+	bowProjectile = App->modTextures->loadTexture("Bow_p.png");
+
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -56,6 +69,12 @@ bool ModuleResources::init()
 	loadTextureAsync("wizard_run.png",		 &wizardRun);
 	loadTextureAsync("hunter_idle.png",		 &hunterIdle);
 	loadTextureAsync("hunter_run.png",		 &hunterRun);
+	loadTextureAsync("Waraxe.png",			 &axe);
+	loadTextureAsync("Staff.png",			 &staff);
+	loadTextureAsync("Bow.png",				 &bow);
+	loadTextureAsync("Waraxe_p.png",		 &axeProjectile);
+	loadTextureAsync("Staff_p.png",			 &staffProjectile);
+	loadTextureAsync("Bow_p.png",			 &bowProjectile);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");

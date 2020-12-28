@@ -19,6 +19,9 @@ struct InputPacketData
 	real32 horizontalAxis = 0.0f;
 	real32 verticalAxis = 0.0f;
 	uint16 buttonBits = 0;
+	int16 mouseX = 0;
+	int16 mouseY = 0;
+	uint16 mouseButtonBits = 0;
 };
 
 uint16 packInputControllerButtons(const InputController &input);
@@ -26,3 +29,9 @@ uint16 packInputControllerButtons(const InputController &input);
 void unpackInputControllerButtons(uint16 buttonBits, InputController &input);
 
 InputController inputControllerFromInputPacketData(const InputPacketData &inputPacketData, const InputController &previousGamepad);
+
+uint16 packMouseControllerButtons(const MouseController& input);
+
+void unpackMouseControllerButtons(uint16 buttonBits, MouseController& input);
+
+MouseController mouseControllerFromInputPacketData(const InputPacketData& inputPacketData, const MouseController& previousGamepad);

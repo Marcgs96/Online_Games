@@ -146,12 +146,16 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 					return;
 
 				InputController prevInput;
+				MouseController prevMouse;
 				prevInput = inputControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevInput);
+				prevMouse = mouseControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevMouse);
 
 				for (int i = inputDataFront + 1; i < inputDataBack; i++) {
 
 					prevInput = inputControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevInput);
 					playerGameObject->behaviour->onInput(prevInput);
+					prevMouse = mouseControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevMouse);
+					playerGameObject->behaviour->onMouseInput(prevMouse);
 				}
 			}
 		}	
@@ -214,10 +218,17 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.verticalAxis = Input.verticalAxis;
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
 
+			//Pack current mouse input
+			inputPacketData.mouseX = Mouse.x;
+			inputPacketData.mouseY = Mouse.y;
+			inputPacketData.mouseButtonBits = packMouseControllerButtons(Mouse);
+
 			// TODO(you): Latency management lab session
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			if (playerGameObject != nullptr)
+			if (playerGameObject != nullptr) {
 				playerGameObject->behaviour->onInput(Input);
+				playerGameObject->behaviour->onMouseInput(Mouse);
+			}
 		}
 
 		secondsSinceLastInputDelivery += Time.deltaTime;
@@ -240,6 +251,9 @@ void ModuleNetworkingClient::onUpdate()
 				packet << inputPacketData.horizontalAxis;
 				packet << inputPacketData.verticalAxis;
 				packet << inputPacketData.buttonBits;
+				packet << inputPacketData.mouseX;
+				packet << inputPacketData.mouseY;
+				packet << inputPacketData.mouseButtonBits;
 			}
 
 			// Clear the queue

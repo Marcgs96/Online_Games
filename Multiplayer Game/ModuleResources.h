@@ -24,6 +24,15 @@ public:
 	Texture* hunterIdle = nullptr;
 	Texture* hunterRun = nullptr;
 
+	//weapons
+	Texture* axe = nullptr;
+	Texture* staff = nullptr;
+	Texture* bow = nullptr;	
+	
+	Texture* axeProjectile = nullptr;
+	Texture* staffProjectile = nullptr;
+	Texture* bowProjectile = nullptr;
+
 	AnimationClip *deathClip = nullptr;
 
 	AnimationClip* playerIdleClip = nullptr;
@@ -52,7 +61,7 @@ private:
 		void execute() override;
 	};
 
-	static const int MAX_RESOURCES = 16;
+	static const int MAX_RESOURCES = 32;
 	TaskLoadTexture tasks[MAX_RESOURCES] = {};
 	uint32 taskCount = 0;
 	uint32 finishedTaskCount = 0;

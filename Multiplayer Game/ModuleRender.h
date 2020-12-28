@@ -104,6 +104,7 @@ public:
 	void resizeBuffers(unsigned int width, unsigned int height);
 
 	vec2 WorldToScreen(vec2 worldPosition);
+	vec2 ScreenToWorld(vec2 screenPosition);
 
 	void present();
 

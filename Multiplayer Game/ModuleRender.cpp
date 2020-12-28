@@ -456,7 +456,26 @@ vec2 ModuleRender::WorldToScreen(vec2 worldPosition)
 	screenPosition.x = worldPosition.x + screenWidth / 2;
 	screenPosition.y = worldPosition.y + screenHeight / 2;
 
+	worldPosition = worldPosition - cameraPosition;
+
 	return screenPosition;
+}
+
+vec2 ModuleRender::ScreenToWorld(vec2 screenPosition)
+{
+	// Setup viewport
+	RECT rect;
+	::GetClientRect(hwnd, &rect);
+	float screenWidth = (float)(rect.right - rect.left);
+	float screenHeight = (float)(rect.bottom - rect.top);
+
+	vec2 worldPosition;
+	worldPosition.x = screenPosition.x - screenWidth / 2;
+	worldPosition.y = screenPosition.y - screenHeight / 2;
+
+	worldPosition = worldPosition + cameraPosition;
+
+	return worldPosition;
 }
 
 void ModuleRender::present()

@@ -219,14 +219,18 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
 
 			//Pack current mouse input
-			inputPacketData.mouseX = Mouse.x;
-			inputPacketData.mouseY = Mouse.y;
+			vec2 mousePosition = App->modRender->ScreenToWorld({ (float)Mouse.x, (float)Mouse.y });
+			inputPacketData.mouseX = mousePosition.x;
+			inputPacketData.mouseY = mousePosition.y;
 			inputPacketData.mouseButtonBits = packMouseControllerButtons(Mouse);
+
 
 			// TODO(you): Latency management lab session
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 			if (playerGameObject != nullptr) {
 				playerGameObject->behaviour->onInput(Input);
+				Mouse.x = mousePosition.x;
+				Mouse.y = mousePosition.y;
 				playerGameObject->behaviour->onMouseInput(Mouse);
 			}
 		}

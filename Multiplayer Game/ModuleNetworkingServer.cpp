@@ -197,6 +197,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						//Mouse
 						proxy->mouse.x = inputData.mouseX;
 						proxy->mouse.y = inputData.mouseY;
+
 						unpackMouseControllerButtons(inputData.mouseButtonBits, proxy->mouse);
 						proxy->gameObject->behaviour->onMouseInput(proxy->mouse);
 

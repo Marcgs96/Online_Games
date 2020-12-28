@@ -22,17 +22,17 @@ void Player::start()
 		case PlayerType::Berserker:
 			weapon->sprite->texture = App->modResources->axe;
 			wBehaviour->weaponType = WeaponType::Axe;
-			weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
+			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
 			wBehaviour->weaponType = WeaponType::Staff;
-			weapon->sprite->pivot = vec2{ 0.0f, 0.5f };
+			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
 			wBehaviour->weaponType = WeaponType::Bow;
-			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
+			weapon->sprite->pivot = vec2{ 0.2f, 0.5f };
 			break;
 		case PlayerType::None:
 			break;
@@ -45,7 +45,7 @@ void Player::start()
 		weapon->behaviour = wBehaviour;
 
 		weapon->sprite->order = 6;
-		weapon->size = vec2{ 75, 50 };
+		weapon->size = vec2{ 50, 75 };
 		weapon->tag = gameObject->tag;
 	}
 }
@@ -322,17 +322,12 @@ void Player::read(const InputMemoryStream& packet)
 
 void Projectile::start()
 {
-	gameObject->networkInterpolationEnabled = false;
+	gameObject->networkInterpolationEnabled = true;
 }
 
 void Projectile::update()
 {
 	secondsSinceCreation += Time.deltaTime;
-
-	//THis is from laser////
-	const float pixelsPerSecond = 1000.0f;
-	gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
-	//////////////
 
 	if (isServer)
 	{
@@ -360,36 +355,49 @@ void Projectile::read(const InputMemoryStream& packet)
 
 void AxeProjectile::start()
 {
+	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+
+	if (isServer) {
+		direction = vec2FromDegrees(gameObject->angle);
+		direction = { -direction.x, -direction.y };
+	}
 }
 
 void AxeProjectile::update()
 {
-	if (angleIncrementRatio >= PI)
-		angleIncrementRatio = 0;
+	if (isServer) {
+		Projectile::update();
 
-	gameObject->angle += angleIncrementRatio;
-	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+		gameObject->angle += angleIncrementRatio;
+		gameObject->position += direction * velocity * Time.deltaTime;
+
+		NetworkUpdate(gameObject);
+	}
 }
 
 void StaffProjectile::start()
 {
+	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 }
 
 void StaffProjectile::update()
 {
+	Projectile::update();
 	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
 }
 
 
 void BowProjectile::start()
 {
+	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 }
 
 void BowProjectile::update()
 {
+	Projectile::update();
 	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
 }
 
@@ -406,38 +414,46 @@ void Weapon::update()
 
 void Weapon::Use()
 {
-
-	switch (weaponType)
-	{
-	case WeaponType::Axe: {
-
-		} break;
-	case WeaponType::Staff: {
-
-		} break;
-	case WeaponType::Bow: {
-
-		} break;
-	default: {
-
-		} break;
-	}
-
 	if (isServer)
 	{
 		GameObject* projectile = NetworkInstantiate();
+		projectile->sprite = App->modRender->addSprite(projectile);
+		projectile->sprite->order = 3;
+
+		switch (weaponType)
+		{
+			case WeaponType::Axe: {
+
+				projectile->sprite->texture = App->modResources->axeProjectile;
+				AxeProjectile* projectileBehaviour = App->modBehaviour->addAxeProjectile(projectile);
+				projectileBehaviour->isServer = isServer;
+				projectileBehaviour->shooterID = player->networkId;
+
+			} break;
+			case WeaponType::Staff: {
+
+				projectile->sprite->texture = App->modResources->staffProjectile;
+				StaffProjectile* projectileBehaviour = App->modBehaviour->addStaffProjectile(projectile);
+				projectileBehaviour->isServer = isServer;
+				projectileBehaviour->shooterID = player->networkId;
+
+			} break;
+			case WeaponType::Bow: {
+
+				projectile->sprite->texture = App->modResources->bowProjectile;
+				BowProjectile* projectileBehaviour = App->modBehaviour->addBowProjectile(projectile);
+				projectileBehaviour->isServer = isServer;
+				projectileBehaviour->shooterID = player->networkId;
+
+			} break;
+			default: {
+
+			} break;
+		}
 
 		projectile->position = gameObject->position;
 		projectile->angle = gameObject->angle;
-		projectile->size = { 20, 60 };
-
-		projectile->sprite = App->modRender->addSprite(projectile);
-		projectile->sprite->order = 3;
-		projectile->sprite->texture = App->modResources->laser;
-
-		Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile);
-		projectileBehaviour->isServer = isServer;
-		projectileBehaviour->shooterID = player->networkId;
+		projectile->size = { 0, 0 };
 
 		projectile->tag = gameObject->tag;
 	}
@@ -466,14 +482,12 @@ void Weapon::onMouseInput(const MouseController& input)
 void Weapon::HandleWeaponRotation(const MouseController& input)
 {
 	vec2 mousePosition = { input.x, input.y };
-	vec2 positionScreen = App->modRender->WorldToScreen(gameObject->position);
-	vec2 position = positionScreen - App->modRender->cameraPosition;
 
-	float angle = atan2(mousePosition.y - position.y, mousePosition.x - position.x) * (180 / PI);
+	float angle = atan2(mousePosition.y - gameObject->position.y, mousePosition.x - gameObject->position.x) * (180 / PI) - 90;
 
 	gameObject->angle = angle;
 
-	if (angle <= 0) {
+	if (angle <= 180) {
 		gameObject->sprite->order = 1;
 	}
 	else {

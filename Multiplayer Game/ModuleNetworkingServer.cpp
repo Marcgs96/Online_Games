@@ -297,8 +297,9 @@ void ModuleNetworkingServer::onConnectionReset(const sockaddr_in & fromAddress)
 void ModuleNetworkingServer::onDisconnect()
 {
 	uint16 netGameObjectsCount;
-	GameObject *netGameObjects[MAX_NETWORK_OBJECTS];
+	GameObject* netGameObjects[MAX_NETWORK_OBJECTS] = {};
 	App->modLinkingContext->getNetworkGameObjects(netGameObjects, &netGameObjectsCount);
+
 	for (uint32 i = 0; i < netGameObjectsCount; ++i)
 	{
 		NetworkDestroy(netGameObjects[i]);
@@ -309,7 +310,14 @@ void ModuleNetworkingServer::onDisconnect()
 		destroyClientProxy(&clientProxy);
 	}
 	
+	for (DelayedDestroyEntry& destroyEntry : netGameObjectsToDestroyWithDelay)
+	{
+		destroyEntry.delaySeconds = 0.0f;
+		destroyEntry.object = nullptr;
+	}
+
 	nextClientId = 0;
+	secondsSinceSendPingPacket = 0;
 
 	state = ServerState::Stopped;
 }
@@ -356,7 +364,7 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 	{
 		destroyNetworkObject(clientProxy->gameObject);
 	}
-
+	clientProxy->deliveryManager.clear();
     *clientProxy = {};
 }
 

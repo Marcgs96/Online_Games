@@ -13,21 +13,6 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(behaviour);
 	}
 
-	for (AxeProjectile& behaviour : axeProjectiles)
-	{
-		handleBehaviourLifeCycle(&behaviour);
-	}
-
-	for (StaffProjectile& behaviour : staffProjectiles)
-	{
-		handleBehaviourLifeCycle(&behaviour);
-	}
-
-	for (BowProjectile& behaviour : bowProjectiles)
-	{
-		handleBehaviourLifeCycle(&behaviour);
-	}
-
 	for (DeathGhost& behaviour : deathGhosts)
 	{
 		handleBehaviourLifeCycle(&behaviour);

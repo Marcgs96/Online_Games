@@ -21,9 +21,6 @@ private:
 
 	Player players[MAX_CLIENTS];
 	Projectile* projectiles[MAX_GAME_OBJECTS];
-	AxeProjectile axeProjectiles[MAX_GAME_OBJECTS];
-	StaffProjectile staffProjectiles[MAX_GAME_OBJECTS];
-	BowProjectile bowProjectiles[MAX_GAME_OBJECTS];
 	DeathGhost deathGhosts[MAX_CLIENTS];
 	Weapon weapons[MAX_CLIENTS];
 };

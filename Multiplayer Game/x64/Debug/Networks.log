@@ -1,7 +1,7 @@
 ﻿  UnityBuild.cpp
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(256,23): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(551,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(551,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(266,23): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(562,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(562,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': signed/unsigned mismatch
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data

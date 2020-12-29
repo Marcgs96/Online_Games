@@ -536,7 +536,8 @@ static void selectAndSortObjects(GameObject toSort[MAX_GAME_OBJECTS], GameObject
 	for (int i = 0; i < MAX_GAME_OBJECTS; ++i)
 	{
 		if (toSort[i].state == GameObject::UPDATING &&
-			toSort[i].sprite != nullptr &&
+			toSort[i].sprite != nullptr && 
+			toSort[i].sprite->enabled &&
 			(toSort[i].animation == nullptr ||
 			!toSort[i].animation->finished())) // && toSort[i]->scene->enabled)
 		{
@@ -802,7 +803,7 @@ void Sprite::write(OutputMemoryStream& packet)
 	packet.Write(order);
 	packet.Write(pivot.x);
 	packet.Write(pivot.y);
-	//Todo? add pivot and color to serialization
+	packet.Write(enabled);
 }
 
 void Sprite::read(const InputMemoryStream& packet)
@@ -817,6 +818,7 @@ void Sprite::read(const InputMemoryStream& packet)
 	packet.Read(order);
 	packet.Read(pivot.x);
 	packet.Read(pivot.y);
+	packet.Read(enabled);
 }
 
 void Animation::write(OutputMemoryStream& packet)

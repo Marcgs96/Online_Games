@@ -220,6 +220,14 @@ void Player::Die()
 	NetworkDestroy(deathEffect, 2.0f);
 
 	//Kill player
+	level = BASE_LEVEL;
+	gameObject->collider->isTrigger = false;
+	gameObject->sprite->enabled = false;
+	if (weapon)
+	{
+		weapon->sprite->enabled = false;
+		NetworkUpdate(weapon);
+	}
 	ChangeState(PlayerState::Dead);
 }
 
@@ -228,7 +236,8 @@ void Player::Respawn()
 	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
 	gameObject->hasTeleported = true;
 	gameObject->collider->isTrigger = true;
-	gameObject->sprite->color.a = 1.0f;
+	gameObject->sprite->enabled = true;
+	lifebar->sprite->enabled = true;
 
 	hitPoints = BASE_HP;
 	maxHitPoints = BASE_HP;
@@ -239,6 +248,7 @@ void Player::Respawn()
 	{
 		Weapon* weaponBehaviour = (Weapon*)weapon->behaviour;
 		weapon->size = vec2{ weaponBehaviour->initial_size.x, weaponBehaviour->initial_size.y };
+		weapon->sprite->enabled = true;
 
 		NetworkUpdate(weapon);
 	}
@@ -284,6 +294,7 @@ bool Player::ChangeState(PlayerState newState)
 	{
 	case PlayerState::Idle:
 	{
+		lifebar->sprite->enabled = true;
 		switch (playerType)
 		{
 		case PlayerType::Berserker:
@@ -304,6 +315,7 @@ bool Player::ChangeState(PlayerState newState)
 
 	case PlayerState::Running:
 	{
+		lifebar->sprite->enabled = true;
 		switch (playerType)
 		{
 		case PlayerType::Berserker:
@@ -322,9 +334,8 @@ bool Player::ChangeState(PlayerState newState)
 	}
 		break;
 	case PlayerState::Dead:
-		gameObject->collider->isTrigger = false;
-		gameObject->sprite->color.a = 0.0f;	
-		level = BASE_LEVEL;
+		lifebar->sprite->enabled = false;
+		//set death animation
 		break;
 	}
 

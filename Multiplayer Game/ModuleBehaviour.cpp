@@ -59,6 +59,12 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 		return addDeathGhost(parentGameObject);	
 	case BehaviourType::Weapon:
 		return addWeapon(parentGameObject);
+	case BehaviourType::AxeSpell:
+		return addAxeSpell(parentGameObject);
+	case BehaviourType::StaffSpell:
+		return addStaffSpell(parentGameObject);
+	case BehaviourType::BowSpell:
+		return addBowSpell(parentGameObject);
 	default:
 		return nullptr;
 	}
@@ -171,6 +177,57 @@ DeathGhost* ModuleBehaviour::addDeathGhost(GameObject* parentGameObject)
 Weapon* ModuleBehaviour::addWeapon(GameObject* parentGameObject)
 {
 	for (Weapon& behaviour : weapons)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+AxeSpell* ModuleBehaviour::addAxeSpell(GameObject* parentGameObject)
+{
+	for (AxeSpell& behaviour : axeSpells)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+StaffSpell* ModuleBehaviour::addStaffSpell(GameObject* parentGameObject)
+{
+	for (StaffSpell& behaviour : staffSpells)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
+BowSpell* ModuleBehaviour::addBowSpell(GameObject* parentGameObject)
+{
+	for (BowSpell& behaviour : bowSpells)
 	{
 		if (behaviour.gameObject == nullptr)
 		{

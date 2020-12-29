@@ -24,18 +24,24 @@ void Player::start()
 			wBehaviour->weaponType = WeaponType::Axe;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
 			weapon->size = vec2{ 50, 75 };
+
+			spell = new AxeSpell();
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
 			wBehaviour->weaponType = WeaponType::Staff;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.3f };
 			weapon->size = vec2{ 50, 100 };
+
+			spell = new StaffSpell();
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
 			wBehaviour->weaponType = WeaponType::Bow;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
 			weapon->size = vec2{ 100, 50 };
+
+			spell = new StaffSpell();
 			break;
 		case PlayerType::None:
 			break;
@@ -58,6 +64,7 @@ void Player::onInput(const InputController &input)
 		return;
 
 	HandleMovementInput(input);
+	HandleCombatInput(input);
 }
 
 void Player::onMouseInput(const MouseController& input)
@@ -167,10 +174,8 @@ void Player::HandleMovementInput(const InputController& input)
 
 void Player::HandleCombatInput(const InputController& input)
 {
-	if (input.actionRight == ButtonState::Press)
-	{
-		if (isServer)
-		{
+	if (input.space == ButtonState::Press) {
+		if (isServer) {
 			UseSpell();
 		}
 	}
@@ -190,10 +195,10 @@ void Player::UseWeapon()
 
 void Player::UseSpell()
 {
-	/*if (spell)
+	if (spell && spell->spellCooldownTimer >= spell->spellCooldown)
 	{
-		spell.Use();
-	}*/
+		spell->Use();
+	}
 }
 
 void Player::Die()
@@ -633,4 +638,58 @@ void DeathGhost::update()
 	const float advanceSpeed = 50.0f;
 	gameObject->position.y -= advanceSpeed * Time.deltaTime;
 	gameObject->sprite->color.a -= 0.5f * Time.deltaTime;
+}
+
+void Spell::start()
+{
+	spellCooldownTimer = 0.0f;
+}
+
+void Spell::update()
+{
+	if(spellCooldownTimer < spellCooldown)
+		spellCooldownTimer += Time.deltaTime;
+}
+
+void Spell::Use()
+{
+	spellCooldownTimer = 0.0f;
+}
+
+void AxeSpell::start()
+{
+
+}
+
+void AxeSpell::update()
+{
+}
+
+void AxeSpell::Use()
+{
+
+}
+
+void StaffSpell::start()
+{
+}
+
+void StaffSpell::update()
+{
+}
+
+void StaffSpell::Use()
+{
+}
+
+void BowSpell::start()
+{
+}
+
+void BowSpell::update()
+{
+}
+
+void BowSpell::Use()
+{
 }

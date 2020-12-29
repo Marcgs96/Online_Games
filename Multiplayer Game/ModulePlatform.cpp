@@ -370,6 +370,9 @@ bool ModulePlatform::preUpdate()
 					{
 						Win32ProcessKeyboardButton(&KeyboardInput.start, IsDown);
 					}
+					else if (VKCode == VK_SPACE) {
+						Win32ProcessKeyboardButton(&KeyboardInput.space, IsDown);
+					}
 					else if (VKCode == VK_F1 && IsDown)
 					{
 						App->modUI->setEnabled(!App->modUI->isEnabled());
@@ -438,6 +441,7 @@ bool ModulePlatform::preUpdate()
 			Win32ProcessGamepadButton(&GamepadInput.rightShoulder, pad, XINPUT_GAMEPAD_RIGHT_SHOULDER);
 			Win32ProcessGamepadButton(&GamepadInput.back, pad, XINPUT_GAMEPAD_BACK);
 			Win32ProcessGamepadButton(&GamepadInput.start, pad, XINPUT_GAMEPAD_START);
+			Win32ProcessGamepadButton(&GamepadInput.space, pad, XINPUT_GAMEPAD_RIGHT_THUMB);
 
 			GamepadInput.horizontalAxis = Win32ProcessGamepadThumb(pad->sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 			GamepadInput.verticalAxis = Win32ProcessGamepadThumb(pad->sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);

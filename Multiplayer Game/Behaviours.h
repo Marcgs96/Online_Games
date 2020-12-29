@@ -44,7 +44,11 @@ enum class BehaviourType : uint8
 	Weapon,
 	StaffProjectile,
 	AxeProjectile,
-	BowProjectile
+	BowProjectile,
+	Spell,
+	AxeSpell,
+	StaffSpell,
+	BowSpell
 };
 
 enum class PlayerType : uint8
@@ -135,6 +139,48 @@ struct BowProjectile : public Projectile
 	void update() override;
 };
 
+struct Spell : public Behaviour
+{
+	float spellCooldown = 10.0f;
+	float spellCooldownTimer = 0.0f;
+
+	BehaviourType type() const override { return BehaviourType::Spell; }
+
+	virtual void start() override;
+	virtual void update() override;
+
+	virtual void Use();
+};
+
+struct AxeSpell : public Spell
+{
+	BehaviourType type() const override { return BehaviourType::AxeSpell; }
+
+	virtual void start() override;
+	virtual void update() override;
+
+	virtual void Use();
+};
+
+struct StaffSpell : public Spell
+{
+	BehaviourType type() const override { return BehaviourType::StaffSpell; }
+
+	virtual void start() override;
+	virtual void update() override;
+
+	virtual void Use();
+};
+
+struct BowSpell : public Spell
+{
+	BehaviourType type() const override { return BehaviourType::BowSpell; }
+
+	virtual void start() override;
+	virtual void update() override;
+
+	virtual void Use();
+};
 
 struct Player : public Behaviour
 {
@@ -157,7 +203,10 @@ struct Player : public Behaviour
 	GameObject* lifebar = nullptr;
 	GameObject* weapon = nullptr;
 	std::string name = "";
-	//Spell* spell = nullptr;
+
+	//////Spell///////
+	Spell* spell = nullptr;
+	/////////////////
 
 	BehaviourType type() const override { return BehaviourType::Player; }
 

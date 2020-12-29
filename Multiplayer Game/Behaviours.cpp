@@ -342,7 +342,7 @@ bool Player::ChangeState(PlayerState newState)
 	return true;
 }
 
-void Player::write(OutputMemoryStream& packet)
+void Player::writeCreate(OutputMemoryStream& packet)
 {
 	packet << playerType;
 	packet << currentState;
@@ -351,9 +351,10 @@ void Player::write(OutputMemoryStream& packet)
 	packet << movementSpeed;
 	packet << level;
 	packet << name;
+	packet << (weapon? weapon->networkId:0);
 }
 
-void Player::read(const InputMemoryStream& packet)
+void Player::readCreate(const InputMemoryStream& packet)
 {
 	PlayerState new_state;
 
@@ -364,6 +365,41 @@ void Player::read(const InputMemoryStream& packet)
 	packet >> movementSpeed;
 	packet >> level;
 	packet >> name;
+
+	uint32 weaponNetworkID;
+	packet >> weaponNetworkID;
+	if (!weapon)
+	{
+		weapon = App->modLinkingContext->getNetworkGameObject(weaponNetworkID);
+		if (weapon)
+		{
+			((Weapon*)weapon->behaviour)->player = gameObject;
+			weapon->networkInterpolationEnabled = gameObject->networkInterpolationEnabled;
+		}
+			
+;	}
+
+	ChangeState(new_state);
+}
+
+void Player::writeUpdate(OutputMemoryStream& packet)
+{
+	packet << currentState;
+	packet << hitPoints;
+	packet << maxHitPoints;
+	packet << movementSpeed;
+	packet << level;
+}
+
+void Player::readUpdate(const InputMemoryStream& packet)
+{
+	PlayerState new_state;
+
+	packet >> new_state;
+	packet >> hitPoints;
+	packet >> maxHitPoints;
+	packet >> movementSpeed;
+	packet >> level;
 
 	ChangeState(new_state);
 }
@@ -397,12 +433,12 @@ void Projectile::update()
 	}
 }
 
-void Projectile::write(OutputMemoryStream& packet)
+void Projectile::writeCreate(OutputMemoryStream& packet)
 {
 	packet << shooterID;
 }
 
-void Projectile::read(const InputMemoryStream& packet)
+void Projectile::readCreate(const InputMemoryStream& packet)
 {
 	packet >> shooterID;
 }
@@ -536,20 +572,28 @@ void Weapon::Use()
 	}
 }
 
-void Weapon::write(OutputMemoryStream& packet)
+void Weapon::writeCreate(OutputMemoryStream& packet)
 {
 	packet << weaponType;
-	packet << player->networkId;
+	packet << (player? player->networkId:0);
 }
 
-void Weapon::read(const InputMemoryStream& packet)
+void Weapon::readCreate(const InputMemoryStream& packet)
 {
 	packet >> weaponType;
 	uint32 playerID;
 	packet >> playerID;
-	player = App->modLinkingContext->getNetworkGameObject(playerID);	
-	if(player)
-		((Player*)player->behaviour)->weapon = gameObject;
+
+	if (!player)
+	{
+		player = App->modLinkingContext->getNetworkGameObject(playerID);
+		if (player)
+		{
+			((Player*)player->behaviour)->weapon = gameObject;
+			gameObject->networkInterpolationEnabled = player->networkInterpolationEnabled;
+		}
+			
+	}
 }
 
 void Weapon::onMouseInput(const MouseController& input)
@@ -571,6 +615,9 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 	else {
 		gameObject->sprite->order = 1;
 	}
+
+	if (isServer)
+		NetworkUpdate(gameObject);
 }
 
 void DeathGhost::start()

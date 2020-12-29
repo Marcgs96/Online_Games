@@ -81,7 +81,7 @@ public:
 	// Spawning network objects
 	//////////////////////////////////////////////////////////////////////
 
-	GameObject * spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
+	GameObject * spawnPlayer(uint8 spaceshipType, std::string name, vec2 initialPosition, float initialAngle);
 
 
 

@@ -77,8 +77,7 @@ void Player::update()
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
 
-	const uint8 max_hp = HitPoints(level);
-	const float lifeRatio = max(0.01f, (float)(hitPoints) / (max_hp));
+	const float lifeRatio = max(0.01f, (float)(hitPoints) / (maxHitPoints));
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
@@ -125,7 +124,7 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 					if (shooter)
 					{
 						Player* player = (Player*)shooter->behaviour;
-						player->LevelUp();
+						player->LevelUp(this->level);
 					}
 				}
 					
@@ -147,8 +146,7 @@ void Player::HandleMovementInput(const InputController& input)
 
 	if (!isZero(movement_vector))
 	{
-		const float advanceSpeed = 200.0f;
-		gameObject->position += movement_vector * advanceSpeed * Time.deltaTime;
+		gameObject->position += movement_vector * movementSpeed * Time.deltaTime;
 
 		ChangeState(PlayerState::Running);
 		if (movement_vector.x != 0) //Flip character according to direction
@@ -222,7 +220,6 @@ void Player::Die()
 	NetworkDestroy(deathEffect, 2.0f);
 
 	//Kill player
-	//NetworkDestroy(gameObject);
 	ChangeState(PlayerState::Dead);
 }
 
@@ -233,17 +230,36 @@ void Player::Respawn()
 	gameObject->collider->isTrigger = true;
 	gameObject->sprite->color.a = 1.0f;
 
-	level = BASE_LEVEL;
-	hitPoints = HitPoints(level);
+	hitPoints = BASE_HP;
+	maxHitPoints = BASE_HP;
+	gameObject->size = { BASE_SIZE, BASE_SIZE };
+	movementSpeed = BASE_SPEED;
+
+	if (weapon)
+	{
+		Weapon* weaponBehaviour = (Weapon*)weapon->behaviour;
+		weapon->size = vec2{ weaponBehaviour->initial_size.x, weaponBehaviour->initial_size.y };
+
+		NetworkUpdate(weapon);
+	}
+
 	ChangeState(PlayerState::Idle);
 }
 
-void Player::LevelUp()
+void Player::LevelUp(uint8 killedLevel)
 {
-	level = min(level + 1, MAX_LEVEL);
+	uint8 newLevel = min(level + 1, MAX_LEVEL);
+	level = max(killedLevel, newLevel);
 
-	float newSize = LevelSize(level, 50);
+	uint8 newMaxHP = HitPoints(level);
+	float currentHPPercentage = (float)hitPoints / (float)maxHitPoints;
+	hitPoints = newMaxHP * currentHPPercentage;
+	maxHitPoints = newMaxHP;
+
+	float newSize = LevelSize(level, BASE_SIZE);
 	gameObject->size = vec2{ gameObject->size.x > 0 ? newSize : -newSize, newSize };
+
+	movementSpeed = LevelSpeed(level);
 
 	if (weapon)
 	{
@@ -308,6 +324,7 @@ bool Player::ChangeState(PlayerState newState)
 	case PlayerState::Dead:
 		gameObject->collider->isTrigger = false;
 		gameObject->sprite->color.a = 0.0f;	
+		level = BASE_LEVEL;
 		break;
 	}
 
@@ -318,8 +335,11 @@ void Player::write(OutputMemoryStream& packet)
 {
 	packet << playerType;
 	packet << currentState;
-	packet << gameObject->size.x;
 	packet << hitPoints;
+	packet << maxHitPoints;
+	packet << movementSpeed;
+	packet << level;
+	packet << name;
 }
 
 void Player::read(const InputMemoryStream& packet)
@@ -328,10 +348,19 @@ void Player::read(const InputMemoryStream& packet)
 
 	packet >> playerType;
 	packet >> new_state;
-	packet >> gameObject->size.x;
 	packet >> hitPoints;
+	packet >> maxHitPoints;
+	packet >> movementSpeed;
+	packet >> level;
+	packet >> name;
 
 	ChangeState(new_state);
+}
+
+void Player::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
+{
+	networkChildren.push_back(weapon);
+	weapon->behaviour->GetChildrenNetworkObjects(networkChildren);
 }
 
 void Projectile::start()
@@ -508,7 +537,8 @@ void Weapon::read(const InputMemoryStream& packet)
 	uint32 playerID;
 	packet >> playerID;
 	player = App->modLinkingContext->getNetworkGameObject(playerID);	
-	((Player*)player->behaviour)->weapon = gameObject;
+	if(player)
+		((Player*)player->behaviour)->weapon = gameObject;
 }
 
 void Weapon::onMouseInput(const MouseController& input)
@@ -523,8 +553,6 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 	float angle = atan2(mousePosition.y - gameObject->position.y, mousePosition.x - gameObject->position.x) * (180 / PI) - 90;
 
 	gameObject->angle = angle;
-
-	LOG("angle: %f", angle);
 
 	if (angle <= 90 && angle > -90) {
 		gameObject->sprite->order = 6;

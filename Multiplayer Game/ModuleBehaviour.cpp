@@ -185,6 +185,20 @@ Weapon* ModuleBehaviour::addWeapon(GameObject* parentGameObject)
 	return nullptr;
 }
 
+std::list<Player> ModuleBehaviour::GetPlayersList()
+{
+	std::list<Player> playersList;
+	for (Player player : players)
+	{
+		if (player.gameObject != nullptr)
+		{
+			playersList.push_back(player);
+		}
+	}
+
+	return playersList;
+}
+
 void ModuleBehaviour::handleBehaviourLifeCycle(Behaviour *behaviour)
 {
 	GameObject *gameObject = behaviour->gameObject;

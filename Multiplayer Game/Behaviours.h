@@ -23,6 +23,8 @@ struct Behaviour
 
 	virtual void onCollisionTriggered(Collider &c1, Collider &c2) { }
 
+	virtual void GetChildrenNetworkObjects(std::list<GameObject*>&) { }
+
 	virtual void write(OutputMemoryStream &packet) { }
 
 	virtual void read(const InputMemoryStream &packet) { }
@@ -63,6 +65,7 @@ struct Weapon : public Behaviour
 
 	WeaponType weaponType = WeaponType::None;
 	GameObject* player = nullptr;
+	std::list<GameObject*> spawned_projectiles;
 	vec2 initial_size = {};
 	float cooldown = 0.5f;
 	float cooldownTimer = 0.f;
@@ -76,6 +79,7 @@ struct Weapon : public Behaviour
 
 	void onMouseInput(const MouseController& input) override;
 	void HandleWeaponRotation(const MouseController& input);
+
 };
 
 struct Projectile : public Behaviour
@@ -136,14 +140,21 @@ struct Player : public Behaviour
 	static const uint8 BASE_LEVEL = 1;
 	static const uint8 HP_INCREMENT = 1;
 	static const uint8 MAX_LEVEL = 10;
+	static const uint8 BASE_SIZE = 65;
+	static const uint8 BASE_SPEED = 200;
+
 	#define HitPoints(x) BASE_HP + (x * HP_INCREMENT) - 1;
 	#define LevelSize(x, y) y + (x * y * 0.3f);
+	#define LevelSpeed(x) BASE_SPEED - (x * 10);
 
 	uint8 level = BASE_LEVEL;
 	uint8 hitPoints = BASE_HP;
+	uint8 maxHitPoints = BASE_HP;
+	uint8 movementSpeed = BASE_SPEED;
 
 	GameObject* lifebar = nullptr;
 	GameObject* weapon = nullptr;
+	std::string name = "";
 	//Spell* spell = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::Player; }
@@ -164,6 +175,8 @@ struct Player : public Behaviour
 
 	void read(const InputMemoryStream &packet) override;
 
+	void GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren) override;
+
 	// Player State
 	enum PlayerState{
 		Idle,
@@ -180,7 +193,7 @@ struct Player : public Behaviour
 	void UseSpell();
 	void Die();
 	void Respawn();
-	void LevelUp();
+	void LevelUp(uint8 killedLevel);
 	bool ChangeState(PlayerState newState);
 };
 

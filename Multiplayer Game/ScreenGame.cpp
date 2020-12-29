@@ -58,8 +58,54 @@ void ScreenGame::update()
 	}
 }
 
+bool compareLevel(const Player& first, const Player& second)
+{
+	if (first.level == second.level)
+		return (first.name < second.name);
+	else
+		return (first.level > second.level);
+}
+
 void ScreenGame::gui()
 {
+	std::list<Player> playersList = App->modBehaviour->GetPlayersList();
+	playersList.sort(compareLevel);
+
+	ImGuiWindowFlags window_flags = 0;
+	window_flags |= ImGuiWindowFlags_NoBackground;
+	window_flags |= ImGuiWindowFlags_NoTitleBar;
+
+	bool open = true;
+	ImGui::Begin("LeaderBoard", &open, window_flags);
+
+	uint8 count = 1;
+	bool printedSelf = false;
+
+	for (std::list<Player>::iterator it = playersList.begin(); it != playersList.end() && count < 6; ++it)
+	{
+		ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+		if (!isServer && App->modNetClient->GetNetworkId() == (*it).gameObject->networkId)
+		{
+			printedSelf = true;
+		}
+		++count;
+	}
+	if (!isServer && !printedSelf)
+	{
+		ImGui::Separator();
+		count = 1;
+		for (std::list<Player>::iterator it = playersList.begin(); it != playersList.end(); ++it)
+		{
+			if (App->modNetClient->GetNetworkId() == (*it).gameObject->networkId)
+			{
+				ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+				break;
+			}
+			++count;
+		}
+	}
+
+	ImGui::End();
 }
 
 void ScreenGame::disable()

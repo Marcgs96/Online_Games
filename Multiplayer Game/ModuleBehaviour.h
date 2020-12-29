@@ -17,6 +17,7 @@ public:
 	DeathGhost* addDeathGhost(GameObject* parentGameObject);
 	Weapon* addWeapon(GameObject* parentGameObject);
 
+	std::list<Player> GetPlayersList();
 private:
 
 	void handleBehaviourLifeCycle(Behaviour * behaviour);

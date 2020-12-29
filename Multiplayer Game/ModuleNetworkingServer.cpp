@@ -125,7 +125,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 
 					// Create new network object
 					vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f};
-					proxy->gameObject = spawnPlayer(classType, initialPosition, 0);
+					proxy->gameObject = spawnPlayer(classType, playerName, initialPosition, 0);
 				}
 				else
 				{
@@ -374,6 +374,13 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 	// Destroy the object from all clients
 	if (IsValid(clientProxy->gameObject))
 	{
+		std::list<GameObject*> relatedNetworkObjects;
+		clientProxy->gameObject->behaviour->GetChildrenNetworkObjects(relatedNetworkObjects);
+
+		for (GameObject* networkObject : relatedNetworkObjects)
+		{
+			destroyNetworkObject(networkObject);
+		}
 		destroyNetworkObject(clientProxy->gameObject);
 	}
 	clientProxy->deliveryManager.clear();
@@ -385,7 +392,7 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 // Spawning
 //////////////////////////////////////////////////////////////////////
 
-GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, vec2 initialPosition, float initialAngle)
+GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, std::string name, vec2 initialPosition, float initialAngle)
 {
 	// Create a new game object with the player properties
 	GameObject *gameObject = NetworkInstantiate();
@@ -421,6 +428,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, vec2 initialPo
 
 	// Create behaviour
 	Player* playerBehaviour = App->modBehaviour->addPlayer(gameObject);
+	playerBehaviour->name = name;
 	playerBehaviour->playerType = (PlayerType)classType;
 	gameObject->behaviour = playerBehaviour;
 	gameObject->behaviour->isServer = true;

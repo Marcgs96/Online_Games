@@ -74,6 +74,11 @@ void ScreenGame::gui()
 	ImGuiWindowFlags window_flags = 0;
 	window_flags |= ImGuiWindowFlags_NoBackground;
 	window_flags |= ImGuiWindowFlags_NoTitleBar;
+	window_flags |= ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoResize;
+
+	ImGui::SetNextWindowPos(ImVec2(750, 0));
+	ImGui::SetNextWindowSize(ImVec2(225, 250));
 
 	bool open = true;
 	ImGui::Begin("LeaderBoard", &open, window_flags);
@@ -81,24 +86,46 @@ void ScreenGame::gui()
 	uint8 count = 1;
 	bool printedSelf = false;
 
+	ImGui::Columns(3, "entries", false);
+	ImGui::SetColumnWidth(0, 25);
+	ImGui::SetColumnWidth(1, 125);
+	ImGui::SetColumnWidth(2, 75);
 	for (std::list<Player>::iterator it = playersList.begin(); it != playersList.end() && count < 6; ++it)
 	{
-		ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+		//ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+		ImGui::Text("#%i",count);
+		ImGui::NextColumn();
+		ImGui::Text("%s", (*it).name.c_str());
+		ImGui::NextColumn();
+		ImGui::Text("Level %i", (*it).level);
+		ImGui::NextColumn();
+
 		if (!isServer && App->modNetClient->GetNetworkId() == (*it).gameObject->networkId)
 		{
 			printedSelf = true;
 		}
 		++count;
 	}
+	ImGui::Columns(1);
 	if (!isServer && !printedSelf)
 	{
 		ImGui::Separator();
+		ImGui::Columns(3, "playerEntry", false);
+		ImGui::SetColumnWidth(0, 25);
+		ImGui::SetColumnWidth(1, 125);
+		ImGui::SetColumnWidth(2, 75);
 		count = 1;
 		for (std::list<Player>::iterator it = playersList.begin(); it != playersList.end(); ++it)
 		{
 			if (App->modNetClient->GetNetworkId() == (*it).gameObject->networkId)
 			{
-				ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+				//ImGui::Text("#%i  %s  Level %i", count, (*it).name.c_str(), (*it).level);
+				ImGui::Text("#%i", count);
+				ImGui::NextColumn();
+				ImGui::Text("%s", (*it).name.c_str());
+				ImGui::NextColumn();
+				ImGui::Text("Level %i", (*it).level);
+				ImGui::NextColumn();
 				break;
 			}
 			++count;

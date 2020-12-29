@@ -33,23 +33,23 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 	case BehaviourType::Player:
 		return addPlayer(parentGameObject);
 	case BehaviourType::Projectile:
-		return addProjectile(parentGameObject, BehaviourType::Projectile);
+		return addProjectile(BehaviourType::Projectile, parentGameObject);
 	case BehaviourType::AxeProjectile:
-		return addProjectile(parentGameObject, BehaviourType::AxeProjectile);
+		return addProjectile(BehaviourType::AxeProjectile, parentGameObject);
 	case BehaviourType::StaffProjectile:
-		return addProjectile(parentGameObject, BehaviourType::StaffProjectile);
+		return addProjectile(BehaviourType::StaffProjectile, parentGameObject);
 	case BehaviourType::BowProjectile:
-		return addProjectile(parentGameObject, BehaviourType::BowProjectile);
+		return addProjectile(BehaviourType::BowProjectile, parentGameObject);
+	case BehaviourType::AxeSpell:
+		return addSpell(BehaviourType::AxeSpell, parentGameObject);
+	case BehaviourType::StaffSpell:
+		return addSpell(BehaviourType::StaffSpell, parentGameObject);
+	case BehaviourType::BowSpell:
+		return addSpell(BehaviourType::BowSpell, parentGameObject);
 	case BehaviourType::DeathGhost:
 		return addDeathGhost(parentGameObject);	
 	case BehaviourType::Weapon:
 		return addWeapon(parentGameObject);
-	case BehaviourType::AxeSpell:
-		return addAxeSpell(parentGameObject);
-	case BehaviourType::StaffSpell:
-		return addStaffSpell(parentGameObject);
-	case BehaviourType::BowSpell:
-		return addBowSpell(parentGameObject);
 	default:
 		return nullptr;
 	}
@@ -72,7 +72,7 @@ Player* ModuleBehaviour::addPlayer(GameObject *parentGameObject)
 	return nullptr;
 }
 
-Projectile* ModuleBehaviour::addProjectile(GameObject* parentGameObject, BehaviourType type)
+Projectile* ModuleBehaviour::addProjectile(BehaviourType type, GameObject* parentGameObject)
 {
 	for (Projectile*& behaviour : projectiles)
 	{
@@ -160,16 +160,53 @@ Weapon* ModuleBehaviour::addWeapon(GameObject* parentGameObject)
 	return nullptr;
 }
 
-AxeSpell* ModuleBehaviour::addAxeSpell(GameObject* parentGameObject)
+Spell* ModuleBehaviour::addSpell(BehaviourType behaviourType, GameObject* parentGameObject)
 {
-	for (AxeSpell& behaviour : axeSpells)
+	for (Spell*& behaviour : spells)
 	{
-		if (behaviour.gameObject == nullptr)
+		if (behaviour == nullptr)
 		{
-			behaviour = {};
-			behaviour.gameObject = parentGameObject;
-			parentGameObject->behaviour = &behaviour;
-			return &behaviour;
+			switch (behaviourType)
+			{
+			case BehaviourType::AxeSpell:
+				behaviour = new AxeSpell;
+				break;
+			case BehaviourType::StaffSpell:
+				behaviour = new StaffSpell;
+				break;
+			case BehaviourType::BowSpell:
+				behaviour = new BowSpell;
+				break;
+			default:
+				break;
+			}
+			behaviour->gameObject = parentGameObject;
+			parentGameObject->behaviour = behaviour;
+			return behaviour;
+		}
+		else
+		{
+			if (behaviour->gameObject == nullptr)
+			{
+				delete behaviour;
+				switch (behaviourType)
+				{
+				case BehaviourType::AxeSpell:
+					behaviour = new AxeSpell;
+					break;
+				case BehaviourType::StaffSpell:
+					behaviour = new StaffSpell;
+					break;
+				case BehaviourType::BowSpell:
+					behaviour = new BowSpell;
+					break;
+				default:
+					break;
+				}
+				behaviour->gameObject = parentGameObject;
+				parentGameObject->behaviour = behaviour;
+				return behaviour;
+			}
 		}
 	}
 
@@ -177,39 +214,6 @@ AxeSpell* ModuleBehaviour::addAxeSpell(GameObject* parentGameObject)
 	return nullptr;
 }
 
-StaffSpell* ModuleBehaviour::addStaffSpell(GameObject* parentGameObject)
-{
-	for (StaffSpell& behaviour : staffSpells)
-	{
-		if (behaviour.gameObject == nullptr)
-		{
-			behaviour = {};
-			behaviour.gameObject = parentGameObject;
-			parentGameObject->behaviour = &behaviour;
-			return &behaviour;
-		}
-	}
-
-	ASSERT(false);
-	return nullptr;
-}
-
-BowSpell* ModuleBehaviour::addBowSpell(GameObject* parentGameObject)
-{
-	for (BowSpell& behaviour : bowSpells)
-	{
-		if (behaviour.gameObject == nullptr)
-		{
-			behaviour = {};
-			behaviour.gameObject = parentGameObject;
-			parentGameObject->behaviour = &behaviour;
-			return &behaviour;
-		}
-	}
-
-	ASSERT(false);
-	return nullptr;
-}
 
 std::list<Player> ModuleBehaviour::GetPlayersList()
 {

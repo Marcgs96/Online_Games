@@ -10,12 +10,10 @@ public:
 
 	Behaviour * addBehaviour(BehaviourType behaviourType, GameObject *parentGameObject);
 	Player * addPlayer(GameObject *parentGameObject);
-	Projectile * addProjectile(GameObject *parentGameObject, BehaviourType behaviourType);
+	Projectile * addProjectile(BehaviourType behaviourType, GameObject *parentGameObject);
 	DeathGhost* addDeathGhost(GameObject* parentGameObject);
 	Weapon* addWeapon(GameObject* parentGameObject);
-	AxeSpell* addAxeSpell(GameObject* parentGameObject);
-	StaffSpell* addStaffSpell(GameObject* parentGameObject);
-	BowSpell* addBowSpell(GameObject* parentGameObject);
+	Spell* addSpell(BehaviourType behaviourType, GameObject* parentGameObject);
 
 	std::list<Player> GetPlayersList();
 private:
@@ -26,8 +24,6 @@ private:
 	Projectile* projectiles[MAX_GAME_OBJECTS];
 	DeathGhost deathGhosts[MAX_CLIENTS];
 	Weapon weapons[MAX_CLIENTS];
-	AxeSpell axeSpells[MAX_CLIENTS];
-	StaffSpell staffSpells[MAX_CLIENTS];
-	BowSpell bowSpells[MAX_CLIENTS];
+	Spell* spells[MAX_CLIENTS];
 };
 

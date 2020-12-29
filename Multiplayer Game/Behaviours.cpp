@@ -550,7 +550,7 @@ void Weapon::Use()
 			case WeaponType::Axe: {
 
 				projectile->sprite->texture = App->modResources->axeProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::AxeProjectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 
@@ -558,7 +558,7 @@ void Weapon::Use()
 			case WeaponType::Staff: {
 
 				projectile->sprite->texture = App->modResources->staffProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::StaffProjectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 
@@ -566,7 +566,7 @@ void Weapon::Use()
 			case WeaponType::Bow: {
 
 				projectile->sprite->texture = App->modResources->bowProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::BowProjectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 

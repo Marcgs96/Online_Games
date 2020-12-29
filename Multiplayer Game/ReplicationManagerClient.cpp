@@ -37,6 +37,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 				if (networkId == App->modNetClient->GetNetworkId())
 				{
 					gameObject->networkInterpolationEnabled = false;
+					gameObject->behaviour->OnInterpolationDisable();
 				}
 					
 			}

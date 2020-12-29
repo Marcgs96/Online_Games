@@ -69,6 +69,9 @@ void Player::onInput(const InputController &input)
 
 void Player::onMouseInput(const MouseController& input)
 {
+	if (currentState == PlayerState::Dead)
+		return;
+
 	if (input.mouse1 == ButtonState::Press && isServer)
 	{
 		UseWeapon();
@@ -122,8 +125,6 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 
 			if (hitPoints <= 0)
 			{
-				Die();
-
 				Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
 				if (projectile)
 				{
@@ -134,7 +135,7 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 						player->LevelUp(this->level);
 					}
 				}
-					
+				Die();					
 
 				NetworkUpdate(gameObject);
 			}
@@ -415,6 +416,12 @@ void Player::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
 	weapon->behaviour->GetChildrenNetworkObjects(networkChildren);
 }
 
+void Player::OnInterpolationDisable()
+{
+	if (weapon)
+		weapon->networkInterpolationEnabled = false;
+}
+
 void Projectile::start()
 {
 	gameObject->networkInterpolationEnabled = true;
@@ -543,7 +550,7 @@ void Weapon::Use()
 			case WeaponType::Axe: {
 
 				projectile->sprite->texture = App->modResources->axeProjectile;
-				AxeProjectile* projectileBehaviour = App->modBehaviour->addAxeProjectile(projectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::AxeProjectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 
@@ -551,7 +558,7 @@ void Weapon::Use()
 			case WeaponType::Staff: {
 
 				projectile->sprite->texture = App->modResources->staffProjectile;
-				StaffProjectile* projectileBehaviour = App->modBehaviour->addStaffProjectile(projectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::StaffProjectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 
@@ -559,7 +566,7 @@ void Weapon::Use()
 			case WeaponType::Bow: {
 
 				projectile->sprite->texture = App->modResources->bowProjectile;
-				BowProjectile* projectileBehaviour = App->modBehaviour->addBowProjectile(projectile);
+				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(projectile, BehaviourType::BowProjectile);
 				projectileBehaviour->isServer = isServer;
 				projectileBehaviour->shooterID = player->networkId;
 

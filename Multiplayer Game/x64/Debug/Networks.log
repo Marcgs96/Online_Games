@@ -1,10 +1,10 @@
 ﻿  UnityBuild.cpp
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(493,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(493,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
-D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': signed/unsigned mismatch
-D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleResources.cpp(35): warning C4715: 'ModuleResources::GetTextureByFile': not all control paths return a value
-  Networks.vcxproj -> D:\Downloads\Online_Games\Multiplayer Game\x64\Debug\Networks.exe
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(512,30): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(512,39): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
+C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleResources.cpp(35): warning C4715: 'ModuleResources::GetTextureByFile': no todas las rutas de acceso de control devuelven un valor
+  Networks.vcxproj -> C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\x64\Debug\Networks.exe

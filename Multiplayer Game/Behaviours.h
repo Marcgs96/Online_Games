@@ -143,9 +143,9 @@ struct Player : public Behaviour
 	static const uint8 BASE_SIZE = 65;
 	static const uint8 BASE_SPEED = 200;
 
-	#define HitPoints(x) BASE_HP + (x * HP_INCREMENT) - 1;
-	#define LevelSize(x, y) y + (x * y * 0.3f);
-	#define LevelSpeed(x) BASE_SPEED - (x * 10);
+	inline int HitPoints(uint8 x) { return (BASE_HP + (x * HP_INCREMENT) - 1); }
+	inline int LevelSize(uint8 x, uint8 y){ return y + (y * x * 0.2f); }
+	inline int LevelSpeed(uint8 x) { return BASE_SPEED - (x * 10); }
 
 	uint8 level = BASE_LEVEL;
 	uint8 hitPoints = BASE_HP;

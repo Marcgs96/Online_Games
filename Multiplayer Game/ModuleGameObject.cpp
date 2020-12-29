@@ -181,7 +181,7 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	{
 		packet.Write(true);
 		packet.Write(this->behaviour->type());
-		behaviour->write(packet);
+		behaviour->writeCreate(packet);
 	}
 	else
 	{
@@ -214,7 +214,7 @@ void GameObject::writeUpdate(OutputMemoryStream& packet)
 	if (this->behaviour)
 	{
 		packet.Write(true);
-		behaviour->write(packet);
+		behaviour->writeUpdate(packet);
 	}
 	else
 	{
@@ -274,7 +274,7 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 		packet.Read(type);
 
 		behaviour = App->modBehaviour->addBehaviour(type, this);
-		behaviour->read(packet);
+		behaviour->readCreate(packet);
 	}
 }
 
@@ -322,6 +322,6 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 	packet.Read(ret);
 	if (ret)
 	{
-		behaviour->read(packet);
+		behaviour->readUpdate(packet);
 	}
 }

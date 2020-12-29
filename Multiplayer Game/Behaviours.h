@@ -25,9 +25,13 @@ struct Behaviour
 
 	virtual void GetChildrenNetworkObjects(std::list<GameObject*>&) { }
 
-	virtual void write(OutputMemoryStream &packet) { }
+	virtual void writeCreate(OutputMemoryStream &packet) { }
 
-	virtual void read(const InputMemoryStream &packet) { }
+	virtual void readCreate(const InputMemoryStream &packet) { }
+
+	virtual void writeUpdate(OutputMemoryStream& packet) { }
+
+	virtual void readUpdate(const InputMemoryStream& packet) { }
 };
 
 
@@ -74,12 +78,11 @@ struct Weapon : public Behaviour
 	void update() override;
 	void Use();
 
-	void write(OutputMemoryStream& packet) override;
-	void read(const InputMemoryStream& packet) override;
+	void writeCreate(OutputMemoryStream& packet) override;
+	void readCreate(const InputMemoryStream& packet) override;
 
 	void onMouseInput(const MouseController& input) override;
 	void HandleWeaponRotation(const MouseController& input);
-
 };
 
 struct Projectile : public Behaviour
@@ -97,9 +100,8 @@ struct Projectile : public Behaviour
 
 	virtual void update() override;
 
-	void write(OutputMemoryStream& packet) override;
-
-	void read(const InputMemoryStream& packet) override;
+	void writeCreate(OutputMemoryStream& packet) override;
+	void readCreate(const InputMemoryStream& packet) override;
 };
 
 struct AxeProjectile : public Projectile
@@ -171,9 +173,10 @@ struct Player : public Behaviour
 
 	void onCollisionTriggered(Collider &c1, Collider &c2) override;
 
-	void write(OutputMemoryStream &packet) override;
-
-	void read(const InputMemoryStream &packet) override;
+	void writeCreate(OutputMemoryStream& packet) override;
+	void readCreate(const InputMemoryStream& packet) override;
+	void writeUpdate(OutputMemoryStream& packet) override;
+	void readUpdate(const InputMemoryStream& packet) override;
 
 	void GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren) override;
 

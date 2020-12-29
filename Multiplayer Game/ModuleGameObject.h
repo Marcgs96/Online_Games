@@ -41,7 +41,6 @@ struct GameObject
 
 
 	// Interpolation Component
-
 	void Interpolate();
 	vec2 initial_position = vec2{ 0.0f, 0.0f };
 	vec2 initial_size = vec2{ 0.0f, 0.0f };

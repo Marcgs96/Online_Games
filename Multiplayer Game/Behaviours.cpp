@@ -573,8 +573,11 @@ void Weapon::Use()
 
 		projectile->position = gameObject->position;
 		projectile->angle = gameObject->angle;
-		projectile->size = { 75, 75 };
-
+		vec2 standardSize = { 75, 75 };
+		Player* playerBehaviour = (Player*)player->behaviour;
+		float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
+		float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+		projectile->size = { sizeX, sizeY };
 		projectile->tag = gameObject->tag;
 	}
 }

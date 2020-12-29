@@ -199,7 +199,7 @@ void Player::UseSpell()
 void Player::Die()
 {
 	// Centered death effect
-	float size = 40.0f;
+	float size = gameObject->size.y;
 	vec2 position = gameObject->position;
 
 	GameObject* deathEffect = NetworkInstantiate();

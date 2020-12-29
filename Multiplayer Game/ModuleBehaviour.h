@@ -10,10 +10,7 @@ public:
 
 	Behaviour * addBehaviour(BehaviourType behaviourType, GameObject *parentGameObject);
 	Player * addPlayer(GameObject *parentGameObject);
-	Projectile * addProjectile(GameObject *parentGameObject);
-	AxeProjectile * addAxeProjectile(GameObject *parentGameObject);
-	StaffProjectile * addStaffProjectile(GameObject *parentGameObject);
-	BowProjectile * addBowProjectile(GameObject *parentGameObject);
+	Projectile * addProjectile(GameObject *parentGameObject, BehaviourType behaviourType);
 	DeathGhost* addDeathGhost(GameObject* parentGameObject);
 	Weapon* addWeapon(GameObject* parentGameObject);
 
@@ -23,7 +20,7 @@ private:
 	void handleBehaviourLifeCycle(Behaviour * behaviour);
 
 	Player players[MAX_CLIENTS];
-	Projectile projectiles[MAX_GAME_OBJECTS];
+	Projectile* projectiles[MAX_GAME_OBJECTS];
 	AxeProjectile axeProjectiles[MAX_GAME_OBJECTS];
 	StaffProjectile staffProjectiles[MAX_GAME_OBJECTS];
 	BowProjectile bowProjectiles[MAX_GAME_OBJECTS];

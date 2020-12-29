@@ -25,7 +25,10 @@ void Player::start()
 			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
 			weapon->size = vec2{ 50, 75 };
 
-			spell = new AxeSpell();
+			spell = App->modBehaviour->addSpell(BehaviourType::AxeSpell, this->gameObject);
+			spell->player = gameObject;
+			spell->isServer = isServer;
+
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
@@ -33,15 +36,15 @@ void Player::start()
 			weapon->sprite->pivot = vec2{ 0.5f, 0.3f };
 			weapon->size = vec2{ 50, 100 };
 
-			spell = new StaffSpell();
+			spell = App->modBehaviour->addSpell(BehaviourType::StaffSpell, this->gameObject);
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
 			wBehaviour->weaponType = WeaponType::Bow;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
 			weapon->size = vec2{ 100, 50 };
-
-			spell = new StaffSpell();
+			
+			spell = App->modBehaviour->addSpell(BehaviourType::BowSpell, this->gameObject);
 			spell->isServer = isServer;
 			break;
 		case PlayerType::None:
@@ -654,7 +657,7 @@ void DeathGhost::update()
 
 void Spell::start()
 {
-	spellCooldownTimer = 0.0f;
+	spellCooldownTimer = 10.0f;
 }
 
 void Spell::update()
@@ -670,16 +673,41 @@ void Spell::Use()
 
 void AxeSpell::start()
 {
-
+	Spell::start();
 }
 
 void AxeSpell::update()
 {
+	Spell::update();
 }
 
 void AxeSpell::Use()
 {
+	Spell::Use();
+	if (isServer)
+	{
+		for (int i = 0; i < NUM_AXES; ++i) {
 
+			axes[i] = NetworkInstantiate();
+			axes[i]->sprite = App->modRender->addSprite(axes[i]);
+			axes[i]->sprite->order = 3;
+
+			axes[i]->sprite->texture = App->modResources->axeProjectile;
+			WhirlwindAxeProjectile* whirlwindAxeBehaviour = (WhirlwindAxeProjectile*)App->modBehaviour->addProjectile(BehaviourType::WhirlwindAxeProjectile, axes[i]);
+			whirlwindAxeBehaviour->isServer = isServer;
+			whirlwindAxeBehaviour->shooterID = player->networkId;
+			whirlwindAxeBehaviour->index = i;
+			whirlwindAxeBehaviour->player = gameObject;
+
+			vec2 standardSize = { 75, 75 };
+			Player* playerBehaviour = (Player*)player->behaviour;
+			float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
+			float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+			axes[i]->size = { sizeX, sizeY };
+			axes[i]->tag = gameObject->tag;
+		}
+	}
+	LOG("ASD");
 }
 
 void StaffSpell::start()
@@ -745,4 +773,46 @@ void BowSpell::onInput(const InputController& input)
 		Hold();
 	else if (input.space == ButtonState::Release)
 		Release();
+}
+
+void WhirlwindAxeProjectile::start()
+{
+	Projectile::start();
+	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+
+	if (isServer) {
+		if (index == 0) {
+			gameObject->position = player->position + vec2FromDegrees(0) * rotationRadius;
+		}
+		else if(index == 1){
+			gameObject->position = player->position + vec2FromDegrees(120) * rotationRadius;
+		}
+		else{
+			gameObject->position = player->position + vec2FromDegrees(240) * rotationRadius;
+		}
+	}
+}
+
+void WhirlwindAxeProjectile::update()
+{
+	if (isServer) {
+		Projectile::update();
+
+		//if (index == 0) {
+		//	gameObject->angle += selfRotationIncrementRatio;
+		//	orbitAngle += orbitSpeed * Time.deltaTime;
+		//	gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+		//}
+		//else if(index == 1){
+		//	gameObject->angle += selfRotationIncrementRatio;
+		//	orbitAngle += orbitSpeed * Time.deltaTime;
+		//	gameObject->position = { player->position.x + rotationRadius * -cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+		//}else{
+		//	gameObject->angle += selfRotationIncrementRatio;
+		//	orbitAngle += orbitSpeed * Time.deltaTime;
+		//	gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+		//}
+
+		//NetworkUpdate(gameObject);
+	}
 }

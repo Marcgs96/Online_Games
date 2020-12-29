@@ -13,6 +13,12 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(behaviour);
 	}
 
+	for (Spell* behaviour : spells)
+	{
+		handleBehaviourLifeCycle(behaviour);
+	}
+
+
 	for (DeathGhost& behaviour : deathGhosts)
 	{
 		handleBehaviourLifeCycle(&behaviour);
@@ -40,6 +46,8 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 		return addProjectile(BehaviourType::StaffProjectile, parentGameObject);
 	case BehaviourType::BowProjectile:
 		return addProjectile(BehaviourType::BowProjectile, parentGameObject);
+	case BehaviourType::WhirlwindAxeProjectile:
+		return addProjectile(BehaviourType::WhirlwindAxeProjectile, parentGameObject);
 	case BehaviourType::AxeSpell:
 		return addSpell(BehaviourType::AxeSpell, parentGameObject);
 	case BehaviourType::StaffSpell:
@@ -89,6 +97,9 @@ Projectile* ModuleBehaviour::addProjectile(BehaviourType type, GameObject* paren
 			case BehaviourType::BowProjectile:
 				behaviour = new BowProjectile;
 				break;
+			case BehaviourType::WhirlwindAxeProjectile:
+				behaviour = new WhirlwindAxeProjectile;
+				break;
 			default:
 				break;
 			}
@@ -112,6 +123,8 @@ Projectile* ModuleBehaviour::addProjectile(BehaviourType type, GameObject* paren
 				case BehaviourType::BowProjectile:
 					behaviour = new BowProjectile;
 					break;
+				case BehaviourType::WhirlwindAxeProjectile:
+					behaviour = new WhirlwindAxeProjectile;
 				default:
 					break;
 				}
@@ -181,7 +194,6 @@ Spell* ModuleBehaviour::addSpell(BehaviourType behaviourType, GameObject* parent
 				break;
 			}
 			behaviour->gameObject = parentGameObject;
-			parentGameObject->behaviour = behaviour;
 			return behaviour;
 		}
 		else
@@ -204,7 +216,6 @@ Spell* ModuleBehaviour::addSpell(BehaviourType behaviourType, GameObject* parent
 					break;
 				}
 				behaviour->gameObject = parentGameObject;
-				parentGameObject->behaviour = behaviour;
 				return behaviour;
 			}
 		}

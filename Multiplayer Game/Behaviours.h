@@ -50,7 +50,8 @@ enum class BehaviourType : uint8
 	Spell,
 	AxeSpell,
 	StaffSpell,
-	BowSpell
+	BowSpell,
+	WhirlwindAxeProjectile
 };
 
 enum class PlayerType : uint8
@@ -130,6 +131,25 @@ struct AxeProjectile : public Projectile
 	void update() override;
 };
 
+struct WhirlwindAxeProjectile : public Projectile
+{
+	float selfRotationIncrementRatio = 10;
+	float orbitAngle = 0;
+	float orbitSpeed = 2;
+	float rotationRadius = 150;
+
+	vec2 direction;
+	uint8 index = 0;
+
+	GameObject* player = nullptr;
+
+	BehaviourType type() const override { return BehaviourType::WhirlwindAxeProjectile; }
+
+	void start() override;
+
+	void update() override;
+};
+
 struct StaffProjectile : public Projectile
 {
 	BehaviourType type() const override { return BehaviourType::StaffProjectile; }
@@ -151,8 +171,10 @@ struct BowProjectile : public Projectile
 
 struct Spell : public Behaviour
 {
-	float spellCooldown = 10.0f;
-	float spellCooldownTimer = 0.0f;
+	float spellCooldown = 1.0f;
+	float spellCooldownTimer = 1.0f;
+
+	GameObject* player = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::Spell; }
 
@@ -164,7 +186,9 @@ struct Spell : public Behaviour
 
 struct AxeSpell : public Spell
 {
+	static const uint8 NUM_AXES = 3;
 	BehaviourType type() const override { return BehaviourType::AxeSpell; }
+	GameObject* axes[NUM_AXES];
 
 	virtual void start() override;
 	virtual void update() override;

@@ -702,7 +702,6 @@ void AxeSpell::Use()
 			axes[i]->tag = gameObject->tag;
 		}
 	}
-	LOG("ASD");
 }
 
 void StaffSpell::start()
@@ -735,14 +734,12 @@ void WhirlwindAxeProjectile::start()
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 
 	if (isServer) {
-		if (index == 0) {
-			gameObject->position = player->position + vec2FromDegrees(0) * rotationRadius;
-		}
-		else if(index == 1){
-			gameObject->position = player->position + vec2FromDegrees(120) * rotationRadius;
-		}
+		if (index == 0)
+			orbitAngle = PI/2;
+		else if(index == 1)
+			orbitAngle = 7 * PI / 6;
 		else{
-			gameObject->position = player->position + vec2FromDegrees(240) * rotationRadius;
+			orbitAngle = 11 * PI / 6;
 		}
 	}
 }
@@ -752,21 +749,22 @@ void WhirlwindAxeProjectile::update()
 	if (isServer) {
 		Projectile::update();
 
-		//if (index == 0) {
-		//	gameObject->angle += selfRotationIncrementRatio;
-		//	orbitAngle += orbitSpeed * Time.deltaTime;
-		//	gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-		//}
-		//else if(index == 1){
-		//	gameObject->angle += selfRotationIncrementRatio;
-		//	orbitAngle += orbitSpeed * Time.deltaTime;
-		//	gameObject->position = { player->position.x + rotationRadius * -cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-		//}else{
-		//	gameObject->angle += selfRotationIncrementRatio;
-		//	orbitAngle += orbitSpeed * Time.deltaTime;
-		//	gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-		//}
+		if (index == 0) {
+			gameObject->angle += selfRotationIncrementRatio;
+			orbitAngle += orbitSpeed * Time.deltaTime;
+			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+		}
+		else if(index == 1){
+			gameObject->angle += selfRotationIncrementRatio;
+			orbitAngle += orbitSpeed * Time.deltaTime;
+			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			LOG("orbit angle %f", orbitAngle);
+		}else{
+			gameObject->angle += selfRotationIncrementRatio;
+			orbitAngle += orbitSpeed * Time.deltaTime;
+			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+		}
 
-		//NetworkUpdate(gameObject);
+		NetworkUpdate(gameObject);
 	}
 }

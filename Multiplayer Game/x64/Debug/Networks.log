@@ -13,5 +13,5 @@ D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): w
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleResources.cpp(35): warning C4715: 'ModuleResources::GetTextureByFile': not all control paths return a value
-  Networks.vcxproj -> D:\Downloads\Online_Games\Multiplayer Game\x64\Debug\Networks.exe
+D:\Downloads\Online_Games\Multiplayer Game\ModuleLinkingContext.cpp(35,9): error C2561: 'ModuleLinkingContext::getNetworkGameObject': function must return a value
+D:\Downloads\Online_Games\Multiplayer Game\ModuleLinkingContext.cpp(32): message : see declaration of 'ModuleLinkingContext::getNetworkGameObject'

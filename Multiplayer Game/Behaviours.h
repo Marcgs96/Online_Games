@@ -32,6 +32,8 @@ struct Behaviour
 	virtual void writeUpdate(OutputMemoryStream& packet) { }
 
 	virtual void readUpdate(const InputMemoryStream& packet) { }
+
+	virtual void OnInterpolationDisable() { }
 };
 
 
@@ -179,6 +181,8 @@ struct Player : public Behaviour
 	void readUpdate(const InputMemoryStream& packet) override;
 
 	void GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren) override;
+
+	void OnInterpolationDisable() override;
 
 	// Player State
 	enum PlayerState{

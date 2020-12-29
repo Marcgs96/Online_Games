@@ -1,17 +1,17 @@
 ﻿  UnityBuild.cpp
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.h(149,51): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(266,23): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(269,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(277,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(277,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(278,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(278,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(606,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
-D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(606,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.h(151,51): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(264,23): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(267,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(275,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(275,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(276,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(276,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(610,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(610,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': signed/unsigned mismatch
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
 D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
-D:\Downloads\Online_Games\Multiplayer Game\ModuleLinkingContext.cpp(35,9): error C2561: 'ModuleLinkingContext::getNetworkGameObject': function must return a value
-D:\Downloads\Online_Games\Multiplayer Game\ModuleLinkingContext.cpp(32): message : see declaration of 'ModuleLinkingContext::getNetworkGameObject'
+D:\Downloads\Online_Games\Multiplayer Game\ModuleResources.cpp(35): warning C4715: 'ModuleResources::GetTextureByFile': not all control paths return a value
+  Networks.vcxproj -> D:\Downloads\Online_Games\Multiplayer Game\x64\Debug\Networks.exe

@@ -62,6 +62,9 @@ void Player::onInput(const InputController &input)
 
 void Player::onMouseInput(const MouseController& input)
 {
+	if (currentState == PlayerState::Dead)
+		return;
+
 	if (input.mouse1 == ButtonState::Press && isServer)
 	{
 		UseWeapon();
@@ -115,8 +118,6 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 
 			if (hitPoints <= 0)
 			{
-				Die();
-
 				Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
 				if (projectile)
 				{
@@ -127,7 +128,7 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 						player->LevelUp(this->level);
 					}
 				}
-					
+				Die();					
 
 				NetworkUpdate(gameObject);
 			}
@@ -408,6 +409,12 @@ void Player::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
 {
 	networkChildren.push_back(weapon);
 	weapon->behaviour->GetChildrenNetworkObjects(networkChildren);
+}
+
+void Player::OnInterpolationDisable()
+{
+	if (weapon)
+		weapon->networkInterpolationEnabled = false;
 }
 
 void Projectile::start()

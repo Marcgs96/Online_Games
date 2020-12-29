@@ -70,6 +70,14 @@ enum class WeaponType : uint8
 	None
 };
 
+// Player State
+enum class PlayerState : uint8 {
+	Idle,
+	Running,
+	Charging,
+	Dead
+};
+
 struct Weapon : public Behaviour 
 {
 	BehaviourType type() const override { return BehaviourType::Weapon; }
@@ -195,17 +203,26 @@ struct StaffSpell : public Spell
 	virtual void start() override;
 	virtual void update() override;
 
-	virtual void Use();
+	virtual void Use() override;
 };
 
 struct BowSpell : public Spell
 {
+	static const uint8 MIN_DAMAGE = 2;
+	static const uint8 MIN_CHARGE = 0;
+	static const uint8 MAX_CHARGE = 5;
+	static const uint8 MAX_DAMAGE = 15;
+	static const uint8 MAX_SIZE_INCREASE = 2;
+	static const uint8 MIN_SIZE_INCREASE = 1;
+
+	float chargeTime = 0.0f;
+
 	BehaviourType type() const override { return BehaviourType::BowSpell; }
 
-	virtual void start() override;
-	virtual void update() override;
-
-	virtual void Use();
+	void Use() override;
+	void Hold();
+	void Release();
+	void onInput(const InputController& input) override;
 };
 
 struct Player : public Behaviour
@@ -257,12 +274,6 @@ struct Player : public Behaviour
 
 	void OnInterpolationDisable() override;
 
-	// Player State
-	enum PlayerState{
-		Idle,
-		Running,
-		Dead
-	};
 	PlayerState currentState = PlayerState::Idle;
 	PlayerType playerType = PlayerType::None;
 

@@ -43,8 +43,9 @@ void Player::start()
 			wBehaviour->weaponType = WeaponType::Bow;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
 			weapon->size = vec2{ 100, 50 };
-
+			
 			spell = App->modBehaviour->addSpell(BehaviourType::BowSpell, this->gameObject);
+			spell->isServer = isServer;
 			break;
 		case PlayerType::None:
 			break;
@@ -94,6 +95,7 @@ void Player::update()
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
+
 
 	if (currentState == PlayerState::Dead && isServer)
 	{
@@ -150,6 +152,9 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 
 void Player::HandleMovementInput(const InputController& input)
 {
+	if (currentState == PlayerState::Charging)
+		return;
+
 	vec2 movement_vector;
 
 	movement_vector.x = input.horizontalAxis;
@@ -178,11 +183,11 @@ void Player::HandleMovementInput(const InputController& input)
 
 void Player::HandleCombatInput(const InputController& input)
 {
-	if (input.space == ButtonState::Press) {
-		if (isServer) {
-			UseSpell();
-		}
-	}
+	if (!isServer)
+		return;
+
+	if (spell)
+		spell->onInput(input);
 }
 
 void Player::UseWeapon()
@@ -716,16 +721,57 @@ void StaffSpell::Use()
 {
 }
 
-void BowSpell::start()
-{
-}
-
-void BowSpell::update()
-{
-}
-
 void BowSpell::Use()
 {
+	chargeTime = 0;
+	Player* playerBehaviour = (Player*)gameObject->behaviour;
+	playerBehaviour->ChangeState(PlayerState::Charging);
+
+	NetworkUpdate(gameObject);
+}
+
+void BowSpell::Hold()
+{
+	chargeTime += Time.deltaTime;
+}
+
+void BowSpell::Release()
+{
+	GameObject* projectile = NetworkInstantiate();
+	projectile->sprite = App->modRender->addSprite(projectile);
+	projectile->sprite->order = 3;
+	projectile->sprite->texture = App->modResources->bowProjectile;
+
+	vec2 standardSize = { 75, 75 };
+	Player* playerBehaviour = (Player*)gameObject->behaviour;
+	float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
+	float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+
+	projectile->tag = gameObject->tag;
+
+	projectile->position = playerBehaviour->weapon->position;
+	projectile->angle = playerBehaviour->weapon->angle;
+
+	BowProjectile* projectileBehaviour = (BowProjectile*) App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
+	projectileBehaviour->isServer = isServer;
+	projectileBehaviour->shooterID = gameObject->networkId;
+
+	chargeTime = min(MAX_CHARGE, chargeTime);
+	projectileBehaviour->damagePoints = MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE);
+	float multiplier = MIN_SIZE_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_SIZE_INCREASE - MIN_SIZE_INCREASE);
+	projectile->size = { sizeX * multiplier, sizeY * multiplier };
+
+	playerBehaviour->ChangeState(PlayerState::Idle);
+}
+
+void BowSpell::onInput(const InputController& input)
+{
+	if (input.space == ButtonState::Press) 
+		Use();
+	else if (input.space == ButtonState::Pressed)
+		Hold();
+	else if (input.space == ButtonState::Release)
+		Release();
 }
 
 void WhirlwindAxeProjectile::start()

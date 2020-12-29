@@ -23,16 +23,19 @@ void Player::start()
 			weapon->sprite->texture = App->modResources->axe;
 			wBehaviour->weaponType = WeaponType::Axe;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
+			weapon->size = vec2{ 50, 75 };
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
 			wBehaviour->weaponType = WeaponType::Staff;
-			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
+			weapon->sprite->pivot = vec2{ 0.5f, 0.3f };
+			weapon->size = vec2{ 50, 100 };
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
 			wBehaviour->weaponType = WeaponType::Bow;
-			weapon->sprite->pivot = vec2{ 0.2f, 0.5f };
+			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
+			weapon->size = vec2{ 100, 50 };
 			break;
 		case PlayerType::None:
 			break;
@@ -45,7 +48,6 @@ void Player::start()
 		weapon->behaviour = wBehaviour;
 
 		weapon->sprite->order = 6;
-		weapon->size = vec2{ 50, 75 };
 		weapon->tag = gameObject->tag;
 	}
 }
@@ -151,7 +153,7 @@ void Player::HandleMovementInput(const InputController& input)
 		ChangeState(PlayerState::Running);
 		if (movement_vector.x != 0) //Flip character according to direction
 			gameObject->size.x = movement_vector.x > 0 ? abs(gameObject->size.x): -abs(gameObject->size.x);
-
+		
 		if (isServer)
 		{
 			NetworkUpdate(gameObject);
@@ -181,7 +183,10 @@ void Player::UseWeapon()
 	if (weapon)
 	{
 		Weapon* weaponBehaviour = (Weapon*)weapon->behaviour;
-		weaponBehaviour->Use();
+		if (weaponBehaviour->cooldownTimer >= weaponBehaviour->cooldown) {
+			weaponBehaviour->Use();
+			weaponBehaviour->cooldownTimer = 0;
+		}
 	}
 }
 
@@ -380,12 +385,22 @@ void StaffProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+
+	if (isServer) {
+		direction = vec2FromDegrees(gameObject->angle);
+		direction = { -direction.x, -direction.y };
+	}
 }
 
 void StaffProjectile::update()
 {
-	Projectile::update();
-	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+	if (isServer) {
+		Projectile::update();
+
+		gameObject->position += direction * velocity * Time.deltaTime;
+
+		NetworkUpdate(gameObject);
+	}
 }
 
 
@@ -393,12 +408,22 @@ void BowProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+
+	if (isServer) {
+		direction = vec2FromDegrees(gameObject->angle);
+		direction = { -direction.x, -direction.y };
+	}
 }
 
 void BowProjectile::update()
 {
-	Projectile::update();
-	gameObject->position += vec2FromDegrees(gameObject->angle) * velocity * Time.deltaTime;
+	if (isServer) {
+		Projectile::update();
+
+		gameObject->position += direction * velocity * Time.deltaTime;
+
+		NetworkUpdate(gameObject);
+	}
 }
 
 
@@ -409,7 +434,10 @@ void Weapon::start()
 
 void Weapon::update()
 {
-	gameObject->position = player->position;
+	vec2 offset = { 0, 8 };
+	gameObject->position = player->position + offset;
+
+	cooldownTimer += Time.deltaTime;
 }
 
 void Weapon::Use()
@@ -453,7 +481,7 @@ void Weapon::Use()
 
 		projectile->position = gameObject->position;
 		projectile->angle = gameObject->angle;
-		projectile->size = { 0, 0 };
+		projectile->size = { 75, 75 };
 
 		projectile->tag = gameObject->tag;
 	}
@@ -487,11 +515,13 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 
 	gameObject->angle = angle;
 
-	if (angle <= 180) {
-		gameObject->sprite->order = 1;
+	LOG("angle: %f", angle);
+
+	if (angle <= 90 && angle > -90) {
+		gameObject->sprite->order = 6;
 	}
 	else {
-		gameObject->sprite->order = 6;
+		gameObject->sprite->order = 1;
 	}
 }
 

@@ -63,6 +63,8 @@ struct Weapon : public Behaviour
 
 	WeaponType weaponType = WeaponType::None;
 	GameObject* player = nullptr;
+	float cooldown = 0.5f;
+	float cooldownTimer = 0.f;
 
 	void start() override;
 	void update() override;
@@ -80,7 +82,7 @@ struct Projectile : public Behaviour
 	float secondsSinceCreation = 0.0f;
 	float velocity = 1000.0f;
 	vec2 direction = { 0,0 };
-	uint8 damagePoints = 0;
+	uint8 damagePoints = 1;
 	
 	uint32 shooterID = 0;
 
@@ -97,7 +99,7 @@ struct Projectile : public Behaviour
 
 struct AxeProjectile : public Projectile
 {
-	float angleIncrementRatio = 5;
+	float angleIncrementRatio = 10;
 	vec2 direction;
 
 	BehaviourType type() const override { return BehaviourType::AxeProjectile; }

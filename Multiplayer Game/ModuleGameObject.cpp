@@ -131,6 +131,7 @@ void GameObject::Interpolate()
 	{
 		position = lerp(initial_position, final_position, t);
 		angle = lerp(initial_angle, final_angle, t);
+		size = lerp(initial_size, final_size, t);
 
 		secondsElapsed += Time.deltaTime;
 	}
@@ -195,6 +196,9 @@ void GameObject::writeUpdate(OutputMemoryStream& packet)
 	packet.Write(this->position.x);
 	packet.Write(this->position.y);
 
+	packet.Write(this->size.x);
+	packet.Write(this->size.y);
+
 	packet.Write(this->angle);
 
 	if (this->sprite)
@@ -227,6 +231,8 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 
 	packet.Read(this->size.x);
 	packet.Read(this->size.y);
+
+	initial_size = final_size = size;
 
 	packet.Read(this->angle);
 
@@ -284,6 +290,10 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 		packet.Read(final_position.x);
 		packet.Read(final_position.y);
 
+		packet.Read(final_size.x);
+		packet.Read(final_size.y);
+		initial_size = size = final_size;
+
 		packet.Read(final_angle);
 
 		secondsElapsed = 0;
@@ -293,6 +303,9 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 		hasTeleported = false;
 		packet.Read(position.x);
 		packet.Read(position.y);
+
+		packet.Read(size.x);
+		packet.Read(size.y);
 
 		packet.Read(angle);
 	}

@@ -63,6 +63,7 @@ struct Weapon : public Behaviour
 
 	WeaponType weaponType = WeaponType::None;
 	GameObject* player = nullptr;
+	vec2 initial_size = {};
 	float cooldown = 0.5f;
 	float cooldownTimer = 0.f;
 
@@ -136,7 +137,7 @@ struct Player : public Behaviour
 	static const uint8 HP_INCREMENT = 1;
 	static const uint8 MAX_LEVEL = 10;
 	#define HitPoints(x) BASE_HP + (x * HP_INCREMENT) - 1;
-	#define LevelSize(x) 50 + (x * 50 * 0.3f);
+	#define LevelSize(x, y) y + (x * y * 0.3f);
 
 	uint8 level = BASE_LEVEL;
 	uint8 hitPoints = BASE_HP;

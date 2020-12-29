@@ -235,11 +235,20 @@ void Player::Respawn()
 
 void Player::LevelUp()
 {
-	level = max(level + 1, MAX_LEVEL);
+	level = min(level + 1, MAX_LEVEL);
 
-	float newSize = LevelSize(level);
-	gameObject->size.x = newSize;
-	gameObject->size.y = newSize;
+	float newSize = LevelSize(level, 50);
+	gameObject->size = vec2{ gameObject->size.x > 0 ? newSize : -newSize, newSize };
+
+	if (weapon)
+	{
+		Weapon* weaponBehaviour = (Weapon*)weapon->behaviour;
+		float size_x = LevelSize(level, weaponBehaviour->initial_size.x);
+		float size_y = LevelSize(level, weaponBehaviour->initial_size.y);
+		weapon->size = vec2{ size_x, size_y };
+
+		NetworkUpdate(weapon);
+	}
 
 	NetworkUpdate(gameObject);
 }
@@ -404,7 +413,7 @@ void BowProjectile::update()
 
 void Weapon::start()
 {
-
+	initial_size = gameObject->size;
 }
 
 void Weapon::update()

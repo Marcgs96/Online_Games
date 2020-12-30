@@ -142,6 +142,8 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 	// Write object properties
 	packet.Write(this->position.x);
 	packet.Write(this->position.y);
+	packet.Write(this->initial_position.x);
+	packet.Write(this->initial_position.y);
 
 	packet.Write(this->size.x);
 	packet.Write(this->size.y);
@@ -227,7 +229,9 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 	packet.Read(this->position.x);
 	packet.Read(this->position.y);
 
-	initial_position = final_position = position;
+	packet.Read(this->initial_position.x);
+	packet.Read(this->initial_position.y);
+	final_position = position;
 
 	packet.Read(this->size.x);
 	packet.Read(this->size.y);

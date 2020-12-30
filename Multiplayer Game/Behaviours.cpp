@@ -216,7 +216,7 @@ void Player::Die()
 	vec2 position = gameObject->position;
 
 	GameObject* deathEffect = NetworkInstantiate();
-	deathEffect->position = position;
+	deathEffect->position = deathEffect->initial_position = position;
 	deathEffect->size = vec2{ size, size };
 
 	deathEffect->sprite = App->modRender->addSprite(deathEffect);
@@ -603,7 +603,7 @@ void Weapon::Use()
 			} break;
 		}
 
-		projectile->position = gameObject->position;
+		projectile->position = projectile->initial_position = gameObject->position;
 		projectile->angle = gameObject->angle;
 		vec2 standardSize = { 75, 75 };
 		Player* playerBehaviour = (Player*)player->behaviour;
@@ -796,7 +796,7 @@ void BowSpell::Release()
 	projectile->size = { sizeX, sizeY};
 	projectile->tag = gameObject->tag;
 
-	projectile->position = playerBehaviour->weapon->position;
+	projectile->position = projectile->initial_position = playerBehaviour->weapon->position;
 	projectile->angle = playerBehaviour->weapon->angle;
 
 	BowProjectile* projectileBehaviour = (BowProjectile*) App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
@@ -850,17 +850,17 @@ void WhirlwindAxeProjectile::update()
 		if (index == 0) {
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
 		}
 		else if(index == 1){
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
 			LOG("orbit angle %f", orbitAngle);
 		}else{
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
 		}
 
 		NetworkUpdate(gameObject);

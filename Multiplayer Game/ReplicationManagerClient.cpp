@@ -56,8 +56,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			{
 				App->modLinkingContext->unregisterNetworkGameObject(gameObject);
 				App->modGameObject->Destroy(gameObject);
-			}
-				
+			}				
 		}
 		break;
 		default:

@@ -396,7 +396,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 classType, std::string na
 {
 	// Create a new game object with the player properties
 	GameObject *gameObject = NetworkInstantiate();
-	gameObject->position = initialPosition;
+	gameObject->position = gameObject->initial_position = initialPosition;
 	gameObject->size = { 65, 65 };
 	gameObject->angle = initialAngle;
 
@@ -580,6 +580,7 @@ void NetworkDestroy(GameObject * gameObject, float delaySeconds)
 	ASSERT(App->modNetServer->isConnected());
 	ASSERT(gameObject->networkId != 0);
 
+	gameObject->toBeDestroyed = true;
 	App->modNetServer->destroyNetworkObject(gameObject, delaySeconds);
 }
 

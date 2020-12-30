@@ -28,7 +28,6 @@ void Player::start()
 			spell = App->modBehaviour->addSpell(BehaviourType::AxeSpell, this->gameObject);
 			spell->player = this;
 			spell->isServer = isServer;
-
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
@@ -37,6 +36,8 @@ void Player::start()
 			weapon->size = vec2{ 50, 100 };
 
 			spell = App->modBehaviour->addSpell(BehaviourType::StaffSpell, this->gameObject);
+			spell->player = this;
+			spell->isServer = isServer;
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
@@ -45,6 +46,7 @@ void Player::start()
 			weapon->size = vec2{ 100, 50 };
 			
 			spell = App->modBehaviour->addSpell(BehaviourType::BowSpell, this->gameObject);
+			spell->player = this;
 			spell->isServer = isServer;
 			break;
 		case PlayerType::None:
@@ -119,7 +121,7 @@ void Player::destroy()
 
 void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 {
-	if (c2.type == ColliderType::Projectile && c2.gameObject->tag != gameObject->tag)
+	if (c2.type == ColliderType::Projectile && c2.gameObject->tag != gameObject->tag && !c2.gameObject->toBeDestroyed)
 	{
 		Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
 		if (isServer)
@@ -147,12 +149,17 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 			}
 
 			NetworkUpdate(gameObject);
-			if(!projectile->perforates)
-				NetworkDestroy(c2.gameObject); // Destroy the Projectile
+			if (!projectile->perforates)
+			{
+				NetworkDestroy(c2.gameObject, REPLICATION_INTERVAL_SECONDS); // Destroy the Projectile
+			}
+				
 		}
-		else if (projectile->shooterID == App->modNetClient->GetNetworkId() && 
-			c1.gameObject != gameObject && !projectile->perforates)
+		else if (projectile->shooterID == App->modNetClient->GetNetworkId() &&
+			projectile->shooterID != gameObject->networkId && !projectile->perforates)
+		{
 			Destroy(c2.gameObject);
+		}
 	}
 }
 
@@ -592,7 +599,7 @@ void Weapon::Use()
 	projectile->position = projectile->initial_position = gameObject->position;
 
 	vec2 standardSize = { 75, 75 };
-	Player* playerBehaviour = player->behaviour;
+	Player* playerBehaviour = (Player*)player->behaviour;
 	float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
 	float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
 	projectile->size = { sizeX, sizeY };
@@ -607,8 +614,8 @@ void Weapon::Use()
 	switch (weaponType)
 	{
 	case WeaponType::Axe: {
-		projectile->sprite->texture = App->modResources->staffProjectile;
-		projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
+		projectile->sprite->texture = App->modResources->axeProjectile;
+		projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
 	} break;
 	case WeaponType::Staff: {
 		projectile->sprite->texture = App->modResources->staffProjectile;
@@ -867,29 +874,29 @@ void WhirlwindAxeProjectile::start()
 
 void WhirlwindAxeProjectile::update()
 {
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
+	if (isServer) {
 		Projectile::update();
 
 		if (index == 0) {
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = gameObject->initial_position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) ,
+				player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}
 		else if(index == 1){
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = gameObject->initial_position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) ,
+				player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}else{
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-		}
-		if (isServer)
-		{
-			HandleDamageTimers();
-			NetworkUpdate(gameObject);
+			gameObject->position = gameObject->initial_position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) ,
+				player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}
 
+		HandleDamageTimers();
+		NetworkUpdate(gameObject);
 	}
 }
 

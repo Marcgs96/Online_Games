@@ -26,7 +26,7 @@ void Player::start()
 			weapon->size = vec2{ 50, 75 };
 
 			spell = App->modBehaviour->addSpell(BehaviourType::AxeSpell, this->gameObject);
-			spell->player = gameObject;
+			spell->player = this;
 			spell->isServer = isServer;
 
 			break;
@@ -127,7 +127,12 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 
 			if (hitPoints > 0)
 			{
-				hitPoints = projectile->damagePoints <= hitPoints? hitPoints - projectile->damagePoints : 0;
+				if (projectile->CanDamagePlayer(c1.gameObject)) {
+
+					hitPoints = projectile->damagePoints <= hitPoints ? hitPoints - projectile->damagePoints : 0;
+				}
+				else
+					return;
 			}
 
 			if (hitPoints <= 0)
@@ -571,36 +576,36 @@ void Weapon::Use()
 		projectile->sprite = App->modRender->addSprite(projectile);
 		projectile->sprite->order = 3;
 
+		Projectile* projectileBehaviour = nullptr;
+
 		switch (weaponType)
 		{
 			case WeaponType::Axe: {
 
 				projectile->sprite->texture = App->modResources->axeProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
+				projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
 
 			} break;
 			case WeaponType::Staff: {
 
 				projectile->sprite->texture = App->modResources->staffProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
+				projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
 
 			} break;
 			case WeaponType::Bow: {
 
 				projectile->sprite->texture = App->modResources->bowProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
+				projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
 
 			} break;
 			default: {
 
 			} break;
 		}
+
+		projectileBehaviour->player = (Player*)player->behaviour;
+		projectileBehaviour->isServer = isServer;
+		projectileBehaviour->shooterID = player->networkId;
 
 		projectile->position = gameObject->position;
 		projectile->angle = gameObject->angle;
@@ -713,14 +718,13 @@ void AxeSpell::Use()
 			axes[i]->sprite->texture = App->modResources->axeProjectile;
 			WhirlwindAxeProjectile* whirlwindAxeBehaviour = (WhirlwindAxeProjectile*)App->modBehaviour->addProjectile(BehaviourType::WhirlwindAxeProjectile, axes[i]);
 			whirlwindAxeBehaviour->isServer = isServer;
-			whirlwindAxeBehaviour->shooterID = player->networkId;
+			whirlwindAxeBehaviour->shooterID = gameObject->networkId;
 			whirlwindAxeBehaviour->index = i;
-			whirlwindAxeBehaviour->player = gameObject;
+			whirlwindAxeBehaviour->player = player;
 
 			vec2 standardSize = { 75, 75 };
-			Player* playerBehaviour = (Player*)player->behaviour;
-			float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
-			float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+			float sizeX = player->LevelSize(player->level, standardSize.x);
+			float sizeY = player->LevelSize(player->level, standardSize.y);
 			axes[i]->size = { sizeX, sizeY };
 			axes[i]->tag = gameObject->tag;
 		}
@@ -836,6 +840,7 @@ void WhirlwindAxeProjectile::start()
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 	lifetimeSeconds = 8.0f;
+	perforates = true;
 
 	if (isServer) {
 		if (index == 0)
@@ -856,18 +861,45 @@ void WhirlwindAxeProjectile::update()
 		if (index == 0) {
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) , player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}
 		else if(index == 1){
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) , player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}else{
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
-			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
+			gameObject->position = { player->gameObject->position.x + rotationRadius * cos(orbitAngle) , player->gameObject->position.y + rotationRadius * sin(orbitAngle) };
 		}
 
+		HandleDamageTimers();
+
 		NetworkUpdate(gameObject);
+	}
+}
+
+bool WhirlwindAxeProjectile::CanDamagePlayer(GameObject* player)
+{
+	if (playersDamaged.size() > 0) {
+		if (playersDamaged[player->networkId]) {
+			return false;
+		}
+	}
+
+	playersDamaged.emplace(player->networkId, secondsToDamageAgain);
+	return true;
+}
+
+void WhirlwindAxeProjectile::HandleDamageTimers()
+{
+	std::unordered_map<uint32, float>::iterator it;
+	for (it = playersDamaged.begin(); it != playersDamaged.end();) {
+		it->second -= Time.deltaTime;
+		if (it->second <= 0)
+			it = playersDamaged.erase(it);
+		else {
+			++it;
+		}
 	}
 }

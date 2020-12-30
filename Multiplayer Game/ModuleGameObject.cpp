@@ -173,6 +173,7 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 		packet.Write(true);
 		packet.Write(collider->type);
 		packet.Write(collider->isTrigger);
+		packet.Write(collider->enabled);
 	}
 	else
 	{
@@ -193,8 +194,6 @@ void GameObject::writeCreate(OutputMemoryStream& packet)
 
 void GameObject::writeUpdate(OutputMemoryStream& packet)
 {
-	packet.Write(this->hasTeleported);
-
 	packet.Write(this->position.x);
 	packet.Write(this->position.y);
 
@@ -207,6 +206,18 @@ void GameObject::writeUpdate(OutputMemoryStream& packet)
 	{
 		packet.Write(true);
 		sprite->write(packet);
+	}
+	else
+	{
+		packet.Write(false);
+	}
+
+	if (this->collider)
+	{
+		packet.Write(true);
+		packet.Write(collider->type);
+		packet.Write(collider->isTrigger);
+		packet.Write(collider->enabled);
 	}
 	else
 	{
@@ -265,9 +276,10 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 	{
 		ColliderType type = ColliderType::None;
 		packet.Read(type);
-
 		collider = App->modCollision->addCollider(type, this);
+
 		packet.Read(this->collider->isTrigger);
+		packet.Read(this->collider->enabled);
 	}
 
 	//Check if it has behaviour
@@ -284,9 +296,7 @@ void GameObject::readCreate(const InputMemoryStream& packet)
 
 void GameObject::readUpdate(const InputMemoryStream& packet)
 {
-	packet.Read(hasTeleported);
-
-	if (networkInterpolationEnabled && !hasTeleported)
+	if (networkInterpolationEnabled)
 	{
 		initial_position = position;
 		initial_angle = angle;
@@ -304,7 +314,6 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 	}
 	else
 	{
-		hasTeleported = false;
 		packet.Read(position.x);
 		packet.Read(position.y);
 
@@ -320,6 +329,19 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 	if (ret)
 	{
 		sprite->read(packet);
+	}
+
+	//Check if it has collider
+	packet.Read(ret);
+	if (ret)
+	{
+		ColliderType type = ColliderType::None;
+		packet.Read(type);
+		if(!collider)
+			collider = App->modCollision->addCollider(type, this);
+
+		packet.Read(this->collider->isTrigger);
+		packet.Read(this->collider->enabled);
 	}
 
 	//Check if it has behaviour

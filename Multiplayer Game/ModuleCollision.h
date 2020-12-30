@@ -5,6 +5,7 @@ struct Collider
 	ColliderType type = ColliderType::None;
 	GameObject *gameObject = nullptr;
 	bool isTrigger = false;
+	bool enabled = true;
 };
 
 struct CollisionData

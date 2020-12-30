@@ -101,7 +101,7 @@ bool ModuleCollision::update()
 				continue;
 			}
 
-			if (go->state == GameObject::UPDATING)
+			if (go->state == GameObject::UPDATING && collider->enabled)
 			{
 				// Precompute collision data and store it into activeColliders
 				Sprite *sprite = go->sprite;

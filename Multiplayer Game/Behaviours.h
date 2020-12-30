@@ -98,6 +98,8 @@ struct Player : public Behaviour
 	uint8 maxHitPoints = BASE_HP;
 	uint8 movementSpeed = BASE_SPEED;
 
+	vec2 movement_vector;
+
 	GameObject* lifebar = nullptr;
 	GameObject* weapon = nullptr;
 	std::string name = "";

@@ -174,8 +174,6 @@ void Player::HandleMovementInput(const InputController& input)
 	if (currentState == PlayerState::Charging)
 		return;
 
-	vec2 movement_vector;
-
 	movement_vector.x = input.horizontalAxis;
 	movement_vector.y = -input.verticalAxis;
 
@@ -251,8 +249,9 @@ void Player::Die()
 
 	//Kill player
 	level = BASE_LEVEL;
-	gameObject->collider->isTrigger = false;
+	gameObject->collider->enabled = false;
 	gameObject->sprite->enabled = false;
+	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
 	if (weapon)
 	{
 		weapon->sprite->enabled = false;
@@ -263,9 +262,7 @@ void Player::Die()
 
 void Player::Respawn()
 {
-	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
-	gameObject->hasTeleported = true;
-	gameObject->collider->isTrigger = true;
+	gameObject->collider->enabled = true;
 	gameObject->sprite->enabled = true;
 	lifebar->sprite->enabled = true;
 

@@ -139,7 +139,7 @@ void GameObject::Interpolate()
 
 void GameObject::writeCreate(OutputMemoryStream& packet)
 {
-	// Write object properties
+	//Write object properties
 	packet.Write(this->position.x);
 	packet.Write(this->position.y);
 	packet.Write(this->initial_position.x);

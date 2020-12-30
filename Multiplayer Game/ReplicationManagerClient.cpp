@@ -38,16 +38,15 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 				{
 					gameObject->networkInterpolationEnabled = false;
 					gameObject->behaviour->OnInterpolationDisable();
-				}
-					
+				}				
 			}
-
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			gameObject->readUpdate(packet);
+			if(gameObject)
+				gameObject->readUpdate(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

@@ -92,7 +92,9 @@ private:
 	//////////////////////////////////////////////////////////////////////
 
 	GameObject * instantiateNetworkObject();
-	friend GameObject *(NetworkInstantiate)();
+	GameObject* instantiateNetworkObjectExcluding(uint32 playerNetworkId);
+	friend GameObject* (NetworkInstantiate)();
+	friend GameObject* (NetworkInstantiateExcluding)(uint32 playerNetworkId);
 
 	void updateNetworkObject(GameObject *gameObject);
 	friend void (NetworkUpdate)(GameObject *);
@@ -139,6 +141,8 @@ private:
 // this method instead of Instantiate() to create network objects.
 // It makes sure the object creation is replicated over the network.
 GameObject * NetworkInstantiate();
+//This one instantiates the object to all clients except the passed as parameter. Used for client-side prediction on projectiles
+GameObject* NetworkInstantiateExcluding(uint32 playerNetworkId);
 
 // NOTE(jesus): It marks an object for replication update.
 void NetworkUpdate(GameObject *gameObject);

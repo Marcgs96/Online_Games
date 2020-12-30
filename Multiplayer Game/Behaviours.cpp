@@ -76,7 +76,7 @@ void Player::onMouseInput(const MouseController& input)
 	if (currentState == PlayerState::Dead)
 		return;
 
-	if (input.mouse1 == ButtonState::Press && isServer &&
+	if (input.mouse1 == ButtonState::Press &&
 		currentState != PlayerState::Charging)
 	{
 		UseWeapon();
@@ -121,10 +121,9 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 {
 	if (c2.type == ColliderType::Projectile && c2.gameObject->tag != gameObject->tag)
 	{
+		Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
 		if (isServer)
 		{
-			Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
-
 			if (hitPoints > 0)
 			{
 				hitPoints = projectile->damagePoints <= hitPoints? hitPoints - projectile->damagePoints : 0;
@@ -146,6 +145,9 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 			if(!projectile->perforates)
 				NetworkDestroy(c2.gameObject); // Destroy the Projectile
 		}
+		else if (projectile->shooterID == App->modNetClient->GetNetworkId() && 
+			c1.gameObject != gameObject && !projectile->perforates)
+			Destroy(c2.gameObject);
 	}
 }
 
@@ -458,7 +460,7 @@ void Projectile::update()
 {
 	secondsSinceCreation += Time.deltaTime;
 
-	if (isServer)
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId()))
 	{
 		const float neutralTimeSeconds = 0.1f;
 		if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
@@ -467,7 +469,10 @@ void Projectile::update()
 
 		const float lifetimeSeconds = 10.0f;
 		if (secondsSinceCreation >= lifetimeSeconds) {
-			NetworkDestroy(gameObject);
+			if(isServer)
+				NetworkDestroy(gameObject);
+			else if(shooterID == App->modNetClient->GetNetworkId())
+				Destroy(gameObject);
 		}
 	}
 }
@@ -487,7 +492,7 @@ void AxeProjectile::start()
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		direction = vec2FromDegrees(gameObject->angle);
 		direction = { -direction.x, -direction.y };
 	}
@@ -495,13 +500,14 @@ void AxeProjectile::start()
 
 void AxeProjectile::update()
 {
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		Projectile::update();
 
 		gameObject->angle += angleIncrementRatio;
 		gameObject->position += direction * velocity * Time.deltaTime;
 
-		NetworkUpdate(gameObject);
+		if(isServer)
+			NetworkUpdate(gameObject);
 	}
 }
 
@@ -510,7 +516,7 @@ void StaffProjectile::start()
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		direction = vec2FromDegrees(gameObject->angle);
 		direction = { -direction.x, -direction.y };
 	}
@@ -518,12 +524,13 @@ void StaffProjectile::start()
 
 void StaffProjectile::update()
 {
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		Projectile::update();
 
 		gameObject->position += direction * velocity * Time.deltaTime;
-
-		NetworkUpdate(gameObject);
+		
+		if (isServer)
+			NetworkUpdate(gameObject);
 	}
 }
 
@@ -533,7 +540,7 @@ void BowProjectile::start()
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		direction = vec2FromDegrees(gameObject->angle);
 		direction = { -direction.x, -direction.y };
 	}
@@ -541,12 +548,13 @@ void BowProjectile::start()
 
 void BowProjectile::update()
 {
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		Projectile::update();
 
 		gameObject->position += direction * velocity * Time.deltaTime;
 
-		NetworkUpdate(gameObject);
+		if (isServer)
+			NetworkUpdate(gameObject);
 	}
 }
 
@@ -566,52 +574,59 @@ void Weapon::update()
 
 void Weapon::Use()
 {
-	if (isServer)
+	GameObject* projectile;
+
+	if (isServer) //Create real projectile
 	{
-		GameObject* projectile = NetworkInstantiate();
-		projectile->sprite = App->modRender->addSprite(projectile);
-		projectile->sprite->order = 3;
-
-		switch (weaponType)
-		{
-			case WeaponType::Axe: {
-
-				projectile->sprite->texture = App->modResources->axeProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
-
-			} break;
-			case WeaponType::Staff: {
-
-				projectile->sprite->texture = App->modResources->staffProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
-
-			} break;
-			case WeaponType::Bow: {
-
-				projectile->sprite->texture = App->modResources->bowProjectile;
-				Projectile* projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
-				projectileBehaviour->isServer = isServer;
-				projectileBehaviour->shooterID = player->networkId;
-
-			} break;
-			default: {
-
-			} break;
-		}
-
-		projectile->position = projectile->initial_position = gameObject->position;
-		projectile->angle = gameObject->angle;
-		vec2 standardSize = { 75, 75 };
-		Player* playerBehaviour = (Player*)player->behaviour;
-		float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
-		float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
-		projectile->size = { sizeX, sizeY };
-		projectile->tag = gameObject->tag;
+		projectile = NetworkInstantiateExcluding(player->networkId);
 	}
+	else //Create fake projectile for client
+	{
+		projectile = Instantiate();
+	}
+
+	projectile->position = projectile->initial_position = gameObject->position;
+
+	vec2 standardSize = { 75, 75 };
+	Player* playerBehaviour = (Player*)player->behaviour;
+	float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
+	float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+	projectile->size = { sizeX, sizeY };
+
+	projectile->angle = gameObject->angle;
+	projectile->tag = gameObject->tag;
+
+	projectile->sprite = App->modRender->addSprite(projectile);
+	projectile->sprite->order = 3;
+
+	Projectile* projectileBehaviour = nullptr;
+	switch (weaponType)
+	{
+	case WeaponType::Axe: {
+
+		projectile->sprite->texture = App->modResources->axeProjectile;
+		projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::AxeProjectile, projectile);
+
+	} break;
+	case WeaponType::Staff: {
+
+		projectile->sprite->texture = App->modResources->staffProjectile;
+		projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, projectile);
+
+	} break;
+	case WeaponType::Bow: {
+
+		projectile->sprite->texture = App->modResources->bowProjectile;
+		projectileBehaviour = App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
+
+	} break;
+	default: {
+
+	} break;
+	}
+
+	projectileBehaviour->isServer = isServer;
+	projectileBehaviour->shooterID = player->networkId;
 }
 
 void Weapon::writeCreate(OutputMemoryStream& packet)
@@ -831,7 +846,7 @@ void WhirlwindAxeProjectile::start()
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		if (index == 0)
 			orbitAngle = PI/2;
 		else if(index == 1)
@@ -844,7 +859,7 @@ void WhirlwindAxeProjectile::start()
 
 void WhirlwindAxeProjectile::update()
 {
-	if (isServer) {
+	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
 		Projectile::update();
 
 		if (index == 0) {
@@ -856,13 +871,12 @@ void WhirlwindAxeProjectile::update()
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
 			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-			LOG("orbit angle %f", orbitAngle);
 		}else{
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
 			gameObject->position = gameObject->initial_position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
 		}
-
-		NetworkUpdate(gameObject);
+		if (isServer)
+			NetworkUpdate(gameObject);
 	}
 }

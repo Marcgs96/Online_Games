@@ -462,6 +462,28 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 	return gameObject;
 }
 
+//Instantiates object to all clients excluding the one with passed network id
+GameObject* ModuleNetworkingServer::instantiateNetworkObjectExcluding(uint32 playerNetworkId)
+{
+	// Create an object into the server
+	GameObject* gameObject = Instantiate();
+
+	// Register the object into the linking context
+	App->modLinkingContext->registerNetworkGameObject(gameObject);
+
+	// Notify all client proxies' replication manager to create the object remotely
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientProxies[i].connected && clientProxies[i].gameObject->networkId != playerNetworkId)
+		{
+			// TODO(you): World state replication lab session
+			clientProxies[i].repManagerServer.create(gameObject->networkId);
+		}
+	}
+
+	return gameObject;
+}
+
 void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 {
 	// Notify all client proxies' replication manager to destroy the object remotely
@@ -530,6 +552,14 @@ GameObject * NetworkInstantiate()
 	ASSERT(App->modNetServer->isConnected());
 
 	return App->modNetServer->instantiateNetworkObject();
+}
+
+//Instantiates network object to all players except the passed one
+GameObject* NetworkInstantiateExcluding(uint32 playerNetworkID)
+{
+	ASSERT(App->modNetServer->isConnected());
+
+	return App->modNetServer->instantiateNetworkObjectExcluding(playerNetworkID);
 }
 
 void NetworkUpdate(GameObject * gameObject)

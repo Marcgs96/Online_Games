@@ -106,6 +106,7 @@ struct Projectile : public Behaviour
 	float velocity = 1000.0f;
 	vec2 direction = { 0,0 };
 	uint8 damagePoints = 1;
+	float lifetimeSeconds = 5.0f;
 	
 	uint32 shooterID = 0;
 
@@ -171,8 +172,8 @@ struct BowProjectile : public Projectile
 
 struct Spell : public Behaviour
 {
-	float spellCooldown = 1.0f;
-	float spellCooldownTimer = 1.0f;
+	float spellCooldown = 10.0f;
+	float spellCooldownTimer = 10.0f;
 
 	GameObject* player = nullptr;
 
@@ -194,6 +195,8 @@ struct AxeSpell : public Spell
 	virtual void update() override;
 
 	virtual void Use();
+
+	void onInput(const InputController& input) override;
 };
 
 struct StaffSpell : public Spell

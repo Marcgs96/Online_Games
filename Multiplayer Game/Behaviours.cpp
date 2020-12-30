@@ -446,7 +446,6 @@ void Projectile::update()
 			gameObject->collider = App->modCollision->addCollider(ColliderType::Projectile, gameObject);
 		}
 
-		const float lifetimeSeconds = 10.0f;
 		if (secondsSinceCreation >= lifetimeSeconds) {
 			NetworkDestroy(gameObject);
 		}
@@ -709,6 +708,12 @@ void AxeSpell::Use()
 	}
 }
 
+void AxeSpell::onInput(const InputController& input)
+{
+	if (input.space == ButtonState::Press)
+		Use();
+}
+
 void StaffSpell::start()
 {
 }
@@ -778,10 +783,11 @@ void WhirlwindAxeProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
+	lifetimeSeconds = 8.0f;
 
 	if (isServer) {
 		if (index == 0)
-			orbitAngle = PI/2;
+			orbitAngle = PI / 2;
 		else if(index == 1)
 			orbitAngle = 7 * PI / 6;
 		else{
@@ -804,7 +810,6 @@ void WhirlwindAxeProjectile::update()
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;
 			gameObject->position = { player->position.x + rotationRadius * cos(orbitAngle) , player->position.y + rotationRadius * sin(orbitAngle) };
-			LOG("orbit angle %f", orbitAngle);
 		}else{
 			gameObject->angle += selfRotationIncrementRatio;
 			orbitAngle += orbitSpeed * Time.deltaTime;

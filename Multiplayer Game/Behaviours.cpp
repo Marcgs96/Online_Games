@@ -162,8 +162,7 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 			}
 				
 		}
-		else if (projectile->shooterID == App->modNetClient->GetNetworkId() &&
-			projectile->shooterID != gameObject->networkId && !projectile->perforates)
+		else if (projectile->isFake && projectile->shooterID != gameObject->networkId && !projectile->perforates)
 		{
 			Destroy(c2.gameObject);
 		}
@@ -490,7 +489,7 @@ void Projectile::update()
 		if (secondsSinceCreation >= lifetimeSeconds) {
 			if(isServer)
 				NetworkDestroy(gameObject);
-			else if(shooterID == App->modNetClient->GetNetworkId())
+			else if(isFake)
 				Destroy(gameObject);
 		}
 	}
@@ -510,16 +509,11 @@ void AxeProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
-
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
-		direction = vec2FromDegrees(gameObject->angle);
-		direction = { -direction.x, -direction.y };
-	}
 }
 
 void AxeProjectile::update()
 {
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
+	if (isServer || isFake) {
 		Projectile::update();
 
 		gameObject->angle += angleIncrementRatio;
@@ -534,16 +528,11 @@ void StaffProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
-
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
-		direction = vec2FromDegrees(gameObject->angle);
-		direction = { -direction.x, -direction.y };
-	}
 }
 
 void StaffProjectile::update()
 {
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
+	if (isServer || isFake) {
 		Projectile::update();
 
 		gameObject->position += direction * velocity * Time.deltaTime;
@@ -558,16 +547,11 @@ void BowProjectile::start()
 {
 	Projectile::start();
 	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
-
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
-		direction = vec2FromDegrees(gameObject->angle);
-		direction = { -direction.x, -direction.y };
-	}
 }
 
 void BowProjectile::update()
 {
-	if (isServer || (!isServer && shooterID == App->modNetClient->GetNetworkId())) {
+	if (isServer || isFake) {
 		Projectile::update();
 
 		gameObject->position += direction * velocity * Time.deltaTime;
@@ -640,9 +624,16 @@ void Weapon::Use()
 	} break;
 	}
 
+
+	if (!isServer)
+		projectileBehaviour->isFake = true;
+
 	projectileBehaviour->player = playerBehaviour;
 	projectileBehaviour->isServer = isServer;
 	projectileBehaviour->shooterID = player->networkId;
+
+	projectileBehaviour->direction = vec2FromDegrees(gameObject->angle);
+	projectileBehaviour->direction = { -projectileBehaviour->direction.x, -projectileBehaviour->direction.y };
 }
 
 void Weapon::writeCreate(OutputMemoryStream& packet)
@@ -682,11 +673,11 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 
 	gameObject->angle = angle;
 
-	if (angle <= 90 && angle > -90) {
-		gameObject->sprite->order = 6;
+	if (angle <= -115 && angle >= -245) {
+		gameObject->sprite->order = 1;
 	}
 	else {
-		gameObject->sprite->order = 1;
+		gameObject->sprite->order = 6;
 	}
 
 	if (isServer)
@@ -810,14 +801,51 @@ void AxeSpell::OnLevelUp()
 
 void StaffSpell::start()
 {
+	Spell::start();
 }
 
 void StaffSpell::update()
 {
+	Spell::update();
 }
 
 void StaffSpell::Use()
 {
+	Spell::Use();
+	if (isServer)
+	{
+		vec2 standardSize = { 75, 75 };
+		float sizeX = player->LevelSize(player->level, standardSize.x);
+		float sizeY = player->LevelSize(player->level, standardSize.y);
+		float angle = 0;
+
+		for (int i = 0; i < NUM_ORBS; ++i) {
+
+			orbs[i] = NetworkInstantiate();
+			orbs[i]->sprite = App->modRender->addSprite(orbs[i]);
+			orbs[i]->sprite->order = 3;
+
+			orbs[i]->sprite->texture = App->modResources->staffProjectile;
+			StaffProjectile* projectile = (StaffProjectile*)App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, orbs[i]);
+
+			projectile->isServer = isServer;
+			projectile->shooterID = gameObject->networkId;
+			projectile->player = player;
+			projectile->direction = vec2FromDegrees(angle);
+			projectile->gameObject->position = gameObject->position;
+			projectile->gameObject->initial_position = gameObject->position;
+			angle += 45;
+
+			orbs[i]->size = { sizeX, sizeY };
+			orbs[i]->tag = gameObject->tag;
+		}
+	}
+}
+
+void StaffSpell::onInput(const InputController& input)
+{
+	if (input.space == ButtonState::Press && spellCooldownTimer >= spellCooldown)
+		Use();
 }
 
 void BowSpell::start()
@@ -893,6 +921,10 @@ void BowSpell::Release()
 	projectile->angle = playerBehaviour->weapon->angle;
 
 	BowProjectile* projectileBehaviour = (BowProjectile*) App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
+
+	if (!isServer)
+		projectileBehaviour->isFake = true;
+
 	projectileBehaviour->isServer = isServer;
 	projectileBehaviour->shooterID = gameObject->networkId;
 

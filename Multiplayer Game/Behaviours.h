@@ -174,6 +174,8 @@ struct Weapon : public Behaviour
 
 struct Projectile : public Behaviour
 {
+	bool isFake = false;
+
 	float secondsSinceCreation = 0.0f;
 	float velocity = 1000.0f;
 	bool perforates = false;
@@ -199,7 +201,6 @@ struct Projectile : public Behaviour
 struct AxeProjectile : public Projectile
 {
 	float angleIncrementRatio = 10;
-	vec2 direction;
 
 	BehaviourType type() const override { return BehaviourType::AxeProjectile; }
 
@@ -217,7 +218,6 @@ struct WhirlwindAxeProjectile : public Projectile
 	float secondsToDamageAgain = 2.0f;
 	float rotationRadius = 150;
 
-	vec2 direction;
 	uint8 index = 0;
 
 	BehaviourType type() const override { return BehaviourType::WhirlwindAxeProjectile; }
@@ -291,12 +291,16 @@ struct AxeSpell : public Spell
 
 struct StaffSpell : public Spell
 {
+	static const uint8 NUM_ORBS = 8;
 	BehaviourType type() const override { return BehaviourType::StaffSpell; }
+	GameObject* orbs[NUM_ORBS];
 
-	virtual void start() override;
-	virtual void update() override;
+	void start() override;
+	void update() override;
 
-	virtual void Use() override;
+	virtual void Use();
+
+	void onInput(const InputController& input) override;
 };
 
 struct BowSpell : public Spell

@@ -104,6 +104,7 @@ struct Projectile : public Behaviour
 {
 	float secondsSinceCreation = 0.0f;
 	float velocity = 1000.0f;
+	bool perforates = false;
 	vec2 direction = { 0,0 };
 	uint8 damagePoints = 1;
 	
@@ -217,11 +218,13 @@ struct BowSpell : public Spell
 	static const uint8 MIN_INCREASE = 1;
 
 	float chargeTime = 0.0f;
+	bool charging = false;
 
 	GameObject* chargeEffect = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::BowSpell; }
 
+	void start() override;
 	void Use() override;
 	void Hold();
 	void Release();

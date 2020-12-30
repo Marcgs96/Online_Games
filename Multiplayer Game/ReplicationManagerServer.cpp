@@ -24,6 +24,9 @@ void ReplicationManagerServer::update(uint32 networkId)
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
+	if (commands[networkId].action == ReplicationAction::Create) //If client hasn't created the object but it has to be destroyed already ignore this object
+		commands[networkId].action == ReplicationAction::None;
+
 	commands[networkId].action = ReplicationAction::Destroy;
 }
 

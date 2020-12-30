@@ -123,30 +123,28 @@ void Player::onCollisionTriggered(Collider& c1, Collider& c2)
 	{
 		if (isServer)
 		{
+			Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
+
 			if (hitPoints > 0)
 			{
-				hitPoints--;
-				NetworkUpdate(gameObject);
+				hitPoints = projectile->damagePoints <= hitPoints? hitPoints - projectile->damagePoints : 0;
 			}
 
 			if (hitPoints <= 0)
 			{
-				Projectile* projectile = (Projectile*)c2.gameObject->behaviour;
-				if (projectile)
+				GameObject* shooter = App->modLinkingContext->getNetworkGameObject(projectile->shooterID);
+				if (shooter)
 				{
-					GameObject* shooter = App->modLinkingContext->getNetworkGameObject(projectile->shooterID);
-					if (shooter)
-					{
-						Player* player = (Player*)shooter->behaviour;
-						player->LevelUp(this->level);
-					}
+					Player* player = (Player*)shooter->behaviour;
+					player->LevelUp(this->level);
 				}
-				Die();					
 
-				NetworkUpdate(gameObject);
+				Die();					
 			}
 
-			NetworkDestroy(c2.gameObject); // Destroy the Projectile
+			NetworkUpdate(gameObject);
+			if(!projectile->perforates)
+				NetworkDestroy(c2.gameObject); // Destroy the Projectile
 		}
 	}
 }
@@ -742,16 +740,26 @@ void StaffSpell::Use()
 {
 }
 
+void BowSpell::start()
+{
+	spellCooldownTimer = spellCooldown = 10.0f;
+}
+
 void BowSpell::Use()
 {
+	charging = true;
 	chargeTime = 0;
 	Player* playerBehaviour = (Player*)gameObject->behaviour;
 	playerBehaviour->ChangeState(PlayerState::Charging);
 
-	// Centered death effect
-	chargeEffect = NetworkInstantiate();
-	chargeEffect->position = vec2{ gameObject->position.x - 8, gameObject->position.y - 20 };
+	// Charge effect
+	vec2 offset = { 8, 17 };
+	offset.x = playerBehaviour->LevelSize(playerBehaviour->level, offset.x);
+	offset.y = playerBehaviour->LevelSize(playerBehaviour->level, offset.y);
 	float newSize = 90;
+
+	chargeEffect = NetworkInstantiate();
+	chargeEffect->position = vec2{ gameObject->position.x - offset.x, gameObject->position.y - offset.y };
 	newSize = playerBehaviour->LevelSize(playerBehaviour->level, newSize);
 	chargeEffect->size = vec2{ newSize, newSize };
 
@@ -767,11 +775,15 @@ void BowSpell::Use()
 
 void BowSpell::Hold()
 {
-	chargeTime += Time.deltaTime;
+	if(charging)
+		chargeTime += Time.deltaTime;
 }
 
 void BowSpell::Release()
 {
+	if (!charging)
+		return;
+
 	GameObject* projectile = NetworkInstantiate();
 	projectile->sprite = App->modRender->addSprite(projectile);
 	projectile->sprite->order = 3;
@@ -800,11 +812,13 @@ void BowSpell::Release()
 	NetworkDestroy(chargeEffect);
 
 	playerBehaviour->ChangeState(PlayerState::Idle);
+	charging = false;
+	spellCooldownTimer = 0.0f;
 }
 
 void BowSpell::onInput(const InputController& input)
 {
-	if (input.space == ButtonState::Press) 
+	if (input.space == ButtonState::Press && spellCooldownTimer >= spellCooldown) 
 		Use();
 	else if (input.space == ButtonState::Pressed)
 		Hold();

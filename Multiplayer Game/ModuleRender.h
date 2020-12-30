@@ -15,7 +15,7 @@ struct Sprite
 	void read(const InputMemoryStream& packet);
 };
 
-const uint8 MAX_ANIMATION_CLIP_FRAMES = 25;
+const uint8 MAX_ANIMATION_CLIP_FRAMES = 30;
 
 struct AnimationClip
 {

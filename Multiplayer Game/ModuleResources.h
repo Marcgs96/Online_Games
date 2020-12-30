@@ -33,10 +33,15 @@ public:
 	Texture* staffProjectile = nullptr;
 	Texture* bowProjectile = nullptr;
 
+	Texture* chargeEffect = nullptr;
+	Texture* iceSpike = nullptr;
+
 	AnimationClip *deathClip = nullptr;
 
 	AnimationClip* playerIdleClip = nullptr;
 	AnimationClip* playerRunClip = nullptr;
+
+	AnimationClip* chargeEffectClip = nullptr;
 
 	AudioClip *audioClipLaser = nullptr;
 	AudioClip *audioClipDeath = nullptr;

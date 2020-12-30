@@ -208,14 +208,17 @@ struct StaffSpell : public Spell
 
 struct BowSpell : public Spell
 {
-	static const uint8 MIN_DAMAGE = 2;
+	//Constants
 	static const uint8 MIN_CHARGE = 0;
-	static const uint8 MAX_CHARGE = 5;
+	static const uint8 MAX_CHARGE = 3;
+	static const uint8 MIN_DAMAGE = 2;
 	static const uint8 MAX_DAMAGE = 15;
-	static const uint8 MAX_SIZE_INCREASE = 2;
-	static const uint8 MIN_SIZE_INCREASE = 1;
+	static const uint8 MAX_INCREASE = 3;
+	static const uint8 MIN_INCREASE = 1;
 
 	float chargeTime = 0.0f;
+
+	GameObject* chargeEffect = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::BowSpell; }
 

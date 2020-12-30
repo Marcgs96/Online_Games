@@ -76,7 +76,8 @@ void Player::onMouseInput(const MouseController& input)
 	if (currentState == PlayerState::Dead)
 		return;
 
-	if (input.mouse1 == ButtonState::Press && isServer)
+	if (input.mouse1 == ButtonState::Press && isServer &&
+		currentState != PlayerState::Charging)
 	{
 		UseWeapon();
 	}
@@ -351,6 +352,26 @@ bool Player::ChangeState(PlayerState newState)
 		lifebar->sprite->enabled = false;
 		//set death animation
 		break;
+
+	case PlayerState::Charging:
+	{
+		switch (playerType)
+		{
+		case PlayerType::Berserker:
+			gameObject->sprite->texture = App->modResources->berserkerIdle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		case PlayerType::Wizard:
+			gameObject->sprite->texture = App->modResources->wizardIdle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		case PlayerType::Hunter:
+			gameObject->sprite->texture = App->modResources->hunterIdle;
+			gameObject->animation->clip = App->modResources->playerIdleClip;
+			break;
+		}
+	}
+	break;
 	}
 
 	return true;
@@ -728,6 +749,20 @@ void BowSpell::Use()
 	Player* playerBehaviour = (Player*)gameObject->behaviour;
 	playerBehaviour->ChangeState(PlayerState::Charging);
 
+	// Centered death effect
+	chargeEffect = NetworkInstantiate();
+	chargeEffect->position = vec2{ gameObject->position.x - 8, gameObject->position.y - 20 };
+	float newSize = 90;
+	newSize = playerBehaviour->LevelSize(playerBehaviour->level, newSize);
+	chargeEffect->size = vec2{ newSize, newSize };
+
+	chargeEffect->sprite = App->modRender->addSprite(chargeEffect);
+	chargeEffect->sprite->texture = App->modResources->chargeEffect;
+	chargeEffect->sprite->order = 100;
+
+	chargeEffect->animation = App->modRender->addAnimation(chargeEffect);
+	chargeEffect->animation->clip = App->modResources->chargeEffectClip;
+
 	NetworkUpdate(gameObject);
 }
 
@@ -741,13 +776,13 @@ void BowSpell::Release()
 	GameObject* projectile = NetworkInstantiate();
 	projectile->sprite = App->modRender->addSprite(projectile);
 	projectile->sprite->order = 3;
-	projectile->sprite->texture = App->modResources->bowProjectile;
+	projectile->sprite->texture = App->modResources->iceSpike;
 
-	vec2 standardSize = { 75, 75 };
+	vec2 standardSize = { 20, 75 };
 	Player* playerBehaviour = (Player*)gameObject->behaviour;
 	float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
 	float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
-
+	projectile->size = { sizeX, sizeY};
 	projectile->tag = gameObject->tag;
 
 	projectile->position = playerBehaviour->weapon->position;
@@ -759,8 +794,11 @@ void BowSpell::Release()
 
 	chargeTime = min(MAX_CHARGE, chargeTime);
 	projectileBehaviour->damagePoints = MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE);
-	float multiplier = MIN_SIZE_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_SIZE_INCREASE - MIN_SIZE_INCREASE);
-	projectile->size = { sizeX * multiplier, sizeY * multiplier };
+	float multiplier = MIN_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_INCREASE - MIN_INCREASE);
+	//projectile->size = { sizeX * multiplier, sizeY * multiplier };
+	projectileBehaviour->velocity *= multiplier;
+
+	NetworkDestroy(chargeEffect);
 
 	playerBehaviour->ChangeState(PlayerState::Idle);
 }

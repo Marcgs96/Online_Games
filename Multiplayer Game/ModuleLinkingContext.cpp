@@ -23,7 +23,12 @@ void ModuleLinkingContext::registerNetworkGameObjectWithNetworkId(GameObject * g
 	ASSERT(networkId != 0);
 	uint16 arrayIndex = arrayIndexFromNetworkId(networkId);
 	ASSERT(arrayIndex < MAX_NETWORK_OBJECTS);
-	ASSERT(networkGameObjects[arrayIndex] == nullptr);
+	if (networkGameObjects[arrayIndex] != nullptr)
+	{
+		GameObject* goToDelete = networkGameObjects[arrayIndex];
+		unregisterNetworkGameObject(goToDelete);
+		Destroy(goToDelete);
+	}
 	networkGameObjects[arrayIndex] = gameObject;
 	gameObject->networkId = networkId;
 	networkGameObjectsCount++;

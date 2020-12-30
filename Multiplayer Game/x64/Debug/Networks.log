@@ -1,53 +1,53 @@
 ﻿  UnityBuild.cpp
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.h(93,52): warning C4244: 'return': conversión de 'float' a 'int'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(296,23): warning C4244: '=': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(299,16): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(307,64): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(307,16): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(308,64): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(308,16): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(595,79): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(595,14): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(596,79): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(596,14): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(670,30): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(670,39): warning C4838: la conversión de 'const int16' en 'float' requiere una conversión de restricción
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(746,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(746,27): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(747,58): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(747,23): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(750,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(750,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(751,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(751,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(785,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(785,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(786,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(786,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(788,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(788,27): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(790,58): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(790,23): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(818,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(818,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(819,62): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(819,15): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(868,71): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(868,40): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(869,71): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(869,40): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(874,64): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(874,39): warning C4244: '=': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(915,79): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(915,14): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(916,79): warning C4244: 'argumento': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(916,14): warning C4244: 'inicializando': conversión de 'int' a 'float'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\Behaviours.cpp(932,49): warning C4244: '=': conversión de 'float' a 'uint8'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversión de 'float' a 'int16'; posible pérdida de datos
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ReplicationManagerServer.cpp(28,30): warning C4553: "==": el resultado de la expresión no se usa. ¿Quiso decir "="?
-C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\ModuleResources.cpp(38): warning C4715: 'ModuleResources::GetTextureByFile': no todas las rutas de acceso de control devuelven un valor
-  Networks.vcxproj -> C:\Users\Marc\Documents\GitHub\Online_Games\Multiplayer Game\x64\Debug\Networks.exe
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.h(93,52): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(293,23): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(296,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(304,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(304,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(305,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(305,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(592,79): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(592,14): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(593,79): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(593,14): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(667,30): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(667,39): warning C4838: conversion from 'const int16' to 'float' requires a narrowing conversion
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(743,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(743,27): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(744,58): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(744,23): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(747,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(747,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(748,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(748,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(782,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(782,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(783,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(783,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(785,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(785,27): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(787,58): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(787,23): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(815,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(815,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(816,62): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(816,15): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(865,71): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(865,40): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(866,71): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(866,40): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(871,64): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(871,39): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(912,79): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(912,14): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(913,79): warning C4244: 'argument': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(913,14): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\Behaviours.cpp(932,49): warning C4244: '=': conversion from 'float' to 'uint8', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(153,40): warning C4018: '<': signed/unsigned mismatch
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(223,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(224,42): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(232,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\ModuleNetworkingClient.cpp(233,28): warning C4244: '=': conversion from 'float' to 'int16', possible loss of data
+D:\Downloads\Online_Games\Multiplayer Game\ReplicationManagerServer.cpp(28,30): warning C4553: '==': result of expression not used; did you intend '='?
+D:\Downloads\Online_Games\Multiplayer Game\ModuleResources.cpp(38): warning C4715: 'ModuleResources::GetTextureByFile': not all control paths return a value
+  Networks.vcxproj -> D:\Downloads\Online_Games\Multiplayer Game\x64\Debug\Networks.exe

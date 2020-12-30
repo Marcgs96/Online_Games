@@ -419,7 +419,7 @@ void Player::readCreate(const InputMemoryStream& packet)
 
 	uint32 weaponNetworkID;
 	packet >> weaponNetworkID;
-	if (!weapon)
+	if (!weapon && weaponNetworkID != 0)
 	{
 		weapon = App->modLinkingContext->getNetworkGameObject(weaponNetworkID);
 		if (weapon)
@@ -645,7 +645,7 @@ void Weapon::readCreate(const InputMemoryStream& packet)
 	uint32 playerID;
 	packet >> playerID;
 
-	if (!player)
+	if (!player && playerID != 0)
 	{
 		player = App->modLinkingContext->getNetworkGameObject(playerID);
 		if (player)
@@ -924,6 +924,9 @@ void BowSpell::Release()
 
 	projectileBehaviour->isServer = isServer;
 	projectileBehaviour->shooterID = gameObject->networkId;
+
+	projectileBehaviour->direction = vec2FromDegrees(player->weapon->angle);
+	projectileBehaviour->direction = { -projectileBehaviour->direction.x, -projectileBehaviour->direction.y };
 
 	chargeTime = min(MAX_CHARGE, chargeTime);
 	projectileBehaviour->damagePoints = MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE);

@@ -2,6 +2,8 @@
 
 
 enum class BehaviourType : uint8;
+struct Spell;
+struct AxeSpell;
 
 struct Behaviour
 {
@@ -77,8 +79,6 @@ enum class PlayerState : uint8 {
 	Charging,
 	Dead
 };
-
-struct Spell;
 
 struct Player : public Behaviour
 {
@@ -211,12 +211,12 @@ struct AxeProjectile : public Projectile
 
 struct WhirlwindAxeProjectile : public Projectile
 {
-	float selfRotationIncrementRatio = 10;
+	float selfRotationIncrementRatio = 15;
 	float orbitAngle = 0;
-	float orbitSpeed = 2;
-	float rotationRadius = 150;
+	float orbitSpeed = 1;
 	std::unordered_map<uint32, float> playersDamaged;
 	float secondsToDamageAgain = 2.0f;
+	float rotationRadius = 150;
 
 	vec2 direction;
 	uint8 index = 0;
@@ -262,6 +262,7 @@ struct Spell : public Behaviour
 
 	virtual void start() override;
 	virtual void update() override;
+	virtual void OnLevelUp() {}
 
 	virtual void Use();
 };
@@ -271,13 +272,22 @@ struct AxeSpell : public Spell
 	static const uint8 NUM_AXES = 3;
 	BehaviourType type() const override { return BehaviourType::AxeSpell; }
 	GameObject* axes[NUM_AXES];
+	float rotationRadius = 150;
+	float orbitSpeed = 1;
 
-	virtual void start() override;
-	virtual void update() override;
+	float activeTime = 8;
+	float activeTimeTimer = 0;
+
+	bool isActive = false;
+
+	void start() override;
+	void update() override;
+	void GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren) override;
 
 	virtual void Use();
 
 	void onInput(const InputController& input) override;
+	void OnLevelUp() override;
 };
 
 struct StaffSpell : public Spell

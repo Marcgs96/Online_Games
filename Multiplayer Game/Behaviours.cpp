@@ -308,6 +308,10 @@ void Player::LevelUp(uint8 killedLevel)
 		NetworkUpdate(weapon);
 	}
 
+	if (spell) {
+		spell->OnLevelUp();
+	}
+
 	NetworkUpdate(gameObject);
 }
 
@@ -454,7 +458,7 @@ void Player::readUpdate(const InputMemoryStream& packet)
 void Player::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
 {
 	networkChildren.push_back(weapon);
-	weapon->behaviour->GetChildrenNetworkObjects(networkChildren);
+	spell->GetChildrenNetworkObjects(networkChildren);
 }
 
 void Player::OnInterpolationDisable()
@@ -721,6 +725,19 @@ void AxeSpell::start()
 void AxeSpell::update()
 {
 	Spell::update();
+	if (isActive) {
+		activeTimeTimer += Time.deltaTime;
+		if (activeTimeTimer >= activeTime) {
+			isActive = false;
+		}
+	}
+}
+
+void AxeSpell::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
+{
+	for (int i = 0; i < NUM_AXES; ++i) {
+		networkChildren.push_back(axes[i]);
+	}
 }
 
 void AxeSpell::Use()
@@ -728,6 +745,16 @@ void AxeSpell::Use()
 	Spell::Use();
 	if (isServer)
 	{
+		isActive = true;
+		activeTimeTimer = 0.0f;
+
+		float newRotationRadius = player->LevelSize(player->level, rotationRadius);
+		float newOrbitSpeed = player->LevelSize(player->level, orbitSpeed);
+
+		vec2 standardSize = { 75, 75 };
+		float sizeX = player->LevelSize(player->level, standardSize.x);
+		float sizeY = player->LevelSize(player->level, standardSize.y);
+
 		for (int i = 0; i < NUM_AXES; ++i) {
 
 			axes[i] = NetworkInstantiate();
@@ -740,10 +767,9 @@ void AxeSpell::Use()
 			whirlwindAxeBehaviour->shooterID = gameObject->networkId;
 			whirlwindAxeBehaviour->index = i;
 			whirlwindAxeBehaviour->player = player;
+			whirlwindAxeBehaviour->rotationRadius = newRotationRadius;
+			whirlwindAxeBehaviour->orbitSpeed = newOrbitSpeed;;
 
-			vec2 standardSize = { 75, 75 };
-			float sizeX = player->LevelSize(player->level, standardSize.x);
-			float sizeY = player->LevelSize(player->level, standardSize.y);
 			axes[i]->size = { sizeX, sizeY };
 			axes[i]->tag = gameObject->tag;
 		}
@@ -752,8 +778,30 @@ void AxeSpell::Use()
 
 void AxeSpell::onInput(const InputController& input)
 {
-	if (input.space == ButtonState::Press)
+	if (input.space == ButtonState::Press && spellCooldownTimer >= spellCooldown)
 		Use();
+}
+
+void AxeSpell::OnLevelUp()
+{
+	if (isServer && isActive)
+	{
+		vec2 standardSize = { 75, 75 };
+		float sizeX = player->LevelSize(player->level, standardSize.x);
+		float sizeY = player->LevelSize(player->level, standardSize.y);
+
+		float newRotationRadius = player->LevelSize(player->level, rotationRadius);
+
+		float newOrbitSpeed = player->LevelSize(player->level, orbitSpeed);
+
+		for (int i = 0; i < NUM_AXES; ++i) {
+			if (axes[i]) {
+				axes[i]->size = { sizeX, sizeY };
+				((WhirlwindAxeProjectile*)axes[i]->behaviour)->rotationRadius = newRotationRadius;
+				((WhirlwindAxeProjectile*)axes[i]->behaviour)->orbitSpeed = newOrbitSpeed;
+			}
+		}
+	}
 }
 
 void StaffSpell::start()

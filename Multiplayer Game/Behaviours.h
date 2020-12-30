@@ -157,7 +157,6 @@ struct Weapon : public Behaviour
 
 	WeaponType weaponType = WeaponType::None;
 	GameObject* player = nullptr;
-	std::list<GameObject*> spawned_projectiles;
 	vec2 initial_size = {};
 	float cooldown = 0.5f;
 	float cooldownTimer = 0.f;

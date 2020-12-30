@@ -728,7 +728,8 @@ void AxeSpell::update()
 void AxeSpell::GetChildrenNetworkObjects(std::list<GameObject*>& networkChildren)
 {
 	for (int i = 0; i < NUM_AXES; ++i) {
-		networkChildren.push_back(axes[i]);
+		if(axes[i] != nullptr)
+			networkChildren.push_back(axes[i]);
 	}
 }
 

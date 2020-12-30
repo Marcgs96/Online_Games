@@ -272,7 +272,7 @@ struct AxeSpell : public Spell
 {
 	static const uint8 NUM_AXES = 3;
 	BehaviourType type() const override { return BehaviourType::AxeSpell; }
-	GameObject* axes[NUM_AXES];
+	GameObject* axes[NUM_AXES] = { nullptr };
 	float rotationRadius = 150;
 	float orbitSpeed = 1;
 

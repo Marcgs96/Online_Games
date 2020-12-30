@@ -24,30 +24,18 @@ void Player::start()
 			wBehaviour->weaponType = WeaponType::Axe;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.0f };
 			weapon->size = vec2{ 50, 75 };
-
-			spell = App->modBehaviour->addSpell(BehaviourType::AxeSpell, this->gameObject);
-			spell->player = this;
-			spell->isServer = isServer;
 			break;
 		case PlayerType::Wizard:
 			weapon->sprite->texture = App->modResources->staff;
 			wBehaviour->weaponType = WeaponType::Staff;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.3f };
 			weapon->size = vec2{ 50, 100 };
-
-			spell = App->modBehaviour->addSpell(BehaviourType::StaffSpell, this->gameObject);
-			spell->player = this;
-			spell->isServer = isServer;
 			break;
 		case PlayerType::Hunter:
 			weapon->sprite->texture = App->modResources->bow;
 			wBehaviour->weaponType = WeaponType::Bow;
 			weapon->sprite->pivot = vec2{ 0.5f, 0.2f };
 			weapon->size = vec2{ 100, 50 };
-			
-			spell = App->modBehaviour->addSpell(BehaviourType::BowSpell, this->gameObject);
-			spell->player = this;
-			spell->isServer = isServer;
 			break;
 		case PlayerType::None:
 			break;
@@ -61,6 +49,25 @@ void Player::start()
 
 		weapon->sprite->order = 6;
 		weapon->tag = gameObject->tag;
+	}
+
+	switch (playerType)
+	{
+	case PlayerType::Berserker:
+		spell = App->modBehaviour->addSpell(BehaviourType::AxeSpell, this->gameObject);
+		spell->player = this;
+		spell->isServer = isServer;
+		break;
+	case PlayerType::Wizard:
+		spell = App->modBehaviour->addSpell(BehaviourType::StaffSpell, this->gameObject);
+		spell->player = this;
+		spell->isServer = isServer;
+		break;
+	case PlayerType::Hunter:
+		spell = App->modBehaviour->addSpell(BehaviourType::BowSpell, this->gameObject);
+		spell->player = this;
+		spell->isServer = isServer;
+		break;
 	}
 }
 
@@ -196,9 +203,6 @@ void Player::HandleMovementInput(const InputController& input)
 
 void Player::HandleCombatInput(const InputController& input)
 {
-	if (!isServer)
-		return;
-
 	if (spell)
 		spell->onInput(input);
 }
@@ -777,28 +781,32 @@ void BowSpell::Use()
 {
 	charging = true;
 	chargeTime = 0;
+
 	Player* playerBehaviour = (Player*)gameObject->behaviour;
 	playerBehaviour->ChangeState(PlayerState::Charging);
 
-	// Charge effect
-	vec2 offset = { 8, 17 };
-	offset.x = playerBehaviour->LevelSize(playerBehaviour->level, offset.x);
-	offset.y = playerBehaviour->LevelSize(playerBehaviour->level, offset.y);
-	float newSize = 90;
+	if (isServer)
+	{
+		// Charge effect
+		vec2 offset = { 8, 17 };
+		offset.x = playerBehaviour->LevelSize(playerBehaviour->level, offset.x);
+		offset.y = playerBehaviour->LevelSize(playerBehaviour->level, offset.y);
+		float newSize = 90;
 
-	chargeEffect = NetworkInstantiate();
-	chargeEffect->position = vec2{ gameObject->position.x - offset.x, gameObject->position.y - offset.y };
-	newSize = playerBehaviour->LevelSize(playerBehaviour->level, newSize);
-	chargeEffect->size = vec2{ newSize, newSize };
+		chargeEffect = NetworkInstantiate();
+		chargeEffect->position = chargeEffect->initial_position = vec2{ gameObject->position.x - offset.x, gameObject->position.y - offset.y };
+		newSize = playerBehaviour->LevelSize(playerBehaviour->level, newSize);
+		chargeEffect->size = vec2{ newSize, newSize };
 
-	chargeEffect->sprite = App->modRender->addSprite(chargeEffect);
-	chargeEffect->sprite->texture = App->modResources->chargeEffect;
-	chargeEffect->sprite->order = 100;
+		chargeEffect->sprite = App->modRender->addSprite(chargeEffect);
+		chargeEffect->sprite->texture = App->modResources->chargeEffect;
+		chargeEffect->sprite->order = 100;
 
-	chargeEffect->animation = App->modRender->addAnimation(chargeEffect);
-	chargeEffect->animation->clip = App->modResources->chargeEffectClip;
+		chargeEffect->animation = App->modRender->addAnimation(chargeEffect);
+		chargeEffect->animation->clip = App->modResources->chargeEffectClip;
 
-	NetworkUpdate(gameObject);
+		NetworkUpdate(gameObject);
+	}
 }
 
 void BowSpell::Hold()
@@ -812,7 +820,16 @@ void BowSpell::Release()
 	if (!charging)
 		return;
 
-	GameObject* projectile = NetworkInstantiate();
+	GameObject* projectile = nullptr;
+	if (isServer) //Create real projectile
+	{
+		projectile = NetworkInstantiateExcluding(gameObject->networkId);
+	}
+	else //Create fake projectile for client
+	{
+		projectile = Instantiate();
+	}
+
 	projectile->sprite = App->modRender->addSprite(projectile);
 	projectile->sprite->order = 3;
 	projectile->sprite->texture = App->modResources->iceSpike;
@@ -834,20 +851,23 @@ void BowSpell::Release()
 	chargeTime = min(MAX_CHARGE, chargeTime);
 	projectileBehaviour->damagePoints = MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE);
 	float multiplier = MIN_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_INCREASE - MIN_INCREASE);
-	//projectile->size = { sizeX * multiplier, sizeY * multiplier };
 	projectileBehaviour->velocity *= multiplier;
-
-	NetworkDestroy(chargeEffect);
-
-	playerBehaviour->ChangeState(PlayerState::Idle);
+		
 	charging = false;
 	spellCooldownTimer = 0.0f;
+
+	if (isServer)
+	{
+		playerBehaviour->ChangeState(PlayerState::Idle);
+		NetworkDestroy(chargeEffect);
+		NetworkUpdate(gameObject);
+	}
 }
 
 void BowSpell::onInput(const InputController& input)
 {
 	if (input.space == ButtonState::Press && spellCooldownTimer >= spellCooldown) 
-		Use();
+   		Use();
 	else if (input.space == ButtonState::Pressed)
 		Hold();
 	else if (input.space == ButtonState::Release)

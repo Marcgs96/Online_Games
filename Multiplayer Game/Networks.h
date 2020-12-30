@@ -29,7 +29,7 @@
 #define MAX_LOG_ENTRIES                                  256
 #define MAX_LOG_ENTRY_LENGTH                    Kilobytes(1)
 #define MAX_SCREENS                                       32
-#define MAX_ANIMATION_CLIPS                                4
+#define MAX_ANIMATION_CLIPS                                8
 #define MAX_TASKS                                        128
 #define MAX_TEXTURES                                     512
 #define MAX_GAME_OBJECTS                                4096

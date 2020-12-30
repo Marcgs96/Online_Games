@@ -32,6 +32,9 @@ Texture* ModuleResources::GetTextureByFile(std::string fileName)
 	else if (fileName == "Waraxe_p.png") return axeProjectile;
 	else if (fileName == "Staff_p.png") return staffProjectile;
 	else if (fileName == "Bow_p.png") return bowProjectile;
+	else if (fileName == "chargeEffect.png") return chargeEffect;
+	else if (fileName == "iceSpike.png") return iceSpike;
+	
 }
 bool ModuleResources::init()
 {
@@ -54,6 +57,8 @@ bool ModuleResources::init()
 	axeProjectile = App->modTextures->loadTexture("Waraxe_p.png");
 	staffProjectile = App->modTextures->loadTexture("Staff_p.png");
 	bowProjectile = App->modTextures->loadTexture("Bow_p.png");
+	chargeEffect = App->modTextures->loadTexture("chargeEffect.png");
+	iceSpike = App->modTextures->loadTexture("iceSpike.png");
 
 	loadingFinished = true;
 	completionRatio = 1.0f;
@@ -75,6 +80,8 @@ bool ModuleResources::init()
 	loadTextureAsync("Waraxe_p.png",		 &axeProjectile);
 	loadTextureAsync("Staff_p.png",			 &staffProjectile);
 	loadTextureAsync("Bow_p.png",			 &bowProjectile);
+	loadTextureAsync("chargeEffect.png",	 &chargeEffect);
+	loadTextureAsync("iceSpike.png",		 &iceSpike);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
@@ -156,6 +163,19 @@ void ModuleResources::onTaskFinished(Task * task)
 			float w = 1.0f / 7.0f;
 			float h = 1.0f;
 			playerRunClip->addFrameRect(vec4{ x, y, w, h });
+		}
+
+		//Create charge effect animation clip
+		chargeEffectClip = App->modRender->addAnimationClip();
+		chargeEffectClip->frameTime = 0.075f;
+		chargeEffectClip->loop = true;
+		for (int i = 0; i < 4; ++i)
+		{
+			float x = (i % 4) / 4.0f;
+			float y = 0;
+			float w = 1.0f / 4.0f;
+			float h = 1.0f;
+			chargeEffectClip->addFrameRect(vec4{ x, y, w, h });
 		}
 	}
 }

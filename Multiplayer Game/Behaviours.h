@@ -98,6 +98,8 @@ struct Player : public Behaviour
 	uint8 maxHitPoints = BASE_HP;
 	uint8 movementSpeed = BASE_SPEED;
 
+	vec2 movement_vector;
+
 	GameObject* lifebar = nullptr;
 	GameObject* weapon = nullptr;
 	std::string name = "";
@@ -282,10 +284,12 @@ struct AxeSpell : public Spell
 struct StaffSpell : public Spell
 {
 	BehaviourType type() const override { return BehaviourType::StaffSpell; }
+	float teleportDistance = 150.0f;
 
 	virtual void start() override;
 	virtual void update() override;
 
+	void onInput(const InputController& input) override;
 	virtual void Use() override;
 };
 

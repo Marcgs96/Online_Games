@@ -18,7 +18,6 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(behaviour);
 	}
 
-
 	for (DeathGhost& behaviour : deathGhosts)
 	{
 		handleBehaviourLifeCycle(&behaviour);

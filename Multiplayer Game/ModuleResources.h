@@ -8,11 +8,8 @@ class ModuleResources : public Module
 {
 public:
 	Texture *background = nullptr;
-	Texture *space = nullptr;
-	Texture *asteroid1 = nullptr;
-	Texture *asteroid2 = nullptr;
+	Texture *grass = nullptr;
 
-	Texture *laser = nullptr;
 	Texture *death = nullptr;
 
 	Texture* berserkerIdle = nullptr;

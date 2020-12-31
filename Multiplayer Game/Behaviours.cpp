@@ -402,7 +402,9 @@ void Player::writeCreate(OutputMemoryStream& packet)
 	packet << movementSpeed;
 	packet << level;
 	packet << name;
-	packet << (weapon? weapon->networkId:0);
+	packet << gameObject->position.x;
+	packet << gameObject->position.y;
+	packet << (weapon? weapon->networkId : 0);
 }
 
 void Player::readCreate(const InputMemoryStream& packet)
@@ -416,6 +418,8 @@ void Player::readCreate(const InputMemoryStream& packet)
 	packet >> movementSpeed;
 	packet >> level;
 	packet >> name;
+	packet >> gameObject->initial_position.x;
+	packet >> gameObject->initial_position.y;
 
 	uint32 weaponNetworkID;
 	packet >> weaponNetworkID;

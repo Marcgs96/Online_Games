@@ -15,10 +15,7 @@ void ModuleResources::TaskLoadTexture::execute()
 Texture* ModuleResources::GetTextureByFile(std::string fileName)
 {
 	if (fileName == "background.jpg") return background;
-	else if (fileName == "arena.png") return space;
-	else if (fileName == "asteroid1.png") return asteroid1;
-	else if (fileName == "asteroid2.png") return asteroid2;
-	else if (fileName == "laser.png") return laser;
+	else if (fileName == "arena.png") return grass;
 	else if (fileName == "death_animation.png") return death;
 	else if (fileName == "berserker_idle.png") return berserkerIdle;
 	else if (fileName == "berserker_run.png") return berserkerRun;
@@ -41,9 +38,7 @@ bool ModuleResources::init()
 	background = App->modTextures->loadTexture("background.jpg");
 
 #if !defined(USE_TASK_MANAGER)
-	space = App->modTextures->loadTexture("space_background.jpg");
-	asteroid1 = App->modTextures->loadTexture("asteroid1.png");
-	asteroid2 = App->modTextures->loadTexture("asteroid2.png");
+	grass = App->modTextures->loadTexture("arena.jpg");
 	death = App->modTextures->loadTexture("death_animation.png");
 	berserkerIdle = App->modTextures->loadTexture("berserker_idle.png");
 	berserkerRun = App->modTextures->loadTexture("berserker_run.png");
@@ -63,10 +58,7 @@ bool ModuleResources::init()
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
-	loadTextureAsync("arena.png", &space);
-	loadTextureAsync("asteroid1.png",        &asteroid1);
-	loadTextureAsync("asteroid2.png",        &asteroid2);
-	loadTextureAsync("laser.png",            &laser);
+	loadTextureAsync("arena.png",			 &grass);
 	loadTextureAsync("death_animation.png",  &death);
 	loadTextureAsync("berserker_idle.png",	 &berserkerIdle);
 	loadTextureAsync("berserker_run.png",	 &berserkerRun);

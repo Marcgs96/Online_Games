@@ -264,6 +264,7 @@ struct Spell : public Behaviour
 	virtual void start() override;
 	virtual void update() override;
 	virtual void OnLevelUp() {}
+	virtual void OnDeath() {};
 
 	virtual void Use();
 };
@@ -289,6 +290,7 @@ struct AxeSpell : public Spell
 
 	void onInput(const InputController& input) override;
 	void OnLevelUp() override;
+	void OnDeath() override;
 };
 
 struct StaffSpell : public Spell

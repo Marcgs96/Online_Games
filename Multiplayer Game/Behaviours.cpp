@@ -257,6 +257,8 @@ void Player::Die()
 		weapon->sprite->enabled = false;
 		NetworkUpdate(weapon);
 	}
+	if (spell)
+		spell->OnDeath();
 	ChangeState(PlayerState::Dead);
 }
 
@@ -795,6 +797,19 @@ void AxeSpell::OnLevelUp()
 			}
 		}
 	}
+}
+
+void AxeSpell::OnDeath()
+{
+	for (int i = 0; i < NUM_AXES; ++i) {
+		if (axes[i]) {
+			NetworkDestroy(axes[i]);
+			axes[i] = nullptr;
+		}
+	}
+
+	isActive = false;
+	spellCooldownTimer = 0;
 }
 
 void StaffSpell::start()

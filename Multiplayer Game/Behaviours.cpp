@@ -257,6 +257,8 @@ void Player::Die()
 		weapon->sprite->enabled = false;
 		NetworkUpdate(weapon);
 	}
+	if (spell)
+		spell->OnDeath();
 	ChangeState(PlayerState::Dead);
 }
 
@@ -957,6 +959,15 @@ void BowSpell::onInput(const InputController& input)
 		Hold();
 	else if (input.space == ButtonState::Release)
 		Release();
+}
+
+void BowSpell::OnDeath()
+{
+	charging = false;
+	spellCooldownTimer = 0.0f;
+	chargeTime = 0.0f;
+
+	NetworkDestroy(chargeEffect);
 }
 
 void WhirlwindAxeProjectile::start()

@@ -264,6 +264,7 @@ struct Spell : public Behaviour
 	virtual void start() override;
 	virtual void update() override;
 	virtual void OnLevelUp() {}
+	virtual void OnDeath() {}
 
 	virtual void Use();
 };
@@ -327,4 +328,5 @@ struct BowSpell : public Spell
 	void Hold();
 	void Release();
 	void onInput(const InputController& input) override;
+	void OnDeath() override;
 };

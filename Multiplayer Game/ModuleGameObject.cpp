@@ -227,6 +227,7 @@ void GameObject::writeUpdate(OutputMemoryStream& packet)
 	if (this->behaviour)
 	{
 		packet.Write(true);
+		packet.Write(behaviour->type());
 		behaviour->writeUpdate(packet);
 	}
 	else
@@ -328,7 +329,10 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 	packet.Read(ret);
 	if (ret)
 	{
-		sprite->read(packet);
+		if (!sprite)
+			sprite = App->modRender->addSprite(this);
+		
+		sprite->read(packet);			
 	}
 
 	//Check if it has collider
@@ -348,6 +352,13 @@ void GameObject::readUpdate(const InputMemoryStream& packet)
 	packet.Read(ret);
 	if (ret)
 	{
+		BehaviourType type = BehaviourType::None;
+		packet.Read(type);
+
+		if (!behaviour)
+		{
+			behaviour = App->modBehaviour->addBehaviour(type, this);
+		}
 		behaviour->readUpdate(packet);
 	}
 }

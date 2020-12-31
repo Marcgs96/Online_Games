@@ -5,6 +5,8 @@
 
 void ReplicationManagerServer::create(uint32 networkId)
 {
+	if (networkId == 0)
+		return;
 	/*ReplicationCommand command;
 	command.action = ReplicationAction::Create;
 	command.networkId = networkId;
@@ -16,18 +18,26 @@ void ReplicationManagerServer::create(uint32 networkId)
 
 void ReplicationManagerServer::update(uint32 networkId)
 {
+	if (networkId == 0)
+		return;
+
 	if (commands[networkId].action == ReplicationAction::Create || commands[networkId].action == ReplicationAction::Destroy)
 		return;
 
 	commands[networkId].action = ReplicationAction::Update;
+	commands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
+	if (networkId == 0)
+		return;
+
 	if (commands[networkId].action == ReplicationAction::Create) //If client hasn't created the object but it has to be destroyed already ignore this object
 		commands[networkId].action == ReplicationAction::None;
 
 	commands[networkId].action = ReplicationAction::Destroy;
+	commands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
@@ -51,6 +61,12 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
 			if(gameObject)
 				gameObject->writeCreate(packet);
+			else //This is an old packet with create for a object that has already been deleted on the server so we will create for a dummy
+			{
+				GameObject* dummy = Instantiate();
+				dummy->writeCreate(packet);
+				Destroy(dummy);
+			}
 		}
 		break;
 		case ReplicationAction::Update:
@@ -58,6 +74,12 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(it->second.networkId);
 			if(gameObject)
 				gameObject->writeUpdate(packet);
+			else //This is an old packet with update for a object that has already been deleted on the server so we will write update for a dummy
+			{
+				GameObject* dummy = Instantiate();
+				dummy->writeUpdate(packet);
+				Destroy(dummy);
+			}
 		}
 		break;
 		case ReplicationAction::Destroy:

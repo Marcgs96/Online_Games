@@ -837,9 +837,9 @@ void StaffSpell::update()
 
 void StaffSpell::Use()
 {
-	Spell::Use();
 	if (isServer)
 	{
+		Spell::Use();
 		vec2 standardSize = { 75, 75 };
 		float sizeX = player->LevelSize(player->level, standardSize.x);
 		float sizeY = player->LevelSize(player->level, standardSize.y);

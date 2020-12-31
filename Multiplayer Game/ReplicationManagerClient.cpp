@@ -47,6 +47,12 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			GameObject* gameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 			if(gameObject)
 				gameObject->readUpdate(packet);
+			else
+			{
+				gameObject = App->modGameObject->Instantiate();
+				gameObject->readUpdate(packet);
+				Destroy(gameObject);
+			}
 		}
 		break;
 		case ReplicationAction::Destroy:

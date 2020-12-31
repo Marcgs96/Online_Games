@@ -303,6 +303,7 @@ struct StaffSpell : public Spell
 	void update() override;
 
 	virtual void Use();
+	void OnDeath() override;
 
 	void onInput(const InputController& input) override;
 };

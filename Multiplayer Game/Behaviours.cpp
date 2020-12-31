@@ -251,7 +251,7 @@ void Player::Die()
 	level = BASE_LEVEL;
 	gameObject->collider->enabled = false;
 	gameObject->sprite->enabled = false;
-	gameObject->position = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+	gameObject->position = 1000.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
 	if (weapon)
 	{
 		weapon->sprite->enabled = false;
@@ -702,7 +702,7 @@ void DeathGhost::update()
 
 void Spell::start()
 {
-	spellCooldownTimer = 10.0f;
+	spellCooldownTimer = 8.0f;
 }
 
 void Spell::update()
@@ -822,7 +822,7 @@ void AxeSpell::OnDeath()
 	}
 
 	isActive = false;
-	spellCooldownTimer = 0;
+	spellCooldownTimer = 8.0f;
 }
 
 void StaffSpell::start()
@@ -869,6 +869,11 @@ void StaffSpell::Use()
 	}
 }
 
+void StaffSpell::OnDeath()
+{
+	spellCooldownTimer = 8.0f;
+}
+
 void StaffSpell::onInput(const InputController& input)
 {
 	if (input.space == ButtonState::Press && spellCooldownTimer >= spellCooldown)
@@ -877,7 +882,8 @@ void StaffSpell::onInput(const InputController& input)
 
 void BowSpell::start()
 {
-	spellCooldownTimer = spellCooldown = 10.0f;
+	spellCooldownTimer = 8.0f;
+	spellCooldown = 10.0f;
 }
 
 void BowSpell::Use()
@@ -984,7 +990,7 @@ void BowSpell::onInput(const InputController& input)
 
 void BowSpell::OnDeath()
 {
-	spellCooldownTimer = 0.0f;
+	spellCooldownTimer = 8.0f;
 	chargeTime = 0.0f;
 
 	if (chargeEffect)

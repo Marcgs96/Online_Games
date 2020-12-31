@@ -124,7 +124,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					proxy->clientId = nextClientId++;
 
 					// Create new network object
-					vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f};
+					vec2 initialPosition = 1000.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f};
 					proxy->gameObject = spawnPlayer(classType, playerName, initialPosition, 0);
 				}
 				else

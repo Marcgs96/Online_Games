@@ -76,7 +76,6 @@ bool ModuleResources::init()
 	loadTextureAsync("iceSpike.png",		 &iceSpike);
 #endif
 
-	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
 	audioClipDeath = App->modSound->loadAudioClip("death.wav");
 
 	return true;

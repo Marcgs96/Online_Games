@@ -879,23 +879,21 @@ void BowSpell::start()
 
 void BowSpell::Use()
 {
-	charging = true;
-	chargeTime = 0;
-
-	Player* playerBehaviour = (Player*)gameObject->behaviour;
-	playerBehaviour->ChangeState(PlayerState::Charging);
-
 	if (isServer)
 	{
+		chargeTime = 0;
+
+		player->ChangeState(PlayerState::Charging);
+
 		// Charge effect
 		vec2 offset = { 8, 17 };
-		offset.x = playerBehaviour->LevelSize(playerBehaviour->level, offset.x);
-		offset.y = playerBehaviour->LevelSize(playerBehaviour->level, offset.y);
+		offset.x = player->LevelSize(player->level, offset.x);
+		offset.y = player->LevelSize(player->level, offset.y);
 		float newSize = 90;
 
 		chargeEffect = NetworkInstantiate();
 		chargeEffect->position = chargeEffect->initial_position = vec2{ gameObject->position.x - offset.x, gameObject->position.y - offset.y };
-		newSize = playerBehaviour->LevelSize(playerBehaviour->level, newSize);
+		newSize = player->LevelSize(player->level, newSize);
 		chargeEffect->size = vec2{ newSize, newSize };
 
 		chargeEffect->sprite = App->modRender->addSprite(chargeEffect);
@@ -907,17 +905,18 @@ void BowSpell::Use()
 
 		NetworkUpdate(gameObject);
 	}
+
 }
 
 void BowSpell::Hold()
 {
-	if(charging)
+	if(player->currentState == PlayerState::Charging)
 		chargeTime += Time.deltaTime;
 }
 
 void BowSpell::Release()
 {
-	if (!charging)
+	if (player->currentState != PlayerState::Charging)
 		return;
 
 	GameObject* projectile = nullptr;
@@ -935,14 +934,13 @@ void BowSpell::Release()
 	projectile->sprite->texture = App->modResources->iceSpike;
 
 	vec2 standardSize = { 20, 75 };
-	Player* playerBehaviour = (Player*)gameObject->behaviour;
-	float sizeX = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.x);
-	float sizeY = playerBehaviour->LevelSize(playerBehaviour->level, standardSize.y);
+	float sizeX = player->LevelSize(player->level, standardSize.x);
+	float sizeY = player->LevelSize(player->level, standardSize.y);
 	projectile->size = { sizeX, sizeY};
 	projectile->tag = gameObject->tag;
 
-	projectile->position = projectile->initial_position = playerBehaviour->weapon->position;
-	projectile->angle = playerBehaviour->weapon->angle;
+	projectile->position = projectile->initial_position = player->weapon->position;
+	projectile->angle = player->weapon->angle;
 
 	BowProjectile* projectileBehaviour = (BowProjectile*) App->modBehaviour->addProjectile(BehaviourType::BowProjectile, projectile);
 
@@ -960,13 +958,13 @@ void BowSpell::Release()
 	float multiplier = MIN_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_INCREASE - MIN_INCREASE);
 	projectileBehaviour->velocity *= multiplier;
 		
-	charging = false;
 	spellCooldownTimer = 0.0f;
 
 	if (isServer)
 	{
-		playerBehaviour->ChangeState(PlayerState::Idle);
+		player->ChangeState(PlayerState::Idle);
 		NetworkDestroy(chargeEffect);
+		chargeEffect = nullptr;
 		NetworkUpdate(gameObject);
 	}
 }
@@ -983,12 +981,15 @@ void BowSpell::onInput(const InputController& input)
 
 void BowSpell::OnDeath()
 {
-	charging = false;
 	spellCooldownTimer = 0.0f;
 	chargeTime = 0.0f;
 
-	if(chargeEffect)
+	if (chargeEffect)
+	{
 		NetworkDestroy(chargeEffect);
+		chargeEffect = nullptr;
+	}
+
 }
 
 void WhirlwindAxeProjectile::start()

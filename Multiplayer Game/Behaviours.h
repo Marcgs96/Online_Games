@@ -318,7 +318,6 @@ struct BowSpell : public Spell
 	static const uint8 MIN_INCREASE = 1;
 
 	float chargeTime = 0.0f;
-	bool charging = false;
 
 	GameObject* chargeEffect = nullptr;
 

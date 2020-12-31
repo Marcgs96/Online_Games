@@ -40,7 +40,6 @@ public:
 
 	AnimationClip* chargeEffectClip = nullptr;
 
-	AudioClip *audioClipLaser = nullptr;
 	AudioClip *audioClipDeath = nullptr;
 
 	bool finishedLoading = false;

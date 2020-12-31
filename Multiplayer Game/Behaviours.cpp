@@ -404,7 +404,9 @@ void Player::writeCreate(OutputMemoryStream& packet)
 	packet << movementSpeed;
 	packet << level;
 	packet << name;
-	packet << (weapon? weapon->networkId:0);
+	packet << gameObject->position.x;
+	packet << gameObject->position.y;
+	packet << (weapon? weapon->networkId : 0);
 }
 
 void Player::readCreate(const InputMemoryStream& packet)
@@ -418,6 +420,8 @@ void Player::readCreate(const InputMemoryStream& packet)
 	packet >> movementSpeed;
 	packet >> level;
 	packet >> name;
+	packet >> gameObject->initial_position.x;
+	packet >> gameObject->initial_position.y;
 
 	uint32 weaponNetworkID;
 	packet >> weaponNetworkID;
@@ -968,6 +972,15 @@ void BowSpell::onInput(const InputController& input)
 		Hold();
 	else if (input.space == ButtonState::Release)
 		Release();
+}
+
+void BowSpell::OnDeath()
+{
+	charging = false;
+	spellCooldownTimer = 0.0f;
+	chargeTime = 0.0f;
+
+	NetworkDestroy(chargeEffect);
 }
 
 void WhirlwindAxeProjectile::start()

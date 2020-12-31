@@ -22,19 +22,19 @@ void ScreenGame::enable()
 
 	spaceTopLeft = Instantiate();
 	spaceTopLeft->sprite = App->modRender->addSprite(spaceTopLeft);
-	spaceTopLeft->sprite->texture = App->modResources->space;
+	spaceTopLeft->sprite->texture = App->modResources->grass;
 	spaceTopLeft->sprite->order = -1;
 	spaceTopRight = Instantiate();
 	spaceTopRight->sprite = App->modRender->addSprite(spaceTopRight);
-	spaceTopRight->sprite->texture = App->modResources->space;
+	spaceTopRight->sprite->texture = App->modResources->grass;
 	spaceTopRight->sprite->order = -1;
 	spaceBottomLeft = Instantiate();
 	spaceBottomLeft->sprite = App->modRender->addSprite(spaceBottomLeft);
-	spaceBottomLeft->sprite->texture = App->modResources->space;
+	spaceBottomLeft->sprite->texture = App->modResources->grass;
 	spaceBottomLeft->sprite->order = -1;
 	spaceBottomRight = Instantiate();
 	spaceBottomRight->sprite = App->modRender->addSprite(spaceBottomRight);
-	spaceBottomRight->sprite->texture = App->modResources->space;
+	spaceBottomRight->sprite->texture = App->modResources->grass;
 	spaceBottomRight->sprite->order = -1;
 }
 

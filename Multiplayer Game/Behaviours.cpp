@@ -511,7 +511,6 @@ void Projectile::readCreate(const InputMemoryStream& packet)
 void AxeProjectile::start()
 {
 	Projectile::start();
-	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 }
 
 void AxeProjectile::update()
@@ -530,7 +529,6 @@ void AxeProjectile::update()
 void StaffProjectile::start()
 {
 	Projectile::start();
-	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 }
 
 void StaffProjectile::update()
@@ -549,7 +547,6 @@ void StaffProjectile::update()
 void BowProjectile::start()
 {
 	Projectile::start();
-	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 }
 
 void BowProjectile::update()
@@ -631,6 +628,7 @@ void Weapon::Use()
 	if (!isServer)
 		projectileBehaviour->isFake = true;
 
+	projectileBehaviour->damagePoints = playerBehaviour->level;
 	projectileBehaviour->player = playerBehaviour;
 	projectileBehaviour->isServer = isServer;
 	projectileBehaviour->shooterID = player->networkId;
@@ -689,7 +687,7 @@ void Weapon::HandleWeaponRotation(const MouseController& input)
 
 void DeathGhost::start()
 {
-	App->modSound->playAudioClip(App->modResources->audioClipDeath);
+
 }
 
 void DeathGhost::update()
@@ -767,7 +765,8 @@ void AxeSpell::Use()
 			whirlwindAxeBehaviour->index = i;
 			whirlwindAxeBehaviour->player = player;
 			whirlwindAxeBehaviour->rotationRadius = newRotationRadius;
-			whirlwindAxeBehaviour->orbitSpeed = newOrbitSpeed;;
+			whirlwindAxeBehaviour->orbitSpeed = newOrbitSpeed;
+			whirlwindAxeBehaviour->damagePoints = player->level;
 
 			axes[i]->size = { sizeX, sizeY };
 			axes[i]->tag = gameObject->tag;
@@ -798,6 +797,7 @@ void AxeSpell::OnLevelUp()
 				axes[i]->size = { sizeX, sizeY };
 				((WhirlwindAxeProjectile*)axes[i]->behaviour)->rotationRadius = newRotationRadius;
 				((WhirlwindAxeProjectile*)axes[i]->behaviour)->orbitSpeed = newOrbitSpeed;
+				((WhirlwindAxeProjectile*)axes[i]->behaviour)->damagePoints = player->level;
 			}
 		}
 	}
@@ -846,6 +846,7 @@ void StaffSpell::Use()
 			StaffProjectile* projectile = (StaffProjectile*)App->modBehaviour->addProjectile(BehaviourType::StaffProjectile, orbs[i]);
 
 			projectile->isServer = isServer;
+			projectile->damagePoints = player->level;
 			projectile->shooterID = gameObject->networkId;
 			projectile->player = player;
 			projectile->direction = vec2FromDegrees(angle);
@@ -949,7 +950,7 @@ void BowSpell::Release()
 	projectileBehaviour->direction = { -projectileBehaviour->direction.x, -projectileBehaviour->direction.y };
 
 	chargeTime = min(MAX_CHARGE, chargeTime);
-	projectileBehaviour->damagePoints = MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE);
+	projectileBehaviour->damagePoints = (MIN_DAMAGE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_DAMAGE - MIN_DAMAGE)) * player->level;
 	float multiplier = MIN_INCREASE + ((chargeTime - MIN_CHARGE) / (MAX_CHARGE - MIN_CHARGE)) * (MAX_INCREASE - MIN_INCREASE);
 	projectileBehaviour->velocity *= multiplier;
 		
@@ -980,13 +981,13 @@ void BowSpell::OnDeath()
 	spellCooldownTimer = 0.0f;
 	chargeTime = 0.0f;
 
-	NetworkDestroy(chargeEffect);
+	if(chargeEffect)
+		NetworkDestroy(chargeEffect);
 }
 
 void WhirlwindAxeProjectile::start()
 {
 	Projectile::start();
-	App->modSound->playAudioClip(App->modResources->audioClipLaser); //TODO Change to correct clip
 	lifetimeSeconds = 8.0f;
 	perforates = true;
 

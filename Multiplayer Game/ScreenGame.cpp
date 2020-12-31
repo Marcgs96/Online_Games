@@ -1,4 +1,3 @@
-
 #include "Networks.h"
 
 GameObject *spaceTopLeft = nullptr;
@@ -77,7 +76,8 @@ void ScreenGame::gui()
 	window_flags |= ImGuiWindowFlags_NoMove;
 	window_flags |= ImGuiWindowFlags_NoResize;
 
-	ImGui::SetNextWindowPos(ImVec2(750, 0));
+	vec2 screenSize = App->modRender->GetScreenSize();
+	ImGui::SetNextWindowPos(ImVec2(screenSize.x - 235, 0));
 	ImGui::SetNextWindowSize(ImVec2(225, 250));
 
 	bool open = true;

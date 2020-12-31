@@ -327,7 +327,8 @@ bool Player::ChangeState(PlayerState newState)
 	{
 	case PlayerState::Idle:
 	{
-		lifebar->sprite->enabled = true;
+		if (lifebar)
+			lifebar->sprite->enabled = true;
 		switch (playerType)
 		{
 		case PlayerType::Berserker:
@@ -348,7 +349,8 @@ bool Player::ChangeState(PlayerState newState)
 
 	case PlayerState::Running:
 	{
-		lifebar->sprite->enabled = true;
+		if(lifebar)
+			lifebar->sprite->enabled = true;
 		switch (playerType)
 		{
 		case PlayerType::Berserker:
@@ -367,7 +369,8 @@ bool Player::ChangeState(PlayerState newState)
 	}
 		break;
 	case PlayerState::Dead:
-		lifebar->sprite->enabled = false;
+		if(lifebar)
+			lifebar->sprite->enabled = false;
 		//set death animation
 		break;
 

@@ -32,6 +32,8 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
 {
+	std::vector<decltype(commands)::key_type> vec;
+
 	for (auto it = commands.begin(); it != commands.end(); ++it)
 	{
 		packet.Write(it->second.networkId);
@@ -60,7 +62,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		break;
 		case ReplicationAction::Destroy:
 		{
-
+			vec.emplace_back(it->first);
 		}
 		break;
 		default:
@@ -70,4 +72,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		//This is to clear the action
 		it->second.action = ReplicationAction::None;
 	}
+	for (auto&& key : vec)
+		commands.erase(key);
 }

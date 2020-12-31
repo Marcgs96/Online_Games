@@ -478,6 +478,15 @@ vec2 ModuleRender::ScreenToWorld(vec2 screenPosition)
 	return worldPosition;
 }
 
+vec2 ModuleRender::GetScreenSize()
+{
+	RECT rect;
+	::GetClientRect(hwnd, &rect);
+	float screenWidth = (float)(rect.right - rect.left);
+	float screenHeight = (float)(rect.bottom - rect.top);
+	return { screenWidth, screenHeight };
+}
+
 void ModuleRender::present()
 {
 	g_pSwapChain->Present(1, 0); // Present with vsync

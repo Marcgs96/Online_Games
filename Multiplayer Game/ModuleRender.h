@@ -106,6 +106,7 @@ public:
 
 	vec2 WorldToScreen(vec2 worldPosition);
 	vec2 ScreenToWorld(vec2 screenPosition);
+	vec2 GetScreenSize();
 
 	void present();
 

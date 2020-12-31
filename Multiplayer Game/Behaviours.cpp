@@ -720,11 +720,17 @@ void AxeSpell::start()
 
 void AxeSpell::update()
 {
-	Spell::update();
-	if (isActive) {
-		activeTimeTimer += Time.deltaTime;
-		if (activeTimeTimer >= activeTime) {
-			isActive = false;
+	if (isServer) {
+		Spell::update();
+		if (isActive) {
+			activeTimeTimer += Time.deltaTime;
+			if (activeTimeTimer >= activeTime) {
+				isActive = false;
+				for (int i = 0; i < NUM_AXES; ++i) {
+					NetworkDestroy(axes[i]);
+					axes[i] = nullptr;
+				}
+			}
 		}
 	}
 }
